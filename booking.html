@@ -3,9 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>예약하기 — 플레이션 게임파티룸</title>
-<meta name="description" content="지점·날짜·타임·인원을 고르면 3분 만에 예약 완료. 플레이션 게임파티룸 예약 페이지.">
+<title>파티룸예약 — 플레이션 게임파티룸</title>
+<meta name="description" content="신촌·사당·건대·구의·구리·영등포 8개 지점의 사진·시설·주소를 한눈에 비교하고 바로 예약하세요. 플레이션 파티룸예약.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect x='2' y='10' width='36' height='22' rx='8' fill='%236D3BFF'/%3E%3Crect x='9' y='17' width='4' height='9' rx='1' fill='white'/%3E%3Crect x='6' y='19.5' width='9' height='4' rx='1' fill='white'/%3E%3Ccircle cx='28' cy='18.6' r='2.4' fill='%23FFD84D'/%3E%3Ccircle cx='32.6' cy='23.2' r='2.4' fill='white'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
@@ -13,29 +14,219 @@
 
 <section class="page-hero">
   <div class="wrap">
-    <span class="hud">Reservation</span>
-    <h1 class="d1">오늘의 스테이지를 <span class="vio">세팅</span>해요</h1>
-    <p class="lead">지점 → 날짜 → 타임 → 인원 순서로 고르면 끝. 결제 후 알림톡으로 도어락 비밀번호가 발송돼요.</p>
+    <span class="hud">Party Room Reservation</span>
+    <h1 class="d1">파티룸예약 — 정거장 고르고,<br><span class="vio">바로 플레이</span></h1>
+    <p class="lead">8개 지점의 사진·시설·주소를 한눈에 비교하고, 마음에 드는 정거장을 골라 그대로 예약까지. 결제 후 알림톡으로 도어락 비밀번호가 발송돼요.</p>
+    <div class="hero-stats" style="margin-top:20px">
+      <div class="hs">📍 <b>8개</b> 지점 운영중</div>
+      <div class="hs">👥 <b>124명</b> 최대 수용 합계</div>
+      <div class="hs">🖥️ <b>57대</b> 게이밍 PC</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ 지점 선택 (사진 카드) ═══════════ -->
+<section class="sec" id="stations">
+  <div class="wrap">
+    <div class="sec-head"><div><span class="hud">Step 01 · Station</span><h2 class="d2">지점을 선택하세요</h2><p class="lead">카드를 누르면 해당 지점으로 선택돼요. "공간 상세 보기"에서 PC 사양과 시설을 확인할 수 있어요.</p></div></div>
+    <div id="locFilter" style="display:flex;gap:8px;margin-bottom:22px;flex-wrap:wrap">
+      <button class="region-chip on" data-f="all">전체 8</button>
+      <button class="region-chip" data-f="sinchon">신촌 3</button>
+      <button class="region-chip" data-f="sadang">사당</button>
+      <button class="region-chip" data-f="kondae">건대</button>
+      <button class="region-chip" data-f="guui">구의</button>
+      <button class="region-chip" data-f="guri">구리</button>
+      <button class="region-chip" data-f="ydp">영등포</button>
+    </div>
+
+    <div class="grid-2" style="gap:20px">
+
+      <!-- 신촌 1호점 -->
+      <div class="scard pick rv" data-store="sc1" data-loc-region="sinchon">
+        <div class="s-photo" style="background-image:url('/assets/img/store-sc1.jpg')"><span class="badge-px live">MAX 8</span><span class="s-pick-flag">SELECTED ✓</span></div>
+        <div class="s-body">
+          <h3>신촌 플레이션 1호점 <span class="badge-cook no">배달·전자레인지</span></h3>
+          <p class="s-addr">📍 서울 서대문구 연세로11길 5, 지하 2층 · 신촌역 도보권</p>
+          <div class="s-tags"><span>최대 8인</span><span>PC 6대</span><span>노래방</span><span>레트로 오락기</span><span>빔프로젝터</span></div>
+          <p class="s-desc">신촌 1호 정거장. PC 내전에 가라오케·레트로 오락기까지, 소규모 크루의 밀도 높은 아지트예요.</p>
+          <details><summary>공간 상세 보기</summary>
+            <div class="s-spec">
+              <div>🖥️ 고성능 PC 6대 — i5 13세대 · RTX 4060 Ti · 32" 커브드 게이밍 모니터 · 게이밍 키보드/마우스</div>
+              <div>🎮 기본 설치 게임 — 롤 · 발로란트 · 오버워치2 · 배그 · FC온라인 · 로스트아크 · 메이플 등 12종 (그 외는 입실 후 설치)</div>
+              <div>🎤 노래방 가라오케 · 🎰 레트로 오락기 · 📽️ 빔프로젝터 OTT(내 계정 로그인)</div>
+              <div>🍽 취사 불가 — 배달음식 자유, 전자레인지·전기포트 구비</div>
+              <div>ℹ️ 실내 화장실 · 엘리베이터 있음 · 구비된 실내화 착용 필수</div>
+            </div>
+          </details>
+          <div class="s-actions"><a class="btn btn-primary btn-sm" href="#bookingApp">이 지점으로 예약 ▾</a><a class="btn btn-ghost btn-sm" href="https://map.naver.com/p/search/%EC%84%9C%EC%9A%B8%20%EC%84%9C%EB%8C%80%EB%AC%B8%EA%B5%AC%20%EC%97%B0%EC%84%B8%EB%A1%9C11%EA%B8%B8%205" target="_blank" rel="noopener">지도</a></div>
+        </div>
+      </div>
+
+      <!-- 신촌 2호점 -->
+      <div class="scard pick rv" data-store="sc2" data-loc-region="sinchon">
+        <div class="s-photo" style="background-image:url('/assets/img/store-sc2.jpg')"><span class="badge-px live">MAX 14</span><span class="s-pick-flag">SELECTED ✓</span></div>
+        <div class="s-body">
+          <h3>신촌 플레이션 2호점 <span class="badge-cook">취사 가능</span></h3>
+          <p class="s-addr">📍 서울 서대문구 연세로5가길 11, 3층 · 신촌역 도보권</p>
+          <div class="s-tags"><span>최대 14인</span><span>PC 8대</span><span>PS5·스위치</span><span>노래방</span><span>보드게임</span></div>
+          <p class="s-desc">PC에 진심인 파티룸. 게임하고, 해먹고, 노래하고 — 신촌 한복판에서 편하게 쉬어가요.</p>
+          <details><summary>공간 상세 보기</summary>
+            <div class="s-spec">
+              <div>🖥️ 고성능 PC 8대 — 라이젠 5600 · RTX 4060 · 32" 게이밍 모니터 · 1G 초고속 인터넷</div>
+              <div>🎮 PS5 · 닌텐도 스위치 — 철권, 마리오 시리즈 등 (게임 목록은 카카오톡 문의)</div>
+              <div>🎤 노래방 — 30W 초고출력 블루투스 마이크 · 미러볼 · 최신곡 업데이트</div>
+              <div>📽️ 대형 스크린 & 빔프로젝터 OTT · 노트북 연결 가능(HDMI 지참)</div>
+              <div>🎲 파티용 인기 보드게임 구비</div>
+              <div>🍽 취사 가능 — 인덕션 · 조리도구 · 식기 완비, 배달·주류 반입 OK</div>
+            </div>
+          </details>
+          <div class="s-actions"><a class="btn btn-primary btn-sm" href="#bookingApp">이 지점으로 예약 ▾</a><a class="btn btn-ghost btn-sm" href="https://map.naver.com/p/search/%EC%84%9C%EC%9A%B8%20%EC%84%9C%EB%8C%80%EB%AC%B8%EA%B5%AC%20%EC%97%B0%EC%84%B8%EB%A1%9C5%EA%B0%80%EA%B8%B8%2011" target="_blank" rel="noopener">지도</a></div>
+        </div>
+      </div>
+
+      <!-- 신촌 3호점 -->
+      <div class="scard pick rv" data-store="sc3" data-loc-region="sinchon">
+        <div class="s-photo" style="background-image:url('/assets/img/store-sc3.jpg')"><span class="badge-px live">MAX 14</span><span class="s-pick-flag">SELECTED ✓</span></div>
+        <div class="s-body">
+          <h3>신촌 플레이션 3호점 <span class="badge-yellow" style="font-size:.6rem">RTX 5060</span> <span class="badge-cook">취사 가능</span></h3>
+          <p class="s-addr">📍 서울 서대문구 연세로5가길 11, 5층 · 신촌역 도보권</p>
+          <div class="s-tags"><span>최대 14인</span><span>PC 8대</span><span>PS5·스위치2</span><span>노래방</span><span>보드게임</span></div>
+          <p class="s-desc">RTX 5060 최신 사양의 신촌권 올인원. PC 내전부터 스위치2 파티게임, 노래방까지 전부 가능해요.</p>
+          <details><summary>공간 상세 보기</summary>
+            <div class="s-spec">
+              <div>🖥️ 고성능 PC 8대 — i5-14400F · RTX 5060 · 32" 게이밍 모니터</div>
+              <div>🎮 PS5 · 닌텐도 스위치2 — 철권, 마리오카트, 파티 잼버리 등</div>
+              <div>🎤 노래방 — 30W 블루투스 마이크 · 미러볼 · 최신곡 업데이트</div>
+              <div>📺 대형 TV OTT(내 계정 로그인) · 🎲 파티용 보드게임</div>
+              <div>🍽 취사 가능 — 인덕션 · 전자레인지 · 냉장고 · 식기 완비, 배달·주류 반입 OK</div>
+            </div>
+          </details>
+          <div class="s-actions"><a class="btn btn-primary btn-sm" href="#bookingApp">이 지점으로 예약 ▾</a><a class="btn btn-ghost btn-sm" href="https://map.naver.com/p/search/%EC%84%9C%EC%9A%B8%20%EC%84%9C%EB%8C%80%EB%AC%B8%EA%B5%AC%20%EC%97%B0%EC%84%B8%EB%A1%9C5%EA%B0%80%EA%B8%B8%2011" target="_blank" rel="noopener">지도</a></div>
+        </div>
+      </div>
+
+      <!-- 사당 -->
+      <div class="scard pick on rv" data-store="sadang" data-loc-region="sadang">
+        <div class="s-photo" style="background-image:url('/assets/img/store-sadang.jpg')"><span class="badge-px live">PC 10대</span><span class="s-pick-flag">SELECTED ✓</span></div>
+        <div class="s-body">
+          <h3>사당 게임플레이션 <span class="badge-yellow" style="font-size:.6rem">2026.05 리뉴얼</span> <span class="badge-cook">취사 가능</span></h3>
+          <p class="s-addr">📍 서울 관악구 남현동 1064-3, 4층 · 사당역 도보권</p>
+          <div class="s-tags"><span>최대 16인</span><span>PC 10대</span><span>실제 노래방 기기</span><span>홀덤 10인</span><span>PS5·스위치2</span></div>
+          <p class="s-desc">PC 10대 내전 성지. 최신 노래방 반주기와 10인용 홀덤 테이블까지, 회식 2차의 정석 코스예요.</p>
+          <details><summary>공간 상세 보기</summary>
+            <div class="s-spec">
+              <div>🖥️ 고성능 PC 10대 — i5-14400F · RTX 5060 · 32" 게이밍 모니터 (2026년 5월 전면 PC화)</div>
+              <div>🎤 실제 노래방 기계 — 2025년 12월 최신 반주기 · 무선 마이크 · 미러볼 · 탬버린</div>
+              <div>🎮 PS5 · 닌텐도 스위치2 — 철권, 마리오카트, 잼버리 등</div>
+              <div>🃏 10인용 홀덤 테이블 · 🎲 보드게임 10여 종 · 📽️ 빔프로젝터 OTT</div>
+              <div>🍽 취사 가능 — 인덕션 · 조리도구 · 식기 완비, 배달·주류 반입 OK</div>
+              <div>🚬 실내 흡연 부스 완비 · 엘리베이터 없음 · 실내화 착용 필수</div>
+            </div>
+          </details>
+          <div class="s-actions"><a class="btn btn-primary btn-sm" href="#bookingApp">이 지점으로 예약 ▾</a><a class="btn btn-ghost btn-sm" href="https://map.naver.com/p/search/%EC%84%9C%EC%9A%B8%20%EA%B4%80%EC%95%85%EA%B5%AC%20%EB%82%A8%ED%98%84%EB%8F%99%201064-3" target="_blank" rel="noopener">지도</a></div>
+        </div>
+      </div>
+
+      <!-- 건대 미니 -->
+      <div class="scard pick rv" data-store="kondae" data-loc-region="kondae">
+        <div class="s-photo" style="background-image:url('/assets/img/store-kondae.jpg')"><span class="badge-px live">MAX 8</span><span class="s-pick-flag">SELECTED ✓</span></div>
+        <div class="s-body">
+          <h3>건대 플레이션 미니 <span class="badge-cook no">배달·전자레인지</span></h3>
+          <p class="s-addr">📍 서울 광진구 능동로13길 39, 1층 · 건대입구역 도보권</p>
+          <div class="s-tags"><span>최대 8인</span><span>PC 6대</span><span>스위치2</span><span>레트로 999종</span><span>보드게임</span></div>
+          <p class="s-desc">대학가 한복판의 컴팩트 아지트. 스위치2 마리오카트 월드와 999종 레트로 게임기가 기다려요.</p>
+          <details><summary>공간 상세 보기</summary>
+            <div class="s-spec">
+              <div>🖥️ 고성능 PC 6대 — 라이젠 5600 · RTX 4060 · 32" 게이밍 모니터 · 1G 인터넷</div>
+              <div>🎮 닌텐도 스위치2 — 마리오카트 월드 · 파티 잼버리+잼버리TV · 뿌요뿌요 테트리스 2S · 오버쿡</div>
+              <div>🎰 레트로 게임기 999종 — 스트리트 파이터 · 보글보글 · 테트리스 · 갤러그, 2인 대전 가능</div>
+              <div>🎲 파티용 보드게임 · 📽️ 대형 스크린 & 빔프로젝터 OTT(HDMI 연결 가능)</div>
+              <div>🍽 취사 불가 — 배달·외부음식 반입 OK, 전자레인지 · 냉장고 · 식기 구비</div>
+            </div>
+          </details>
+          <div class="s-actions"><a class="btn btn-primary btn-sm" href="#bookingApp">이 지점으로 예약 ▾</a><a class="btn btn-ghost btn-sm" href="https://map.naver.com/p/search/%EC%84%9C%EC%9A%B8%20%EA%B4%91%EC%A7%84%EA%B5%AC%20%EB%8A%A5%EB%8F%99%EB%A1%9C13%EA%B8%B8%2039" target="_blank" rel="noopener">지도</a></div>
+        </div>
+      </div>
+
+      <!-- 구의 -->
+      <div class="scard pick rv" data-store="guui" data-loc-region="guui">
+        <div class="s-photo" style="background-image:url('/assets/img/store-guui.jpg')"><span class="badge-px live">MAX 24</span><span class="s-pick-flag">SELECTED ✓</span></div>
+        <div class="s-body">
+          <h3>플레이션 건대구의점 <span class="badge-cook">취사 가능</span></h3>
+          <p class="s-addr">📍 서울 광진구 아차산로51길 8, 지하 1층 · 구의역 1번 출구 도보 1분</p>
+          <div class="s-tags"><span>최대 24인</span><span>PC 8대</span><span>PS5·스위치2</span><span>세미나 단상</span><span>무료주차 1대</span></div>
+          <p class="s-desc">구의역 최대 규모 24인 스테이지. 단상이 있어 세미나·MT·개강파티까지 다 되는 공간이에요.</p>
+          <details><summary>공간 상세 보기</summary>
+            <div class="s-spec">
+              <div>🖥️ 고성능 PC 8대 — 라이젠 5600 · RTX 4060 · 32" 게이밍 모니터 · 1G 인터넷</div>
+              <div>🎮 스위치2(마리오카트 월드·잼버리) · PS5(철권8 · FC25 · 스파6 · 잇 테이크스 투)</div>
+              <div>🎓 단상 + 대형 스크린 & 빔프로젝터 — 세미나 · 강의 · 동아리 발표에 최적(HDMI 지참)</div>
+              <div>🎲 보드게임 구비 · 넉넉한 좌석과 테이블</div>
+              <div>🍽 취사 가능 — 인덕션 · 전자레인지 · 냉장고 · 조리도구 완비 (냄새 강한 구이류 제한)</div>
+              <div>🅿️ 무료 주차 1대 — 입실 30분 전부터 (초과 시 인근 공영주차장)</div>
+            </div>
+          </details>
+          <div class="s-actions"><a class="btn btn-primary btn-sm" href="#bookingApp">이 지점으로 예약 ▾</a><a class="btn btn-ghost btn-sm" href="https://map.naver.com/p/search/%EC%84%9C%EC%9A%B8%20%EA%B4%91%EC%A7%84%EA%B5%AC%20%EC%95%84%EC%B0%A8%EC%82%B0%EB%A1%9C51%EA%B8%B8%208" target="_blank" rel="noopener">지도</a></div>
+        </div>
+      </div>
+
+      <!-- 구리 -->
+      <div class="scard pick rv" data-store="guri" data-loc-region="guri">
+        <div class="s-photo" style="background-image:url('/assets/img/store-guri.jpg')"><span class="badge-px live">MAX 30</span><span class="s-pick-flag">SELECTED ✓</span></div>
+        <div class="s-body">
+          <h3>구리 게임플레이션 <span class="badge-yellow" style="font-size:.6rem">최대 규모</span> <span class="badge-cook">취사 가능</span></h3>
+          <p class="s-addr">📍 경기 구리시 검배로6번길 15, 3층 · 구리 시내</p>
+          <div class="s-tags"><span>최대 30인</span><span>PC 6대</span><span>TJ 노래방</span><span>홀덤</span><span>보드게임 20종</span><span>75" TV</span></div>
+          <p class="s-desc">구리에서 가장 넓은 30인 초대형 파티룸. 75인치 TV, TJ 노래방, 홀덤 세트까지 풀옵션이에요.</p>
+          <details><summary>공간 상세 보기</summary>
+            <div class="s-spec">
+              <div>🖥️ 고성능 PC 6대 — 라이젠 5600 · RTX 3070 · 32" 커브드 게이밍 모니터</div>
+              <div>🎤 TJ 미디어 노래방 + 마이크 — 소음 걱정 없는 떼창 타임</div>
+              <div>🎰 레트로 게임기 999종 · 🎴 홀덤 테이블보 + 카드칩 완비</div>
+              <div>🎲 보드게임 20종 — 루미큐브 · 카탄 · 스플렌더 · 뱅 · 할리갈리 등</div>
+              <div>📺 75인치 TV · 💡 RGB 게이밍 조명 · 🚻 단독 실내 화장실</div>
+              <div>🍽 취사 가능 — 인덕션 2구 · 30인분 식기 · 조리도구 완비 · 접이식 매트리스 보유</div>
+            </div>
+          </details>
+          <div class="s-actions"><a class="btn btn-primary btn-sm" href="#bookingApp">이 지점으로 예약 ▾</a><a class="btn btn-ghost btn-sm" href="https://map.naver.com/p/search/%EA%B2%BD%EA%B8%B0%20%EA%B5%AC%EB%A6%AC%EC%8B%9C%20%EA%B2%80%EB%B0%B0%EB%A1%9C6%EB%B2%88%EA%B8%B8%2015" target="_blank" rel="noopener">지도</a></div>
+        </div>
+      </div>
+
+      <!-- 영등포 -->
+      <div class="scard pick rv" data-store="ydp" data-loc-region="ydp">
+        <div class="s-photo" style="background-image:url('/assets/img/store-ydp.jpg')"><span class="badge-px live">MAX 10</span><span class="s-pick-flag">SELECTED ✓</span></div>
+        <div class="s-body">
+          <h3>영등포 플레이션 <span class="badge-cook">취사 가능</span></h3>
+          <p class="s-addr">📍 서울 영등포구 영중로 67-1, 지하 1층 · 영등포시장역 4번 출구 도보 10초</p>
+          <div class="s-tags"><span>최대 10인</span><span>PC 5대</span><span>PS5·스위치2</span><span>노래방</span><span>보드게임</span></div>
+          <p class="s-desc">초역세권 PC 파티룸. 철권 8부터 마리오카트 월드까지 최신 인기 게임을 풀세팅했어요.</p>
+          <details><summary>공간 상세 보기</summary>
+            <div class="s-spec">
+              <div>🖥️ 고성능 PC 5대 — i5-14400F · RTX 5060 · 32" 게이밍 모니터 · 1G 인터넷</div>
+              <div>🎮 PS5 — 철권8 · 철권7 · FC26 · 스파6 · 배틀필드6</div>
+              <div>🎮 스위치2 — 마리오카트 월드 · 젤다 왕국의 눈물 · 마리오파티 · 스매시 · 커비 등</div>
+              <div>🎤 노래방 — 30W 블루투스 마이크 · 미러볼 · 최신곡 · 📺 대형 TV OTT · 🎲 보드게임</div>
+              <div>🍽 취사 가능 — 인덕션 · 전자레인지 · 냉장고 · 식기 완비 (냄새 강한 구이류 제한)</div>
+            </div>
+          </details>
+          <div class="s-actions"><a class="btn btn-primary btn-sm" href="#bookingApp">이 지점으로 예약 ▾</a><a class="btn btn-ghost btn-sm" href="https://map.naver.com/p/search/%EC%84%9C%EC%9A%B8%20%EC%98%81%EB%93%B1%ED%8F%AC%EA%B5%AC%20%EC%98%81%EC%A4%91%EB%A1%9C%2067-1" target="_blank" rel="noopener">지도</a></div>
+        </div>
+      </div>
+
+    </div>
+    <div class="demo-note" style="margin-top:22px">🔑 도어락 비밀번호와 층·호실 안내는 예약 확정 알림톡으로 발송돼요. 시설 구성은 지점 사정에 따라 일부 변경될 수 있으니 특정 게임·기기가 꼭 필요하다면 예약 전에 문의해 주세요.</div>
   </div>
 </section>
 
 <section class="sec" id="bookingApp">
   <div class="wrap" style="display:grid;grid-template-columns:1.6fr 1fr;gap:28px;align-items:start" id="bookGrid">
     <div>
-      <!-- STEP 1 지점 -->
+      <!-- STEP 1 지점 (선택 확인) -->
       <div class="panel rv" style="margin-bottom:20px">
         <span class="hud">Step 01 · Station</span>
-        <h2 class="d3" style="margin:8px 0 16px">지점을 선택하세요</h2>
-        <div class="pick-grid" style="grid-template-columns:repeat(2,1fr)">
-          <div class="pick" data-store="sc1"><div class="p-name">신촌 플레이션</div><div class="p-sub">최대 8인 · PC 6대 · 홀덤 · 노래방</div></div>
-          <div class="pick" data-store="sc2"><div class="p-name">신촌 게임플레이션 2호점</div><div class="p-sub">최대 14인 · PC 8대 · 콘솔 · 노래방 · 홀덤</div></div>
-          <div class="pick" data-store="sc3"><div class="p-name">신촌 게임플레이션 3호점 <span class="badge-yellow" style="font-size:.55rem">풀스펙</span></div><div class="p-sub">최대 14인 · PC 8대 · PS5 · 닌텐도 · 노래방 · 홀덤</div></div>
-          <div class="pick on" data-store="sadang"><div class="p-name">사당 게임플레이션</div><div class="p-sub">최대 16인 · PC 10대 · 노래방</div></div>
-          <div class="pick" data-store="kondae"><div class="p-name">건대 플레이션</div><div class="p-sub">최대 8인 · PC 6대 · 오락기</div></div>
-          <div class="pick" data-store="guui"><div class="p-name">플레이션 건대구의점</div><div class="p-sub">최대 24인 · PC 8대 · PS · 스위치 2대</div></div>
-          <div class="pick" data-store="guri"><div class="p-name">구리 게임플레이션 <span class="badge-yellow" style="font-size:.55rem">최대 규모</span></div><div class="p-sub">최대 30인 · PC · 게임 · 노래방</div></div>
-          <div class="pick" data-store="ydp"><div class="p-name">영등포 플레이션</div><div class="p-sub">최대 10인 · PC 5대 · PS5 · 홀덤테이블</div></div>
-        </div>
+        <h2 class="d3" style="margin:8px 0 10px">선택한 지점</h2>
+        <p id="pickedStoreName" style="font-size:.95rem"><b style="color:var(--violet)">사당 게임플레이션</b> · 최대 16인 · 관악구 사당</p>
+        <p class="hint" style="margin-top:8px"><a href="#stations" style="color:var(--violet);font-weight:800">↑ 위 지점 카드에서 다시 고르기</a></p>
       </div>
 
       <!-- STEP 2 날짜 -->

@@ -17,30 +17,38 @@ var LOGO_SVG = '<svg class="logo-mark" viewBox="0 0 40 40" fill="none" aria-hidd
  + '</svg>';
 
 var STORES = {
-  sc1:{name:'신촌 플레이션', reg:'sinchon', region:'서대문구 신촌', status:'live', near:'신촌역 도보권',
-    max:8, tags:['PC 6대','홀덤','노래방'],
-    desc:'신촌 1호 정거장. 소규모 크루의 내전과 홀덤·노래방까지 한 번에 즐기는 아지트.'},
-  sc2:{name:'신촌 게임플레이션 2호점', reg:'sinchon', region:'신촌권', status:'live', near:'신촌권 · 상세 위치는 예약 시 안내',
-    max:14, tags:['PC 8대','콘솔','노래방','홀덤'],
-    desc:'중형 크루 특화. 콘솔과 노래방을 갖춰 과모임·동아리 뒷풀이에 딱 맞아요.'},
-  sc3:{name:'신촌 게임플레이션 3호점', reg:'sinchon', region:'신촌권', status:'live', near:'신촌권 · 상세 위치는 예약 시 안내',
-    max:14, tags:['PC 8대','PS5','닌텐도','노래방','홀덤'],
-    desc:'신촌권 올인원 최상위 스펙. PC 내전부터 PS5·스위치 파티게임까지 전부 가능해요.'},
-  sadang:{name:'사당 게임플레이션', reg:'sadang', region:'관악구 사당', status:'live', near:'사당역 도보권',
-    max:16, tags:['PC 10대','노래방'],
-    desc:'PC 10대 규모의 내전 성지. 직장인 회식 2차·팀빌딩에 최적화된 지점이에요.'},
-  kondae:{name:'건대 플레이션', reg:'kondae', region:'광진구 건대', status:'live', near:'건대입구역 도보권',
-    max:8, tags:['PC 6대','오락기'],
-    desc:'대학가 한복판의 컴팩트 아지트. 레트로 오락기가 있는 건대 정거장이에요.'},
-  guui:{name:'플레이션 건대구의점', reg:'guui', region:'광진구 구의', status:'live', near:'구의역 도보권',
-    max:24, tags:['PC 8대','PS','닌텐도 스위치 2대'],
-    desc:'최대 24인 대형 스테이지. 동아리 전체 모임, 대형 파티에 추천해요.'},
-  guri:{name:'구리 게임플레이션', reg:'guri', region:'경기 구리시', status:'live', near:'구리 시내 도보권',
-    max:30, tags:['PC','게임','노래방'],
-    desc:'플레이션 최대 규모, 30인 수용. 워크숍·대규모 뒷풀이까지 통째로 즐겨요.'},
-  ydp:{name:'영등포 플레이션', reg:'ydp', region:'영등포구', status:'live', near:'영등포권 · 상세 위치는 예약 시 안내',
-    max:10, tags:['PC 5대','PS5','홀덤테이블'],
-    desc:'서남권 정거장. PS5와 홀덤테이블이 있어 게임과 카드게임을 함께 즐겨요.'}
+  sc1:{name:'신촌 플레이션 1호점', reg:'sinchon', region:'서대문구 신촌', status:'live',
+    addr:'서울 서대문구 연세로11길 5, 지하 2층', near:'신촌역 도보권 · 엘리베이터 있음',
+    max:8, tags:['PC 6대','노래방','레트로 오락기'], cook:false,
+    desc:'신촌 1호 정거장. PC 내전에 가라오케·레트로 오락기까지, 소규모 크루의 밀도 높은 아지트.'},
+  sc2:{name:'신촌 플레이션 2호점', reg:'sinchon', region:'서대문구 신촌', status:'live',
+    addr:'서울 서대문구 연세로5가길 11, 3층', near:'신촌역 도보권',
+    max:14, tags:['PC 8대','PS5·스위치','노래방'], cook:true,
+    desc:'PC에 진심인 파티룸. 게임하고, 해먹고, 노래하고 — 신촌 한복판에서 편하게 쉬어가요.'},
+  sc3:{name:'신촌 플레이션 3호점', reg:'sinchon', region:'서대문구 신촌', status:'live',
+    addr:'서울 서대문구 연세로5가길 11, 5층', near:'신촌역 도보권',
+    max:14, tags:['PC 8대','PS5·스위치2','노래방'], cook:true,
+    desc:'RTX5060 최신 사양의 신촌권 올인원. PC 내전부터 스위치2 파티게임, 노래방까지 전부.'},
+  sadang:{name:'사당 게임플레이션', reg:'sadang', region:'관악구 사당', status:'live',
+    addr:'서울 관악구 남현동 1064-3, 4층', near:'사당역 도보권 · 흡연부스 완비',
+    max:16, tags:['PC 10대','실제 노래방 기기','홀덤'], cook:true,
+    desc:'PC 10대 내전 성지. 최신 노래방 반주기와 10인용 홀덤 테이블까지, 회식 2차의 정석.'},
+  kondae:{name:'건대 플레이션 미니', reg:'kondae', region:'광진구 건대', status:'live',
+    addr:'서울 광진구 능동로13길 39, 1층', near:'건대입구역 도보권',
+    max:8, tags:['PC 6대','스위치2','레트로 999종'], cook:false,
+    desc:'대학가 한복판의 컴팩트 아지트. 스위치2 마리오카트 월드와 999종 레트로 게임기가 기다려요.'},
+  guui:{name:'플레이션 건대구의점', reg:'guui', region:'광진구 구의', status:'live',
+    addr:'서울 광진구 아차산로51길 8, 지하 1층', near:'구의역 1번 출구 도보 1분 · 무료주차 1대',
+    max:24, tags:['PC 8대','PS5·스위치2','세미나 단상'], cook:true,
+    desc:'구의역 최대 규모 24인 스테이지. 단상이 있어 세미나·MT·개강파티까지 다 되는 공간.'},
+  guri:{name:'구리 게임플레이션', reg:'guri', region:'경기 구리시', status:'live',
+    addr:'경기 구리시 검배로6번길 15, 3층', near:'구리 시내 · 단독 화장실',
+    max:30, tags:['PC 6대','노래방','홀덤','보드게임 20종'], cook:true,
+    desc:'구리에서 가장 넓은 30인 초대형 파티룸. 75인치 TV, TJ 노래방, 홀덤 세트까지 풀옵션.'},
+  ydp:{name:'영등포 플레이션', reg:'ydp', region:'영등포구', status:'live',
+    addr:'서울 영등포구 영중로 67-1, 지하 1층', near:'영등포시장역 4번 출구 도보 10초',
+    max:10, tags:['PC 5대','PS5·스위치2','노래방'], cook:true,
+    desc:'초역세권 PC 파티룸. 철권 8부터 마리오카트 월드까지 최신 인기 게임을 풀세팅했어요.'}
 };
 var REGIONS=[['sinchon','신촌'],['sadang','사당'],['kondae','건대'],['guui','구의'],['guri','구리'],['ydp','영등포']];
 
@@ -99,14 +107,14 @@ function buildHeader(){
   var host=$('#site-header'); if(!host) return;
   var id=pageId();
   var nav=[
-    ['about','브랜드'],['locations','지점안내'],['booking','예약'],
+    ['about','브랜드'],['booking','파티룸예약'],['gacha','캡슐가챠샵'],
     ['event','이벤트'],['community','커뮤니티'],['membership','멤버십'],['franchise','창업']
   ];
   var links=nav.map(function(n){
     return '<a href="'+n[0]+'.html"'+(id===n[0]?' class="on"':'')+'>'+n[1]+'</a>';
   }).join('');
   host.innerHTML =
-  '<div class="topbar" id="topbar">🧧 <b>2026.08</b> 무인 가챠샵 "플레이션 가챠" 건대화양 1호점 오픈!'
+  '<div class="topbar" id="topbar">🧧 <b>2026.08</b> 무인 캡슐가챠샵 "플레이션 캡슐가챠" 건대화양점 오픈!'
   +' <a href="gacha.html">미리 보기</a>'
   +'<button class="close" aria-label="공지 닫기" id="topbarClose">×</button></div>'
   +'<header class="site-head"><div class="wrap head-in">'
@@ -124,9 +132,9 @@ function buildHeader(){
   +'<button class="menu-btn" id="drawerClose" aria-label="메뉴 닫기">×</button></div>'
   +'<nav>'
   +'<span class="sep">PLAY</span>'
-  +'<a href="booking.html">예약하기</a><a href="locations.html">지점안내</a><a href="guide.html">이용안내</a><a href="reviews.html">이용후기</a>'
+  +'<a href="booking.html">파티룸예약</a><a href="guide.html">이용안내</a><a href="reviews.html">이용후기</a>'
   +'<span class="sep">BRAND</span>'
-  +'<a href="about.html">브랜드소개</a><a href="about.html#greeting">대표인사말</a><a href="gacha.html">플레이션 가챠 <span class="badge-yellow" style="font-size:.55rem;padding:.2em .6em">NEW</span></a><a href="event.html">이벤트 · 공지</a><a href="community.html">커뮤니티 · 크루모집</a>'
+  +'<a href="about.html">브랜드소개</a><a href="about.html#greeting">대표인사말</a><a href="gacha.html">캡슐가챠샵 <span class="badge-yellow" style="font-size:.55rem;padding:.2em .6em">NEW</span></a><a href="event.html">이벤트 · 공지</a><a href="community.html">커뮤니티 · 크루모집</a>'
   +'<span class="sep">BUSINESS</span>'
   +'<a href="membership.html">멤버십</a><a href="franchise.html">창업안내</a><a href="partnership.html">제휴문의</a>'
   +'</nav>'
@@ -155,7 +163,7 @@ function buildFooter(){
   +'<p class="px" style="color:var(--lime);font-size:.8rem;letter-spacing:.06em">PLAY MORE. CONNECT MORE.</p>'
   +'<p>우리만의 프라이빗 아케이드, 플레이션.<br>신촌부터 영등포까지 6개 지역 8개 정거장에서 오늘의 게임이 출발해요.</p>'
   +'<div class="tel">1544-3523</div><p style="font-size:.8rem">상담 평일 10:00–19:00 · 예약은 연중무휴 24시간 · <a href="https://ssople.com" target="_blank" rel="noopener" style="color:var(--lilac)">ssople.com</a></p></div>'
-  +'<div class="foot-col"><h4>PLAY</h4><a href="booking.html">예약하기</a><a href="locations.html">지점안내</a><a href="guide.html">이용안내</a><a href="reviews.html">이용후기</a></div>'
+  +'<div class="foot-col"><h4>PLAY</h4><a href="booking.html">파티룸예약</a><a href="guide.html">이용안내</a><a href="reviews.html">이용후기</a></div>'
   +'<div class="foot-col"><h4>BRAND</h4><a href="about.html">브랜드소개</a><a href="about.html#greeting">대표인사말</a><a href="event.html">이벤트 · 공지</a><a href="community.html">커뮤니티 · 크루모집</a></div>'
   +'<div class="foot-col"><h4>BUSINESS</h4><a href="membership.html">멤버십</a><a href="franchise.html">창업안내</a><a href="partnership.html">제휴문의</a></div>'
   +'</div>'
@@ -190,7 +198,7 @@ function buildFloaties(){
     book:'지점 → 날짜 → 타임 → 인원 순서로 고르면 끝! 결제 후 알림톡으로 도어락 비밀번호가 발송돼요. <a href="booking.html" style="color:var(--violet);font-weight:800">예약 페이지로 →</a>',
     price:'시간제(시간당 18,000원~), 낮타임(79,000원~), 밤타임·올나잇(129,000원~)이 기본이에요. 기준 4인, 추가 1인당 10,000원이고, 지점 규모에 따라 요금이 조금씩 달라요. <a href="booking.html" style="color:var(--violet);font-weight:800">요금 자세히 →</a>',
     night:'밤타임은 19시부터 다음 날 11시까지! 소파·빈백에서 눈도 붙일 수 있어요. 침구 대여는 예약 옵션에서 곧 만나요.',
-    addr:'신촌(3개점)·사당·건대·구의·구리·영등포, 6개 지역 8개 지점이 모두 운영 중이에요! 상세 주소는 예약 확정 시 알림톡으로 보내드려요. <a href="locations.html" style="color:var(--violet);font-weight:800">지점 보기 →</a>',
+    addr:'신촌(3개점)·사당·건대·구의·구리·영등포, 6개 지역 8개 지점이 모두 운영 중이에요! 각 지점의 주소·사진·시설은 파티룸예약 페이지에서 바로 확인할 수 있어요. <a href="booking.html" style="color:var(--violet);font-weight:800">지점 보기 →</a>',
     refund:'이용 7일 전 100%, 5일 전 70%, 3일 전 50% 환불이에요. 이후에는 환불이 어려워요. <a href="guide.html" style="color:var(--violet);font-weight:800">자세히 →</a>'
   };
   $('#fabHelp').addEventListener('click',function(){h.classList.toggle('open');});
@@ -281,6 +289,7 @@ function bookingPage(){
     $all('[data-opt]').forEach(function(el){el.classList.toggle('on',!!state.opts[el.dataset.opt]);});
     // 요약
     $('#sumStore').textContent=s.name;
+    var pn=$('#pickedStoreName'); if(pn){pn.innerHTML='<b style="color:var(--violet)">'+s.name+'</b> · 최대 '+s.max+'인 · '+s.region;}
     $('#sumDate').textContent=state.date+(c.we?' (주말요금)':' (평일요금)');
     $('#sumTime').textContent=t.name+(state.time==='hourly'?' · '+state.hours+'시간':'');
     $('#sumPeople').textContent=state.people+'명';
@@ -297,6 +306,17 @@ function bookingPage(){
     var tm=e.target.closest('[data-time]'); if(tm){state.time=tm.dataset.time;render();return;}
     var op=e.target.closest('[data-opt]'); if(op){state.opts[op.dataset.opt]=!state.opts[op.dataset.opt];render();return;}
   });
+  // 상단 지점 카드(#stations)에서도 선택 동기화
+  var stz=$('#stations');
+  if(stz){
+    stz.addEventListener('click',function(e){
+      var card=e.target.closest('[data-store]'); if(!card)return;
+      state.store=card.dataset.store; render();
+      if(e.target.closest('a[href="#bookingApp"]')){
+        toast(STORES[state.store].name+' 선택! 아래에서 날짜와 타임을 골라주세요.');
+      }
+    });
+  }
   $('#dateInput').min=new Date().toISOString().slice(0,10);
   $('#dateInput').addEventListener('change',function(){state.date=this.value;render();});
   $('#pMinus').addEventListener('click',function(){if(state.people>2){state.people--;render();}});
@@ -400,7 +420,7 @@ function communityPage(){
   var listEl=$('#crewList'); if(!listEl)return;
   var seed=[
     {ico:'🖥️',title:'[사당] PLAYTION CUP 대비 롤 내전 5인 크루 (실버~플레)',meta:['사당 게임플레이션','7/24 (금) 밤타임','3/5명'],state:'모집중'},
-    {ico:'🃏',title:'[신촌] 홀덤 토너먼트 입문자 모임 — 룰부터 차근차근',meta:['신촌 플레이션','토요일 낮타임','5/8명'],state:'모집중'},
+    {ico:'🃏',title:'[사당] 홀덤 토너먼트 입문자 모임 — 룰부터 차근차근',meta:['사당 게임플레이션','토요일 낮타임','5/8명'],state:'모집중'},
     {ico:'🎤',title:'[구리] 노래방+게임 복합 뒷풀이, 대학 동아리 연합',meta:['구리 게임플레이션','7/26 (일)','18/30명'],state:'모집중'},
     {ico:'🎲',title:'[전지점] 보드게임 입문자 환영! 루미큐브·스플렌더 위주',meta:['지점 무관','일요일 낮','5/6명'],state:'모집중'},
     {ico:'🌙',title:'[구의] 올나잇 발로란트 10인 내전 (마이크 필수)',meta:['플레이션 건대구의점','7/31 (금) 올나잇','7/10명'],state:'모집중'},
