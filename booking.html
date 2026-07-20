@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>예약하기 — 플레이션 게임파티룸</title>
+<meta name="description" content="지점·날짜·타임·인원을 고르면 3분 만에 예약 완료. 플레이션 게임파티룸 예약 페이지.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect x='2' y='10' width='36' height='22' rx='8' fill='%236D3BFF'/%3E%3Crect x='9' y='17' width='4' height='9' rx='1' fill='white'/%3E%3Crect x='6' y='19.5' width='9' height='4' rx='1' fill='white'/%3E%3Ccircle cx='28' cy='18.6' r='2.4' fill='%23FFD84D'/%3E%3Ccircle cx='32.6' cy='23.2' r='2.4' fill='white'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div id="site-header"></div>
+
+<section class="page-hero">
+  <div class="wrap">
+    <span class="hud">Reservation</span>
+    <h1 class="d1">오늘의 스테이지를 <span class="vio">세팅</span>해요</h1>
+    <p class="lead">지점 → 날짜 → 타임 → 인원 순서로 고르면 끝. 결제 후 알림톡으로 도어락 비밀번호가 발송돼요.</p>
+  </div>
+</section>
+
+<section class="sec" id="bookingApp">
+  <div class="wrap" style="display:grid;grid-template-columns:1.6fr 1fr;gap:28px;align-items:start" id="bookGrid">
+    <div>
+      <!-- STEP 1 지점 -->
+      <div class="panel rv" style="margin-bottom:20px">
+        <span class="hud">Step 01 · Station</span>
+        <h2 class="d3" style="margin:8px 0 16px">지점을 선택하세요</h2>
+        <div class="pick-grid" style="grid-template-columns:repeat(2,1fr)">
+          <div class="pick" data-store="sc1"><div class="p-name">신촌 플레이션</div><div class="p-sub">최대 8인 · PC 6대 · 홀덤 · 노래방</div></div>
+          <div class="pick" data-store="sc2"><div class="p-name">신촌 게임플레이션 2호점</div><div class="p-sub">최대 14인 · PC 8대 · 콘솔 · 노래방 · 홀덤</div></div>
+          <div class="pick" data-store="sc3"><div class="p-name">신촌 게임플레이션 3호점 <span class="badge-yellow" style="font-size:.55rem">풀스펙</span></div><div class="p-sub">최대 14인 · PC 8대 · PS5 · 닌텐도 · 노래방 · 홀덤</div></div>
+          <div class="pick on" data-store="sadang"><div class="p-name">사당 게임플레이션</div><div class="p-sub">최대 16인 · PC 10대 · 노래방</div></div>
+          <div class="pick" data-store="kondae"><div class="p-name">건대 플레이션</div><div class="p-sub">최대 8인 · PC 6대 · 오락기</div></div>
+          <div class="pick" data-store="guui"><div class="p-name">플레이션 건대구의점</div><div class="p-sub">최대 24인 · PC 8대 · PS · 스위치 2대</div></div>
+          <div class="pick" data-store="guri"><div class="p-name">구리 게임플레이션 <span class="badge-yellow" style="font-size:.55rem">최대 규모</span></div><div class="p-sub">최대 30인 · PC · 게임 · 노래방</div></div>
+          <div class="pick" data-store="ydp"><div class="p-name">영등포 플레이션</div><div class="p-sub">최대 10인 · PC 5대 · PS5 · 홀덤테이블</div></div>
+        </div>
+      </div>
+
+      <!-- STEP 2 날짜 -->
+      <div class="panel rv" style="margin-bottom:20px">
+        <span class="hud">Step 02 · Date</span>
+        <h2 class="d3" style="margin:8px 0 16px">언제 플레이할까요?</h2>
+        <div class="field" style="margin-bottom:0">
+          <input type="date" id="dateInput" aria-label="이용 날짜 선택">
+          <p class="hint">금요일 밤타임과 토·일은 주말 요금이 적용돼요. 표시 요금은 대표 요금이며 지점 규모에 따라 일부 달라질 수 있어요.</p>
+        </div>
+      </div>
+
+      <!-- STEP 3 타임 -->
+      <div class="panel rv" style="margin-bottom:20px">
+        <span class="hud">Step 03 · Time</span>
+        <h2 class="d3" style="margin:8px 0 16px">타임을 선택하세요</h2>
+        <div class="pick-grid">
+          <div class="pick" data-time="hourly"><div class="p-name">시간제</div><div class="p-sub">2시간부터 자유롭게</div><div class="p-price">₩18,000 /시간</div></div>
+          <div class="pick" data-time="day"><div class="p-name">낮타임</div><div class="p-sub">13:00 – 18:00</div><div class="p-price">₩79,000 /타임</div></div>
+          <div class="pick on" data-time="night"><div class="p-name">밤타임 · 올나잇 <span class="badge-px v" style="font-size:.58rem">BEST</span></div><div class="p-sub">19:00 – 익일 11:00</div><div class="p-price">₩129,000 /타임</div></div>
+        </div>
+        <div id="hourWrap" style="display:none;margin-top:16px">
+          <label style="font-weight:800;font-size:.9rem;display:block;margin-bottom:8px">이용 시간</label>
+          <div class="stepper"><button type="button" id="hMinus" aria-label="시간 줄이기">−</button><span class="stv" id="hourVal">3시간</span><button type="button" id="hPlus" aria-label="시간 늘리기">+</button></div>
+          <p class="hint" style="margin-top:6px">2시간부터 8시간까지 선택할 수 있어요.</p>
+        </div>
+      </div>
+
+      <!-- STEP 4 인원 -->
+      <div class="panel rv" style="margin-bottom:20px">
+        <span class="hud">Step 04 · Players</span>
+        <h2 class="d3" style="margin:8px 0 16px">몇 명이서 오시나요?</h2>
+        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+          <div class="stepper"><button type="button" id="pMinus" aria-label="인원 줄이기">−</button><span class="stv" id="peopleVal">4명</span><button type="button" id="pPlus" aria-label="인원 늘리기">+</button></div>
+          <p class="hint" style="margin:0">기준 4인 · 추가 1인당 +10,000원 · 이 지점 최대 <b id="maxPeople">8</b>명</p>
+        </div>
+      </div>
+
+      <!-- STEP 5 옵션 -->
+      <div class="panel rv">
+        <span class="hud">Step 05 · Power-up</span>
+        <h2 class="d3" style="margin:8px 0 16px">파워업 옵션 (선택)</h2>
+        <div class="pick-grid" style="grid-template-columns:repeat(2,1fr)">
+          <div class="pick" data-opt="deco"><div class="p-name">🎈 파티 데코 세트</div><div class="p-sub">가랜드·풍선·초 세팅</div><div class="p-price">+₩15,000</div></div>
+          <div class="pick" data-opt="snack"><div class="p-name">🍿 스낵 &amp; 드링크 박스</div><div class="p-sub">과자·음료 4인 기준</div><div class="p-price">+₩12,000</div></div>
+          <div class="pick" data-opt="pad"><div class="p-name">🎮 게임패드 추가 2개</div><div class="p-sub">스위치·PS5 겸용</div><div class="p-price">+₩5,000</div></div>
+          <div class="pick" data-opt="vlog"><div class="p-name">📸 브이로그 삼각대·조명</div><div class="p-sub">숏폼 촬영 세트</div><div class="p-price">+₩5,000</div></div>
+          <div class="pick" data-opt="board"><div class="p-name">🎲 보드게임 큐레이션</div><div class="p-sub">인원 맞춤 추천 세팅</div><div class="p-price">무료</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 요약 -->
+    <div class="summary">
+      <div class="panel rv">
+        <span class="hud plain px" style="color:var(--violet)">ORDER SUMMARY</span>
+        <h2 class="d3" style="margin:8px 0 12px">예약 요약</h2>
+        <div class="sum-row"><span>지점</span><b id="sumStore">사당 게임플레이션</b></div>
+        <div class="sum-row"><span>날짜</span><b id="sumDate">—</b></div>
+        <div class="sum-row"><span>타임</span><b id="sumTime">—</b></div>
+        <div class="sum-row"><span>인원</span><b id="sumPeople">4명</b></div>
+        <div style="border-top:1px solid var(--line);margin:10px 0"></div>
+        <div class="sum-row"><span>기본 요금</span><b id="sumBase">—</b></div>
+        <div class="sum-row"><span>인원 추가</span><b id="sumExtra">—</b></div>
+        <div class="sum-row"><span>옵션</span><b id="sumOpt">—</b></div>
+        <div class="sum-row"><span>보증금 <small style="color:var(--ink-faint)">(퇴실 후 환급)</small></span><b id="sumDeposit">—</b></div>
+        <div class="sum-total"><span class="tt">결제 금액</span><span class="tp" id="sumTotal">—</span></div>
+        <button class="btn btn-primary btn-block btn-lg" id="goPay" style="margin-top:18px">결제하러 가기 ▶</button>
+        <p class="hint" style="margin-top:12px">결제 완료 즉시 예약이 확정되고, 이용 안내와 도어락 비밀번호가 알림톡으로 발송돼요.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>@media (max-width:900px){#bookGrid{grid-template-columns:1fr!important}}</style>
+
+<div id="site-footer"></div>
+<script src="assets/app.js"></script>
+</body>
+</html>
