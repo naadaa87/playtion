@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://playtion.kr/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
+  <url><loc>https://playtion.kr/brand</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://playtion.kr/stations</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://playtion.kr/news</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://playtion.kr/platform</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://playtion.kr/help</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://playtion.kr/privacy</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://playtion.kr/terms</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://playtion.kr/party/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
+  <url><loc>https://playtion.kr/party/stations</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://playtion.kr/party/prices</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://playtion.kr/party/booking</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://playtion.kr/party/guide</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://playtion.kr/party/station</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://playtion.kr/gacha/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
+  <url><loc>https://playtion.kr/gacha/products</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://playtion.kr/gacha/item</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://playtion.kr/gacha/calendar</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://playtion.kr/gacha/online</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://playtion.kr/gacha/market</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://playtion.kr/gacha/club</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://playtion.kr/gacha/visit</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://playtion.kr/pass/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
+  <url><loc>https://playtion.kr/partner/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
+  <url><loc>https://playtion.kr/partner/gacha</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://playtion.kr/partner/party</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://playtion.kr/partner/spot</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://playtion.kr/partner/network</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://playtion.kr/partner/business</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+</urlset>

@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+Disallow: /404
+Disallow: /gacha/m
+Disallow: /pass/login
+Disallow: /pass/me
+Disallow: /pass/checkin
+Disallow: /pass/kiosk
+Disallow: /pass/collection
+Disallow: /pass/wallet
+Disallow: /partner/portal
+Disallow: /admin/
+Disallow: /api/
+
+Sitemap: https://playtion.kr/sitemap.xml
