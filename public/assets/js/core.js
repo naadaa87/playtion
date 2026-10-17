@@ -721,7 +721,7 @@
   function serviceWorker() {
     if (!('serviceWorker' in navigator)) return;
     if (location.protocol !== 'https:' || /^(localhost|127\.)/.test(location.hostname)) return;
-    if (!/(^|\.)playtion\.co\.kr$|\.pages\.dev$/.test(location.hostname)) return;
+    if (!/(^|\.)playtion\.(kr|co\.kr)$|\.pages\.dev$/.test(location.hostname)) return;
     window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () { }); });
   }
 

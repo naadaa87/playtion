@@ -1,0 +1,278 @@
+{
+ "chars/capsule-wave": [
+  720,
+  789
+ ],
+ "chars/capsule-celebrate": [
+  720,
+  533
+ ],
+ "chars/capsule-peek": [
+  720,
+  536
+ ],
+ "chars/star": [
+  720,
+  673
+ ],
+ "chars/gacha-robot": [
+  720,
+  797
+ ],
+ "chars/tiger": [
+  720,
+  705
+ ],
+ "chars/cat": [
+  720,
+  659
+ ],
+ "chars/rabbit": [
+  720,
+  717
+ ],
+ "chars/daruma": [
+  720,
+  586
+ ],
+ "chars/fox": [
+  720,
+  657
+ ],
+ "chars/robot": [
+  720,
+  733
+ ],
+ "chars/tanuki": [
+  720,
+  695
+ ],
+ "chars/octopus": [
+  720,
+  631
+ ],
+ "chars/koi": [
+  720,
+  625
+ ],
+ "chars/goblin": [
+  720,
+  634
+ ],
+ "chars/moonjar": [
+  720,
+  769
+ ],
+ "scenes/scene-16bit": [
+  1600,
+  900
+ ],
+ "scenes/scene-comic-five": [
+  1122,
+  1402
+ ],
+ "scenes/scene-garden": [
+  1254,
+  1254
+ ],
+ "scenes/scene-red-capsules": [
+  1600,
+  900
+ ],
+ "scenes/scene-peek": [
+  1600,
+  900
+ ],
+ "scenes/scene-alley": [
+  1600,
+  900
+ ],
+ "scenes/scene-wave": [
+  1448,
+  1086
+ ],
+ "scenes/scene-robot-daruma": [
+  1600,
+  900
+ ],
+ "scenes/scene-shop-line": [
+  1600,
+  900
+ ],
+ "scenes/scene-toy-trio": [
+  1600,
+  900
+ ],
+ "scenes/scene-mascot-cobalt": [
+  1448,
+  1086
+ ],
+ "scenes/sheet-chars-1": [
+  1536,
+  1024
+ ],
+ "scenes/sheet-chars-2": [
+  1254,
+  1254
+ ],
+ "scenes/sheet-chars-3": [
+  1223,
+  1286
+ ],
+ "scenes/scene-parade": [
+  1600,
+  900
+ ],
+ "scenes/scene-sticker-collage": [
+  1254,
+  1254
+ ],
+ "scenes/scene-jump": [
+  1600,
+  900
+ ],
+ "scenes/scene-goods-flatlay": [
+  1254,
+  1254
+ ],
+ "scenes/pattern-capsules": [
+  1600,
+  900
+ ],
+ "scenes/scene-collector-desk": [
+  1448,
+  1086
+ ],
+ "people/teen-sheet": [
+  1536,
+  1024
+ ],
+ "people/mini-collection": [
+  1536,
+  1024
+ ],
+ "people/highfive": [
+  1254,
+  1254
+ ],
+ "people/kids-discover": [
+  1254,
+  1254
+ ],
+ "people/midlife-compare": [
+  1254,
+  1254
+ ],
+ "people/midlife-sheet": [
+  1536,
+  1024
+ ],
+ "people/two-friends": [
+  1254,
+  1254
+ ],
+ "people/generations-bench": [
+  1600,
+  900
+ ],
+ "people/generations-blue": [
+  1600,
+  900
+ ],
+ "people/youth-scarlet": [
+  1600,
+  900
+ ],
+ "people/eight-banner": [
+  1600,
+  900
+ ],
+ "people/eight-group": [
+  1600,
+  900
+ ],
+ "people/couple-handing": [
+  1600,
+  900
+ ],
+ "people/shop-discover": [
+  1600,
+  900
+ ],
+ "people/street-sheet": [
+  1536,
+  1024
+ ],
+ "people/sticker-sheet": [
+  1536,
+  1024
+ ],
+ "people/ink": [
+  1536,
+  1024
+ ],
+ "people/goods-table": [
+  1254,
+  1254
+ ],
+ "people/art-toy": [
+  1536,
+  1024
+ ],
+ "people/collector-sheet": [
+  1536,
+  1024
+ ],
+ "people/kids-sheet": [
+  1536,
+  1024
+ ],
+ "people/pop-comic": [
+  1536,
+  1024
+ ],
+ "people/city-dusk": [
+  1122,
+  1402
+ ],
+ "concept/storefront-night": [
+  1448,
+  1086
+ ],
+ "concept/storefront-day": [
+  1448,
+  1086
+ ],
+ "concept/interior": [
+  1672,
+  941
+ ],
+ "concept/board-tokyo": [
+  1448,
+  1086
+ ],
+ "brand/logo-mark": [
+  497,
+  464
+ ],
+ "brand/logo-word": [
+  847,
+  197
+ ],
+ "brand/logo-sub": [
+  691,
+  73
+ ],
+ "brand/logo-lockup": [
+  900,
+  297
+ ],
+ "brand/mascot-light": [
+  160,
+  149
+ ],
+ "brand/wordmark-dark": [
+  360,
+  84
+ ]
+}
