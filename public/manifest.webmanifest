@@ -1,14 +1,14 @@
 {
   "name": "플레이션 PLAYTION",
   "short_name": "플레이션",
-  "description": "게임파티룸 8곳과 600대 규모 가챠샵을 한 장의 PASS로 잇는 도심형 플레이 플랫폼",
+  "description": "가챠뽑기샵과 게임파티룸을 한 장의 PASS로 잇는 플레이션. 작은 캡슐, 큰 즐거움",
   "lang": "ko",
   "dir": "ltr",
   "start_url": "/pass/me?source=homescreen",
   "scope": "/",
   "display": "standalone",
   "background_color": "#FFFFFF",
-  "theme_color": "#FFFFFF",
+  "theme_color": "#F2242B",
   "icons": [
     {
       "src": "/icon-192.png",

@@ -22,9 +22,9 @@ window.PLT_SITE = {
   brand: {
     name: "플레이션",
     nameEn: "PLAYTION",
-    slogan: "PLAY MORE. CONNECT MORE.",
-    tagline: "놀이가 출발하는 정거장",
-    description: "게임파티룸 8곳과 600대 규모 가챠샵을 한 장의 PASS로 잇는 도심형 플레이 플랫폼"
+    slogan: "PLAY · COLLECT · SHARE",
+    tagline: "작은 캡슐, 큰 즐거움",
+    description: "가챠뽑기샵과 게임파티룸을 한 장의 PASS로 잇는 플레이션. 작은 캡슐, 큰 즐거움"
   },
 
   /* 사업자 정보 — 모든 화면 아래(푸터)에 표시됩니다 */
