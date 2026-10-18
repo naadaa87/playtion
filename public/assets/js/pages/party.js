@@ -60,7 +60,7 @@
     return (P.packages || []).map(function (k) {
       var t = PLT.party.time(k.time);
       var inc = (k.include || []).map(function (id) { var o = (P.options || []).filter(function (x) { return x.id === id; })[0]; return o ? '<span class="tag">' + esc(o.name) + '</span>' : ''; }).join('');
-      return '<article class="pkg"><span class="pkg__who">' + esc(k.who) + '</span><h3 class="t-h3">' + esc(k.name) + '</h3><p class="t-small">' + esc(k.desc) + '</p>' +
+      return '<article class="pkg' + (k.img ? ' pkg--ph' : '') + '">' + (k.img ? '<div class="pkg__ph"><img src="' + PLT.url('assets/img/' + k.img) + '" alt="' + esc(k.name) + ' 모임 그림" loading="lazy" width="1254" height="1254"></div>' : '') + '<span class="pkg__who">' + esc(k.who) + '</span><h3 class="t-h3">' + esc(k.name) + '</h3><p class="t-small">' + esc(k.desc) + '</p>' +
         '<div class="pkg__inc"><span class="tag" style="background:var(--party-soft);color:var(--party-deep)">' + esc(t ? t.name : '') + '</span>' + inc + '</div>' +
         (k.bonus ? '<p class="pkg__bonus">함께 드려요 · ' + esc(k.bonus) + '</p>' : '') +
         '<a class="btn btn--ghost btn--s" href="' + bookUrl({ package: k.id }) + '">이 구성으로 예약</a></article>';

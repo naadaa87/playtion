@@ -668,7 +668,7 @@
     var started = false;
     var toggle = function (v) {
       box.classList.toggle('is-open', v); fab.setAttribute('aria-expanded', v ? 'true' : 'false');
-      if (v && !started) { started = true; say('안녕하세요, 플레이션 도우미예요. 예약, 요금, 가챠샵, PASS 중 궁금한 걸 골라 보세요.'); quick(); }
+      if (v && !started) { started = true; say('안녕하세요, 플레이션 도우미예요. 가챠뽑기샵, 파티룸 예약, 요금, PASS 중 궁금한 걸 골라 보세요.'); quick(); }
       if (v) setTimeout(function () { $('#hq').focus(); }, 50);
     };
     fab.addEventListener('click', function () { toggle(!box.classList.contains('is-open')); });
@@ -684,10 +684,10 @@
     var t = function (id) { var x = PLT.party.time(id); return x ? x : { wd: 0, we: 0 }; };
     var link = function (p, l) { return ' <a href="' + PLT.url(p) + '">' + l + '</a>'; };
     return [
+      { label: '가챠뽑기샵', keys: ['가챠', '캡슐', '뽑기', '입고', '재고'], html: '건대 한아름 건물 1층에 600대 규모로 준비 중이에요. 상품 찾기에서 기기 위치와 재고를, 입고 캘린더에서 신상 일정을 볼 수 있어요.' + link('gacha/', '가챠뽑기샵 보기') },
       { label: '예약 방법', keys: ['예약', '방법', '어떻게'], html: '지점, 날짜, 타임, 인원을 고르면 바로 금액이 보여요. 예약이 확정되면 알림톡으로 도어락 비밀번호가 와요.' + link('party/booking', '예약하러 가기') },
       { label: '요금', keys: ['요금', '가격', '얼마', '비용', '올나잇', '밤타임', '낮타임', '시간제'], html: '시간제 ' + PLT.won(t('hourly').wd) + '/시간(주말 ' + PLT.won(t('hourly').we) + '), 낮타임 ' + PLT.won(t('day').wd) + '(주말 ' + PLT.won(t('day').we) + '), 밤타임·올나잇 ' + PLT.won(t('night').wd) + '(금·토 ' + PLT.won(t('night').we) + ')이에요. 기본 4인, 추가 1인당 ' + PLT.won(P.extraPerPerson) + '이에요.' + link('party/prices', '요금 자세히') },
       { label: '지점 위치', keys: ['위치', '주소', '지점', '어디', '역'], html: '신촌 1·2·3호점, 영등포, 사당, 건대 미니, 건대구의, 구리까지 8개 지점과 건대 가챠샵이 있어요.' + link('stations', '전 지점 보기') },
-      { label: '가챠샵', keys: ['가챠', '캡슐', '뽑기', '입고', '재고'], html: '건대 한아름 건물 1층에 600대 규모로 준비 중이에요. 상품 찾기에서 기기 위치와 재고를, 입고 캘린더에서 신상 일정을 볼 수 있어요.' + link('gacha/', '가챠샵 보기') },
       { label: 'PASS 혜택', keys: ['PASS', '패스', '멤버십', '포인트', '스탬프', '쿠폰', '등급', '환승'], html: '전화번호 하나로 가입하면 첫 예약 10,000원 할인과 온라인 뽑기 1회권을 드려요. 파티룸을 예약하면 가챠 코인, 가챠샵에 세 번 오면 파티룸 쿠폰이 나오는 환승 혜택도 있어요.' + link('pass/', 'PASS 보기') },
       { label: '환불 규정', keys: ['환불', '취소', '변경'], html: '이용 7일 전까지 100%, 5일 전 70%, 3일 전 50% 환불돼요. 2일 전부터는 환불이 어렵지만 3일 전까지 요청하면 일정 변경 1회가 가능해요.' + link('party/guide', '이용안내') },
       { label: '창업 문의', keys: ['창업', '가맹', '입점', '제휴', '투자', '공실'], html: '가챠샵 창업은 5평부터, 추천 10~30평이고 평당 50~70만 원(냉난방기·간판 별도)이에요. 파티룸 창업, SPOT 제휴, 입점도 한곳에서 상담해요.' + link('partner/', '창업·제휴 보기') },
@@ -695,6 +695,8 @@
       { label: '미성년자', keys: ['미성년', '청소년', '학생', '나이'], html: '만 19세 미만은 22시 이후(밤타임·올나잇) 파티룸 이용이 어렵고, 낮 시간 이용은 보호자 동의가 필요해요. 가챠샵은 누구나 이용할 수 있어요.' },
       { label: '음식 반입', keys: ['음식', '배달', '취사', '요리', '술', '주류'], html: '전 지점 배달 음식 반입이 돼요. 신촌 2·3호점, 사당, 구의, 구리, 영등포는 인덕션으로 요리도 할 수 있어요.' },
       { label: '분실물', keys: ['분실', '두고', '잃어'], html: '고객센터나 카카오톡 채널로 알려 주세요. 분실물은 30일 동안 보관해요.' },
+      { label: '대관·다른 공간', keys: ['대관', '세미나', '행사', '워크숍', '워크샵', '단체', '스터디', '회의', '강의', '코워킹', '사무실', '디저트', '카페', '200명', '100명', '50명'], html: '게임 없이 파티만 한다면 전국 120여 곳의 쏘플파티룸, 30명이 넘는 행사는 건대 한아름 건물 2층 메가스팟(최대 200명), 세미나·스터디·코워킹은 같은 건물 4층 소셜팩토리가 맞아요. 디저트와 동네 모임은 24시간 무인카페 밍글에서.' + link('family', '패밀리 사이트 보기') },
+      { label: '상가·인테리어', keys: ['상가', '점포', '부동산', '임대', '매물', '상권', '인테리어', '브랜딩', '간판', '시공', '빌딩'], html: '가게 자리와 상권분석은 오르비스 부동산 중개법인, 오래 비어 있는 상가를 살리는 일은 공백 공간백서, 브랜딩과 인테리어는 코어무드가 도와요. 가챠뽑기샵·게임파티룸 창업은 플레이션 창업·제휴에서 상담해요.' + link('family#build', '공간을 여는 사람들') },
       { label: '온라인 뽑기', keys: ['온라인', '보관함', '배송', '수령'], html: '온라인으로 뽑은 상품은 PASS 보관함에 담겨요. 건대 가챠샵에서 무료로 받거나 배송을 신청할 수 있어요.' + link('gacha/online', '온라인 뽑기') }
     ];
   };
@@ -717,6 +719,12 @@
     try { if (window.gtag) gtag('event', name, params || {}); } catch (e) { }
     try { if (window.fbq && name === 'complete_booking') fbq('track', 'Purchase', { currency: 'KRW', value: (params || {}).value || 0 }); } catch (e) { }
   };
+
+  /* 패밀리 사이트로 나가는 클릭 — GA4 이벤트 family_click (brand, from) */
+  document.addEventListener('click', function (e) {
+    var el = e.target && e.target.closest ? e.target.closest('a[data-family]') : null;
+    if (el) PLT.track('family_click', { brand: el.getAttribute('data-family'), from: PLT.page || '' });
+  });
 
   function serviceWorker() {
     if (!('serviceWorker' in navigator)) return;

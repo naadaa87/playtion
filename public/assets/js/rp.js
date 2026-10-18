@@ -47,6 +47,18 @@
     t.setAttribute('data-cloned', '1');
   });
 
+  /* 패밀리 사이트: 상황 고르기 */
+  var fmChips = $('#fmChips'), fmRoutes = $('#fmRoutes');
+  if (fmChips && fmRoutes) {
+    $$('[data-fm-tag]', fmChips).forEach(function (b) {
+      b.addEventListener('click', function () {
+        var t = b.getAttribute('data-fm-tag');
+        $$('[data-fm-tag]', fmChips).forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+        $$('[data-fm-row]', fmRoutes).forEach(function (r) { r.hidden = !(t === 'all' || r.getAttribute('data-fm-row') === t); });
+      });
+    });
+  }
+
   /* 홈 지점 카드 */
   var host = $('#homeStations');
   if (host && PLT.stations) {

@@ -85,7 +85,7 @@
     });
     select(PLT.param('station') || 'kd-gacha');
     /* 휴대폰: 세로 노선 */
-    var order = ['ydp', 'sc1', 'sc2', 'sc3', 'sadang', 'kondae', 'kd-gacha', 'guui', 'guri'];
+    var order = ['kd-gacha', 'ydp', 'sc1', 'sc2', 'sc3', 'sadang', 'kondae', 'guui', 'guri'];
     list.innerHTML = order.map(function (id) {
       var s = PLT.station(id); if (!s) return '';
       var g = s.type === 'gacha';
@@ -220,7 +220,7 @@
      ------------------------------------------------------------------ */
   function flywheel() {
     var host = $('#flywheel'); if (!host) return;
-    var steps = [['정거장이 늘어나요', '파티룸·가챠샵·SPOT·파트너'], ['회원이 늘어나요', '환승 쿠폰과 스탬프'], ['기록이 쌓여요', '판매·방문·입고 알림 수요'], ['고르는 근거가 생겨요', '상품 교체, 입지, 창업 손익'], ['파트너가 합류해요', '창업·입점·브랜드 제휴']];
+    var steps = [['정거장이 늘어나요', '가챠샵·파티룸·SPOT·파트너'], ['회원이 늘어나요', '환승 쿠폰과 스탬프'], ['기록이 쌓여요', '판매·방문·입고 알림 수요'], ['고르는 근거가 생겨요', '상품 교체, 입지, 창업 손익'], ['파트너가 합류해요', '창업·입점·브랜드 제휴']];
     var cx = 260, cy = 210, R = 150, n = steps.length, svg = '';
     var pt = function (i, r) { var a = -Math.PI / 2 + i * 2 * Math.PI / n; return [cx + r * Math.cos(a), cy + r * Math.sin(a)]; };
     svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + R + '" fill="none" stroke="var(--rule-2)" stroke-width="3" stroke-dasharray="3 9" stroke-linecap="round"/>';
@@ -250,7 +250,7 @@
     var list = $('#faqList'); if (!list) return;
     var P = window.PLT_PARTY || {}, PS = window.PLT_PASS || {};
     var passFaq = PS.faq || [];
-    var groups = [['party', '파티룸', P.faq || []], ['gacha', '가챠샵', (window.PLT_GACHA || {}).faq || []], ['pass', 'PASS', passFaq]];
+    var groups = [['gacha', '가챠뽑기샵', (window.PLT_GACHA || {}).faq || []], ['party', '파티룸', P.faq || []], ['pass', 'PASS', passFaq]];
     var cat = 'all', q = '';
     var cats = $('#faqCats');
     var draw = function () {

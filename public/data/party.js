@@ -56,29 +56,30 @@ window.PLT_PARTY = {
   ],
 
   /* 패키지 — 예약 화면에서 고르면 옵션이 함께 담깁니다 */
+  /* img: 패키지 카드 그림 (assets/img/ 아래 경로, 비우면 그림 없이 표시) */
   packages: [
     {
-      id: "birthday", name: "생일 파티", who: "친구·커플·가족 생일",
+      id: "birthday", img: "party-scenes/pkg-birthday.webp", name: "생일 파티", who: "친구·커플·가족 생일",
       time: "day", include: ["deco", "snack", "vlog"], bonus: "생일 가챠 1회권",
       desc: "데코와 간식, 촬영 세트를 미리 깔아 둬요. 주인공은 입장만 하면 돼요."
     },
     {
-      id: "mt", name: "MT · 동아리", who: "학과·동아리 단체",
+      id: "mt", img: "party-scenes/pkg-mt.webp", name: "MT · 동아리", who: "학과·동아리 단체",
       time: "night", include: ["snack", "pad", "board"], bonus: "대회용 대진표·상품 캡슐",
       desc: "토너먼트 대진표와 우승 상품 캡슐까지 챙겨 드려요. 밤새 내전, 아침엔 정리만."
     },
     {
-      id: "company", name: "회식 · 팀 빌딩", who: "직장인 2차·팀 행사",
+      id: "company", img: "party-scenes/pkg-company.webp", name: "회식 · 팀 빌딩", who: "직장인 2차·팀 행사",
       time: "hourly", include: ["snack"], bonus: "정기 대관 시 할인 협의",
       desc: "노래와 홀덤, 게임을 한 공간에서. 술보다 게임이 남는 회식이에요."
     },
     {
-      id: "couple", name: "커플 · 둘이서", who: "데이트 코스",
+      id: "couple", img: "party-scenes/pkg-couple.webp", name: "커플 · 둘이서", who: "데이트 코스",
       time: "hourly", include: ["coin"], bonus: "가챠샵 환승 쿠폰",
       desc: "스위치 한 판, 영화 한 편, 그리고 가챠샵까지. 둘이 걷기 좋은 코스로 묶었어요."
     },
     {
-      id: "cup", name: "게임 대회 · 시청", who: "e스포츠 결승, 신작 출시일",
+      id: "cup", img: "party-scenes/pkg-cup.webp", name: "게임 대회 · 시청", who: "e스포츠 결승, 신작 출시일",
       time: "night", include: ["pad", "snack"], bonus: "중계 세팅 안내",
       desc: "대형 화면으로 결승을 보고, 끝나면 바로 우리끼리 대회를 열어요."
     }
