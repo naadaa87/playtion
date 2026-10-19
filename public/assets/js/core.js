@@ -106,6 +106,58 @@
     get: function (k) { try { return sessionStorage.getItem('plt:' + k); } catch (e) { return null; } },
     set: function (k, v) { try { sessionStorage.setItem('plt:' + k, v); } catch (e) { } }
   };
+  /* IndexedDB — 사진처럼 큰 데이터(체험 모드 커뮤니티)를 담습니다. 못 쓰는 브라우저면 메모리에만 둡니다 */
+  var idbMem = {};
+  PLT.idb = (function () {
+    var dbp = null;
+    function open() {
+      if (dbp) return dbp;
+      dbp = new Promise(function (res, rej) {
+        try {
+          var r = indexedDB.open('plt', 1);
+          r.onupgradeneeded = function () { r.result.createObjectStore('kv'); };
+          r.onsuccess = function () { res(r.result); };
+          r.onerror = function () { rej(r.error); };
+        } catch (e) { rej(e); }
+      });
+      return dbp;
+    }
+    function tx(mode, fn) {
+      return open().then(function (db) {
+        return new Promise(function (res, rej) {
+          var t = db.transaction('kv', mode), st = t.objectStore('kv'), out = fn(st);
+          t.oncomplete = function () { res(out && out.result !== undefined ? out.result : undefined); };
+          t.onerror = function () { rej(t.error); };
+          t.onabort = function () { rej(t.error); };
+        });
+      });
+    }
+    return {
+      get: function (k, d) { return tx('readonly', function (st) { return st.get(k); }).then(function (v) { return v === undefined ? d : v; }, function () { return idbMem[k] !== undefined ? idbMem[k] : d; }); },
+      set: function (k, v) { return tx('readwrite', function (st) { st.put(v, k); }).catch(function () { idbMem[k] = v; }); },
+      del: function (k) { return tx('readwrite', function (st) { st.delete(k); }).catch(function () { delete idbMem[k]; }); }
+    };
+  })();
+
+  /* 사진 정리 — 긴 변을 줄이고 다시 그려서 위치 정보 같은 메타데이터를 없앱니다. 결과는 JPEG Blob */
+  PLT.shrinkImage = function (file, maxSide, quality) {
+    maxSide = maxSide || 1600; quality = quality || 0.86;
+    return new Promise(function (res, rej) {
+      if (!file || !/^image\//.test(file.type)) return rej(new Error('이미지 파일만 올릴 수 있어요'));
+      var url = URL.createObjectURL(file), img = new Image();
+      img.onload = function () {
+        URL.revokeObjectURL(url);
+        var w = img.naturalWidth, h = img.naturalHeight, s = Math.min(1, maxSide / Math.max(w, h));
+        var cw = Math.max(1, Math.round(w * s)), ch = Math.max(1, Math.round(h * s));
+        var c = document.createElement('canvas'); c.width = cw; c.height = ch;
+        var ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cw, ch); ctx.drawImage(img, 0, 0, cw, ch);
+        if (c.toBlob) c.toBlob(function (b) { b ? res({ blob: b, w: cw, h: ch }) : rej(new Error('사진을 처리하지 못했어요')); }, 'image/jpeg', quality);
+        else { try { var d = c.toDataURL('image/jpeg', quality); fetch(d).then(function (r) { return r.blob(); }).then(function (b) { res({ blob: b, w: cw, h: ch }); }, rej); } catch (e) { rej(e); } }
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); rej(new Error('사진을 읽지 못했어요')); };
+      img.src = url;
+    });
+  };
 
   /* 이벤트 */
   var bus = {};
@@ -558,6 +610,11 @@
     .catch(function (e) {
       console.error(e);
       if (PLT.mode === 'live') { PLT.toast('서비스 연결에 실패해 체험 모드로 열었어요.', 'err'); PLT.mode = 'demo'; return loadScript(PLT.url('assets/js/db-demo.js?v=' + ver)).then(function () { return PLT.db.init(); }); }
+    })
+    /* 커뮤니티(자랑하기·교환 판매) — 켜져 있을 때만 이어서 불러옵니다 */
+    .then(function () {
+      if (PLT.features.community === false || !window.PLT_COMMUNITY) return null;
+      return loadScript(PLT.url('assets/js/db-community.js?v=' + ver)).then(function () { return PLT.db.cInit ? PLT.db.cInit() : null; }).catch(function (e) { console.error(e); });
     });
   PLT.ready = readyChain.then(function () { return PLT.db.me(); }).then(function (me) { PLT.me = me || null; PLT.emit('auth', PLT.me); return PLT.me; });
   PLT.refreshMe = function () { return PLT.db.me().then(function (me) { PLT.me = me || null; PLT.emit('auth', PLT.me); return PLT.me; }); };
@@ -685,6 +742,7 @@
     var link = function (p, l) { return ' <a href="' + PLT.url(p) + '">' + l + '</a>'; };
     return [
       { label: '가챠뽑기샵', keys: ['가챠', '캡슐', '뽑기', '입고', '재고'], html: '건대 한아름 건물 1층에 600대 규모로 준비 중이에요. 상품 찾기에서 기기 위치와 재고를, 입고 캘린더에서 신상 일정을 볼 수 있어요.' + link('gacha/', '가챠뽑기샵 보기') },
+      { label: '자랑·교환 판매', keys: ['자랑', '커뮤니티', '교환', '판매', '중복', '문의함', '하트', '댓글', '사진'], html: '뽑은 캡슐과 피규어를 사진으로 올려 자랑하고, 중복은 회원끼리 교환하거나 판매할 수 있어요. 결제와 배송은 회원끼리 직접 정하고 플레이션은 글과 문의함만 제공해요.' + link('community/', '자랑하기') + link('community/market', '교환 판매') },
       { label: '예약 방법', keys: ['예약', '방법', '어떻게'], html: '지점, 날짜, 타임, 인원을 고르면 바로 금액이 보여요. 예약이 확정되면 알림톡으로 도어락 비밀번호가 와요.' + link('party/booking', '예약하러 가기') },
       { label: '요금', keys: ['요금', '가격', '얼마', '비용', '올나잇', '밤타임', '낮타임', '시간제'], html: '시간제 ' + PLT.won(t('hourly').wd) + '/시간(주말 ' + PLT.won(t('hourly').we) + '), 낮타임 ' + PLT.won(t('day').wd) + '(주말 ' + PLT.won(t('day').we) + '), 밤타임·올나잇 ' + PLT.won(t('night').wd) + '(금·토 ' + PLT.won(t('night').we) + ')이에요. 기본 4인, 추가 1인당 ' + PLT.won(P.extraPerPerson) + '이에요.' + link('party/prices', '요금 자세히') },
       { label: '지점 위치', keys: ['위치', '주소', '지점', '어디', '역'], html: '신촌 1·2·3호점, 영등포, 사당, 건대 미니, 건대구의, 구리까지 8개 지점과 건대 가챠샵이 있어요.' + link('stations', '전 지점 보기') },

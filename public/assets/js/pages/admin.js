@@ -8,7 +8,7 @@
   var PLT = window.PLT, $ = PLT.$, $$ = PLT.$$, esc = PLT.esc, won = PLT.won;
   var G = window.PLT_GACHA || {}, NEWS = window.PLT_NEWS || {}, PS = window.PLT_PASS || {};
   var host = $('#adm');
-  var VIEWS = [['dash', '한눈에 보기'], ['bookings', '파티룸 예약'], ['members', '회원'], ['series', '가챠 상품 상태'], ['arrivals', '입고 일정'], ['box', '보관함 수령·배송'], ['inquiries', '문의·고장'], ['leads', '창업·제휴 상담'], ['market', '마켓·거래'], ['regs', '행사 신청'], ['qr', 'QR 라벨·체크인'], ['tools', '도구']];
+  var VIEWS = [['dash', '한눈에 보기'], ['bookings', '파티룸 예약'], ['members', '회원']].concat(window.PLT_ADMIN_EXTRA_NAV || []).concat([['series', '가챠 상품 상태'], ['arrivals', '입고 일정'], ['box', '보관함 수령·배송'], ['inquiries', '문의·고장'], ['leads', '창업·제휴 상담'], ['market', '마켓·거래 (예전)'], ['regs', '행사 신청'], ['qr', 'QR 라벨·체크인'], ['tools', '도구']]);
   var view = (location.hash || '#dash').slice(1);
 
   var stName = function (id) { var s = PLT.station(id); return s ? s.short : id; };
@@ -53,7 +53,9 @@
   }
   function render() {
     var main = $('#admMain'); main.innerHTML = '<p class="t-muted">불러오고 있어요.</p>';
-    ({ dash: dash, bookings: bookings, members: members, series: series, arrivals: arrivals, box: box, inquiries: inquiries, leads: leads, market: market, regs: regs, qr: qr, tools: tools })[view in { dash: 1, bookings: 1, members: 1, series: 1, arrivals: 1, box: 1, inquiries: 1, leads: 1, market: 1, regs: 1, qr: 1, tools: 1 } ? view : 'dash'](main);
+    var V = { dash: dash, bookings: bookings, members: members, series: series, arrivals: arrivals, box: box, inquiries: inquiries, leads: leads, market: market, regs: regs, qr: qr, tools: tools }, X = window.PLT_ADMIN_EXTRA || {};
+    for (var k in X) V[k] = X[k];
+    (V[view] || V.dash)(main);
   }
 
   /* 한눈에 보기 */

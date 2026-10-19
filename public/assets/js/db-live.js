@@ -62,6 +62,8 @@
   PLT.db = {
     kind: 'live',
     init: function () { return sb.auth.getSession(); },
+    /* 커뮤니티(db-community.js)가 같은 연결을 쓰도록 내부 도구를 건넵니다 */
+    _live: { rpc: rpc, authed: authed, friendly: friendly, no: no },
 
     /* ---------------- 회원 ---------------- */
     me: function () { return authed().then(function (ok) { return ok ? rpc('plt_me') : null; }); },

@@ -66,7 +66,8 @@ window.PLT_SITE = {
   features: {
     onlineGacha: true,      // 온라인 뽑기
     market: true,           // 마켓(교환·판매·구해요)
-    safeTrade: true,        // 마켓 보관함 안전거래
+    safeTrade: false,       // (예전) 마켓 보관함 안전거래 — 결제 기능과 함께 추후 제작
+    community: true,        // 커뮤니티: 자랑하기 · 교환 판매 · 문의함
     store: true,            // 공식 스토어(세트 예약 구매)
     passPlus: true,         // PASS+ 30일 이용권
     coins: true,            // 플레이 코인 충전
