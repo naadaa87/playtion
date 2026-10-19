@@ -23,8 +23,7 @@
 /event /news?tab=events 301
 /events.html /news?tab=events 301
 /events /news?tab=events 301
-/community.html /gacha/club 301
-/community /gacha/club 301
+/community.html /community/ 301
 /gacha.html /gacha/ 301
 /gacha /gacha/ 301
 /products.html /gacha/products 301
@@ -43,8 +42,10 @@
 /club /gacha/club 301
 /program.html /gacha/club 301
 /program /gacha/club 301
-/swap.html /gacha/market 301
-/swap /gacha/market 301
+/swap.html /community/market 301
+/swap /community/market 301
+/gacha/market /community/market 301
+/gacha/market.html /community/market 301
 /notices.html /news?tab=notices 301
 /notices /news?tab=notices 301
 /story.html /brand 301

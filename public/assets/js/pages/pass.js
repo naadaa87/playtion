@@ -148,7 +148,7 @@
   /* ------------------------------------------------------------------
      내 PASS
      ------------------------------------------------------------------ */
-  var TABS = [['bookings', '예약'], ['coupons', '쿠폰'], ['box', '보관함'], ['notes', '알림'], ['trades', '거래'], ['subs', '입고 알림'], ['history', '내역'], ['settings', '설정']];
+  var TABS = [['bookings', '예약'], ['coupons', '쿠폰'], ['box', '보관함'], ['notes', '알림'], ['trades', '교환 판매'], ['subs', '입고 알림'], ['history', '내역'], ['settings', '설정']];
   function mePage() {
     if (PLT.page !== 'me') return;
     PLT.requireLogin().then(function () {
@@ -251,7 +251,7 @@
         return selectable ? '<button type="button" class="bx" data-id="' + b.id + '" aria-pressed="false">' + inner + '</button>' : '<div class="bx">' + inner + '</div>';
       };
       host.innerHTML = (stored.length ? '<div class="row row--between"><h2 class="t-h4">보관 중 ' + stored.length + '개</h2><button class="btn btn--quiet btn--s" type="button" id="bxAll">모두 고르기</button></div><div class="boxgrid mt-s">' + stored.map(function (b) { return item(b, true); }).join('') + '</div>' +
-        '<div class="boxbar"><span class="t-small t-strong" id="bxSel">상품을 골라 주세요</span><button class="btn btn--ink btn--s" type="button" data-act="pickup">매장에서 받기</button><button class="btn btn--ghost btn--s" type="button" data-act="ship">배송 신청</button>' + (PLT.features.market !== false ? '<button class="btn btn--quiet btn--s" type="button" data-act="market">교환 글 올리기</button>' : '') + '</div>' : '') +
+        '<div class="boxbar"><span class="t-small t-strong" id="bxSel">상품을 골라 주세요</span><button class="btn btn--ink btn--s" type="button" data-act="pickup">매장에서 받기</button><button class="btn btn--ghost btn--s" type="button" data-act="ship">배송 신청</button>' + (PLT.features.community !== false ? '<a class="btn btn--quiet btn--s" href="' + PLT.url('community/sell') + '">교환 판매 글 올리기</a>' : '') + '</div>' : '') +
         (others.length ? '<h2 class="t-h4 mt-l">처리 중·지난 상품</h2><div class="boxgrid mt-s">' + others.map(function (b) { return item(b, false); }).join('') + '</div>' : '');
       var sync = function () { $$('.bx[data-id]', host).forEach(function (b) { b.setAttribute('aria-pressed', on.indexOf(b.getAttribute('data-id')) >= 0 ? 'true' : 'false'); }); var t = $('#bxSel', host); if (t) t.textContent = on.length ? on.length + '개 골랐어요' : '상품을 골라 주세요'; };
       $$('.bx[data-id]', host).forEach(function (b) { b.addEventListener('click', function () { var id = b.getAttribute('data-id'), i = on.indexOf(id); if (i >= 0) on.splice(i, 1); else on.push(id); sync(); }); });
@@ -291,10 +291,12 @@
     });
   }
   function trades(host, refresh, redraw) {
+    var top = '<div class="grid g3" style="gap:10px"><a class="panel panel--s" href="' + PLT.url('community/me') + '"><b>내 활동</b><p class="t-small mt-s">내가 올린 자랑 글과 교환 판매 글, 저장한 글</p></a><a class="panel panel--s" href="' + PLT.url('community/inbox') + '"><b>문의함</b><p class="t-small mt-s">교환 판매 글마다 둘만 보는 대화</p></a><a class="panel panel--s" href="' + PLT.url('community/sell') + '"><b>교환 판매 글 올리기</b><p class="t-small mt-s">결제 없이 회원끼리 직접 교환·판매</p></a></div>';
     PLT.db.myTrades().then(function (list) {
-      if (!list.length) { host.innerHTML = empty('안전거래 기록이 없어요', '마켓에서 판매 글을 안전거래로 사고팔면 여기서 진행 상황을 볼 수 있어요.', PLT.url('gacha/market'), '마켓 보기'); return; }
+      if (!list.length) { host.innerHTML = top + '<p class="t-small t-muted mt-m">예전 안전거래 기록은 없어요. 지금은 결제 없이 회원끼리 직접 거래하는 교환 판매만 운영해요.</p>'; return; }
+      host.innerHTML = top;
       var label = { paid: '결제 완료', dropped: '보관함 도착·발송', done: '거래 완료', cancelled: '취소' };
-      host.innerHTML = list.map(function (t) {
+      host.innerHTML += '<h2 class="t-h4 mt-l">예전 안전거래 기록</h2>' + list.map(function (t) {
         var buyer = t.buyerId === PLT.me.id;
         return '<div class="bk"><div><div class="row" style="gap:8px"><span class="lb ' + (buyer ? 'lb--party' : 'lb--gacha') + ' lb--s">' + (buyer ? '구매' : '판매') + '</span><span class="bk__t">' + esc(t.title) + '</span><span class="lb lb--ghost lb--s">' + esc(label[t.status] || t.status) + '</span></div><div class="bk__m">' + PLT.coin(t.price) + (buyer ? '' : ' · 정산 ' + PLT.coin(t.price - t.fee)) + ' · ' + esc(PLT.ago(t.at)) + (t.status === 'dropped' && buyer && t.method === 'locker' ? ' · 보관함 코드 ' + esc(t.code) : '') + '</div></div>' +
           '<div class="row">' + (buyer && t.status === 'dropped' ? '<button class="btn btn--primary btn--s" data-ta="received" data-id="' + t.id + '" type="button">받았어요</button>' : '') + (!buyer && t.status === 'paid' ? '<button class="btn btn--primary btn--s" data-ta="dropped" data-id="' + t.id + '" type="button">' + (t.method === 'locker' ? '보관함에 넣었어요' : '보냈어요') + '</button>' : '') + (t.status === 'paid' ? '<button class="btn btn--quiet btn--s" data-ta="cancel" data-id="' + t.id + '" type="button">취소</button>' : '') + '<a class="btn btn--quiet btn--s" href="' + PLT.url('gacha/market?id=' + t.postId) + '">글 보기</a></div></div>';
@@ -444,7 +446,7 @@
         $('#cbList').innerHTML = list.length ? list.map(function (x) {
           var s = x.s;
           return '<details class="cb' + (x.n === x.t ? ' is-done' : '') + '" data-id="' + s.id + '"><summary><span class="cb__art" style="--c:' + esc(PLT.gacha.tint(s.color)) + '">' + PLT.capsule(s.color, s.name) + '</span><span><b>' + esc(s.name) + '</b>' + (s.sample ? ' <span class="lb lb--sample lb--s">예시</span>' : '') + '<span class="t-small t-muted" style="display:block">' + esc(s.series) + '</span><span class="meter" style="display:block"><i style="width:' + Math.round(x.n / x.t * 100) + '%"></i></span></span><span class="cb__n">' + x.n + '/' + x.t + '</span></summary>' +
-            '<div class="cb__body">' + lineupButtons(s, x.have) + '<div class="row mt-s">' + (x.n < x.t && PLT.features.market !== false ? '<a class="btn btn--gacha btn--s" href="' + PLT.url('gacha/market?new=1&series=' + s.id) + '">빠진 것 구해요 글쓰기</a>' : '') + '<a class="btn btn--quiet btn--s" href="' + PLT.url('gacha/item?id=' + s.id) + '">시리즈 보기</a></div></div></details>';
+            '<div class="cb__body">' + lineupButtons(s, x.have) + '<div class="row mt-s">' + (x.n < x.t && PLT.features.market !== false ? '<a class="btn btn--gacha btn--s" href="' + PLT.url('community/sell') + '">빠진 것 교환해요 글쓰기</a>' : '') + '<a class="btn btn--quiet btn--s" href="' + PLT.url('gacha/item?id=' + s.id) + '">시리즈 보기</a></div></div></details>';
         }).join('') : empty('여기엔 아직 없어요', '다른 보기로 바꿔 보세요.');
         $$('#cbList [data-li]').forEach(function (b) {
           b.addEventListener('click', function () {

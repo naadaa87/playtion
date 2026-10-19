@@ -285,14 +285,14 @@
             '<a class="btn btn--gacha btn--block mt-m' + (left ? '' : ' is-off') + '" href="' + PLT.url('gacha/online?id=' + s.id) + '">' + (left ? PLT.coin(s.price) + '로 뽑기' : '온라인 수량이 모두 나갔어요') + '</a></div>' : '') +
           '<div class="row"><button class="btn btn--quiet btn--s" type="button" id="itReport">안내가 달라요</button><button class="btn btn--quiet btn--s" type="button" id="itShare">공유</button></div>' +
         '</div></div></section>' +
-        '<section class="band band--mist" data-feature="market"><div class="wrap"><div class="sec-head"><div><h2 class="t-h2">이 시리즈 마켓 글</h2></div><a class="sec-head__more" href="' + PLT.url('gacha/market?new=1&series=' + s.id) + '">글쓰기</a></div><div id="itPosts"></div></div></section>' +
+        '<section class="band band--mist" data-feature="community"><div class="wrap"><div class="sec-head"><div><h2 class="t-h2">뽑은 건 자랑하고, 중복은 바꿔요</h2><p class="t-lead">이 시리즈를 뽑았다면 사진으로 자랑해 보세요. 같은 게 두 개라면 교환 판매 글로 올리면 돼요. 결제 없이 회원끼리 직접 정해요.</p></div></div><div class="row" style="gap:8px;flex-wrap:wrap"><a class="btn btn--primary" href="' + PLT.url('community/write') + '">자랑 올리기</a><a class="btn btn--party" href="' + PLT.url('community/market?q=' + encodeURIComponent(s.name)) + '">이 시리즈 교환 판매 글 찾기</a></div></div></section>' +
         '<section class="band"><div class="wrap"><div class="sec-head"><div><h2 class="t-h2">비슷한 시리즈</h2></div></div><div class="mlabels mlabels--rows" id="itSimilar"></div></div></section>';
       bindSub(host);
       var onLi = function (arr) { $('#lineupBox').innerHTML = lineupHtml(s, arr, true); bindLineup($('#lineupBox'), s, onLi); PLT.toast(arr.length === s.lineup.length ? '시리즈를 완성했어요!' : '컬렉션 북에 기록했어요.', 'ok'); };
       bindLineup(host, s, onLi);
       $('#itReport').addEventListener('click', function () { reportModal((s.machines || [])[0], s.id); });
       $('#itShare').addEventListener('click', function () { PLT.share(s.name, s.series + ' · ' + won(s.price), location.href); });
-      PLT.db.posts({ seriesId: s.id }).then(function (list) { $('#itPosts').innerHTML = list.length ? list.slice(0, 5).map(postRow).join('') : '<p class="t-small t-muted">아직 이 시리즈 글이 없어요. 중복이 있다면 첫 교환 글을 올려 보세요.</p>'; });
+      if ($('#itPosts')) PLT.db.posts({ seriesId: s.id }).then(function (list) { $('#itPosts').innerHTML = list.slice(0, 5).map(postRow).join(''); });
       var sim = PLT.gacha.all().filter(function (x) { return x.id !== s.id && x.cat === s.cat; }).concat(PLT.gacha.all().filter(function (x) { return x.id !== s.id && x.cat !== s.cat; })).slice(0, 4);
       $('#itSimilar').innerHTML = sim.map(function (x) { return PLT.gacha.card(x); }).join('');
       if (PLT.features.market === false) { var mb = $('[data-feature="market"]', host); if (mb) mb.hidden = true; }

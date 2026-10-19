@@ -118,6 +118,8 @@
   var DB = PLT.db = {
     kind: 'demo',
     init: function () { return ok(true); },
+    /* 커뮤니티(db-community.js)가 같은 회원·알림 저장소를 쓰도록 내부 도구를 건넵니다 */
+    _demo: { db: function () { return db; }, save: save, need: need, me: meRaw, member: function (id) { return db.members[id] || null; }, note: function () { note.apply(null, arguments); save(); }, now: now, ok: ok, no: no },
 
     /* ---------------- 회원 ---------------- */
     me: function () {
