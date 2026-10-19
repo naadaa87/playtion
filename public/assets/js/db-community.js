@@ -76,11 +76,16 @@
     if (!t) throw fail(label + '을 적어 주세요.');
     return t;
   }
+  /* 사진 주소 — 저장소 종류(site.js 의 media.provider)에 따라 한 곳에서만 정합니다 */
+  var MEDIA = S.media || {};
+  var useR2 = MEDIA.provider !== 'supabase';
   function imgUrl(img) {
     if (!img) return '';
     if (img.url) return img.url;
     if (img.src) return PLT.url(img.src);
-    if (img.path && S.supabase && S.supabase.url) return S.supabase.url.replace(/\/$/, '') + '/storage/v1/object/public/community/' + img.path;
+    if (!img.path) return '';
+    if (useR2) return MEDIA.base ? String(MEDIA.base).replace(/\/$/, '') + '/' + img.path : PLT.url('media/' + img.path);
+    if (S.supabase && S.supabase.url) return S.supabase.url.replace(/\/$/, '') + '/storage/v1/object/public/community/' + img.path.replace(/^community\//, '');
     return '';
   }
   DB.cImg = imgUrl;
@@ -570,15 +575,27 @@
   if (DB.kind === 'live' && DB._live) {
     var rpc = DB._live.rpc, authed = DB._live.authed, sb = PLT.sb;
     function uid() { return sb.auth.getSession().then(function (r) { var s = r.data && r.data.session; if (!s) throw fail('로그인이 필요해요.'); return s.user.id; }); }
+    function token() { return sb.auth.getSession().then(function (r) { var s = r.data && r.data.session; if (!s) throw fail('로그인이 필요해요.'); return s.access_token; }); }
+    /* 사진 올리기 — 기본은 Cloudflare R2(홈페이지 서버 기능 /api/media/upload), media.provider 가 "supabase" 면 Supabase Storage */
     function upload(files) {
       files = files || [];
       if (!files.length) return ok([]);
+      var out = [];
+      if (useR2) {
+        return token().then(function (t) {
+          return files.reduce(function (chain, f) {
+            return chain.then(function () {
+              return fetch(PLT.url('api/media/upload'), { method: 'POST', headers: { Authorization: 'Bearer ' + t, 'Content-Type': f.blob.type || 'image/jpeg' }, body: f.blob })
+                .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok || !j.path) { console.warn(j); throw fail(j.error || C.copy.uploadFail); } out.push({ path: j.path, w: f.w || 0, h: f.h || 0 }); }); });
+            });
+          }, Promise.resolve()).then(function () { return out; });
+        });
+      }
       return uid().then(function (u) {
-        var out = [];
         return files.reduce(function (chain, f) {
           return chain.then(function () {
-            var path = u + '/' + PLT.uid('') + Math.random().toString(36).slice(2, 8) + '.jpg';
-            return sb.storage.from('community').upload(path, f.blob, { contentType: 'image/jpeg', cacheControl: '31536000', upsert: false }).then(function (r) {
+            var path = 'community/' + u + '/' + PLT.uid('') + Math.random().toString(36).slice(2, 8) + '.jpg';
+            return sb.storage.from('community').upload(path.replace(/^community\//, ''), f.blob, { contentType: 'image/jpeg', cacheControl: '31536000', upsert: false }).then(function (r) {
               if (r.error) { console.warn(r.error); throw fail(C.copy.uploadFail); }
               out.push({ path: path, w: f.w || 0, h: f.h || 0 });
             });
@@ -622,7 +639,12 @@
       p.keepImages = Array.isArray(d.keepImages) ? d.keepImages : null;
       return upload(files).then(function (images) { p.newImages = images; return rpc('plt_c_update_post', { p_id: id, p_d: p }); }).then(function (r) { dropPaths(r && r.removedPaths); return withUrls(r, true); });
     };
-    function dropPaths(paths) { paths = paths || []; if (!paths.length) return Promise.resolve(true); return sb.storage.from('community').remove(paths).then(function () { return true; }, function () { return true; }); }
+    /* 사진 지우기 — 글을 지우거나 사진을 뺐을 때. 실패해도 글 처리는 그대로 두고 조용히 넘어갑니다 */
+    function dropPaths(paths) {
+      paths = (paths || []).filter(Boolean); if (!paths.length) return Promise.resolve(true);
+      if (useR2) return token().then(function (t) { return fetch(PLT.url('api/media/delete'), { method: 'POST', headers: { Authorization: 'Bearer ' + t, 'Content-Type': 'application/json' }, body: JSON.stringify({ paths: paths }) }); }).then(function () { return true; }, function () { return true; });
+      return sb.storage.from('community').remove(paths.map(function (p) { return p.replace(/^community\//, ''); })).then(function () { return true; }, function () { return true; });
+    }
     DB.cDeletePost = function (id) { return rpc('plt_c_delete_post', { p_id: id }).then(function (r) { return dropPaths(r && r.paths); }); };
     DB.cHeart = function (id) { if (isSample(id)) return no('운영팀 예시 글이에요. 회원이 올린 글에 하트를 눌러 주세요.'); return rpc('plt_c_heart', { p_id: id }); };
     DB.cSave = function (id) { if (isSample(id)) return no('운영팀 예시 글은 저장할 수 없어요.'); return rpc('plt_c_save', { p_id: id }); };

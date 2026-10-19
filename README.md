@@ -155,7 +155,8 @@ public/assets/js/rp.js                     영상 소리 버튼, 캐릭터 띠, 
 **꼭 알아 둘 것 — 글이 어디에 저장되나**
 - 체험 모드(`site.js` 의 `mode: "demo"`)에서는 글과 사진이 **보는 사람의 브라우저(IndexedDB)에만** 저장돼요. 다른 사람에게 보이지 않고, 브라우저 데이터를 지우면 사라져요. 화면과 흐름을 확인하는 용도예요.
 - 여러 사람이 함께 쓰려면 실서비스 설정이 필요해요. `supabase/schema.sql` 을 적용한 뒤 **`supabase/community.sql`** 을 SQL Editor 에서 실행하면 표·함수·사진 저장소(community 버킷)가 만들어지고, `site.js` 를 `mode: "live"` 로 바꾸면 같은 화면이 그대로 서버 저장으로 동작해요. (6-1 참고)
-- 사진은 Supabase Storage 의 공개 버킷에 회원별 폴더로 올라가요. 주소를 아는 사람은 볼 수 있으니, 숨긴 글의 사진은 목록·상세·공유에서는 보이지 않지만 파일 자체는 남아요. 글을 지우면 파일도 지워요.
+- 사진은 기본으로 **Cloudflare R2** 에 회원별 폴더로 올라가요(`site.js` 의 `media.provider: "r2"`, 설정은 6-6-1). 글과 로그인은 Supabase, 사진은 R2 — 전송량이 무료인 R2가 사진에 알맞아서 이렇게 나눴어요. R2를 아직 안 붙였다면 `media.provider` 를 `"supabase"` 로 두면 community.sql 이 만든 Supabase Storage 버킷을 써요.
+- 사진 주소를 아는 사람은 볼 수 있으니, 숨긴 글의 사진은 목록·상세·공유에서는 보이지 않지만 파일 자체는 남아요. 글을 지우거나 사진을 빼면 파일도 지워요.
 
 **아직 안 만든 것 (기획서 2차 이후)**
 결제·에스크로·정산, 택배 연동, 본인확인, 카카오 로그인·카카오톡 공유 SDK, 문자·앱 푸시 알림(지금은 사이트 안 알림만), POS 연동, 글별 공유 미리보기 이미지(지금은 커뮤니티 공통 이미지), 자동 매칭, 유료 멤버십, 앱.
@@ -367,10 +368,23 @@ supabase: { url: "https://xxxx.supabase.co", anonKey: "sb_publishable_..." },
 toss: { clientKey: "test_ck_..." },
 ```
 
+### 6-6-1. 커뮤니티 사진 저장소 — Cloudflare R2
+
+커뮤니티 사진은 Supabase 가 아니라 Cloudflare R2 에 저장해요. 전송량에 돈을 받지 않아서 사진처럼 많이 보는 파일에 알맞아요. 한 번만 연결하면 돼요.
+
+1. Cloudflare 대시보드 → 왼쪽 **R2 Object Storage** → **Create bucket** → 이름 `playtion-media`, Location 은 **Asia-Pacific (APAC)** → Create. (R2 를 처음 쓰면 결제 수단 등록 화면이 한 번 나오지만, 무료 한도(저장 10GB, 전송량 무제한) 안에서는 요금이 나가지 않아요.)
+2. **Workers & Pages → playtion(Pages 프로젝트) → Settings → Bindings → Add → R2 bucket** → Variable name 에 `PLT_MEDIA`, Bucket 에 `playtion-media` → Save.
+3. 6-4의 환경 변수 중 `SUPABASE_URL` 과 `SUPABASE_SERVICE_ROLE_KEY` 가 들어 있는지 확인해요. 사진을 올릴 때 "진짜 로그인한 회원인지"를 이 값으로 Supabase 에 물어봐요.
+4. **Deployments → 최신 배포 → Retry deployment** 를 한 번 눌러요. 그다음 `https://playtion.kr/api/health` 를 열어 `"media": true` 가 보이면 연결된 거예요.
+5. (선택, 나중에) 사진을 더 빠르게 내보내려면 R2 버킷 → **Settings → Custom Domains → Connect Domain** 에 `media.playtion.kr` 을 붙이고, `site.js` 의 `media.base` 를 `"https://media.playtion.kr"` 로 바꿔요. 붙이기 전에는 홈페이지 서버 기능(`/media/…`)이 대신 내보내 주니 그대로 둬도 동작해요.
+
+사진 파일은 `community/<회원id>/<무작위 이름>.jpg` 로 저장되고, 회원은 자기 폴더의 사진만 올리고 지울 수 있어요. 10MB 초과, 그림이 아닌 파일은 서버가 거절해요.
+
 ### 6-7. 확인하기
 
-1. `https://playtion.kr/api/health` 를 열어 `configured` 안의 `supabase`, `toss`, `sms`, `smsHook` 이 `true` 인지 봅니다.
+1. `https://playtion.kr/api/health` 를 열어 `configured` 안의 `supabase`, `toss`, `sms`, `smsHook`, `media` 가 `true` 인지 봅니다.
 2. 내 번호로 PASS 가입 → 인증 문자가 오는지 확인합니다.
+2-1. 커뮤니티에서 사진 한 장으로 자랑 글을 올려 보고, 다른 휴대폰(또는 시크릿 창)에서도 그 글이 보이는지 확인합니다. 보이면 글은 Supabase, 사진은 R2 에 제대로 저장된 거예요.
 3. 충전 화면에서 1만 원 충전(테스트 키) → 내 PASS에 코인이 들어오는지 봅니다.
 4. 파티룸 하나를 예약해 보고, 운영 콘솔에서 예약이 보이는지 확인합니다.
 5. 운영 콘솔 `/admin/` 에 운영자 이메일로 로그인 → **도구 → 입구 체크인 키** 를 정합니다.

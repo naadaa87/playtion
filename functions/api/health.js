@@ -6,7 +6,8 @@ export async function onRequestGet({ env }) {
     sms: !!(env.SOLAPI_API_KEY && env.SOLAPI_API_SECRET && env.SOLAPI_SENDER),
     smsHook: !!env.SMS_HOOK_SECRET,
     alimtalk: !!env.SOLAPI_PFID,
-    notify: env.NOTIFY_MODE || 'off'
+    notify: env.NOTIFY_MODE || 'off',
+    media: !!env.PLT_MEDIA
   };
   return new Response(JSON.stringify({ ok: true, time: new Date().toISOString(), configured }), {
     headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' }

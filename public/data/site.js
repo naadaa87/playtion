@@ -82,6 +82,11 @@ window.PLT_SITE = {
     url: "",                // 예: "https://abcdxyz.supabase.co"
     anonKey: ""             // Supabase → Project Settings → API Keys 의 Publishable key (sb_publishable_…) 또는 예전 anon key
   },
+  /* 커뮤니티 사진 저장소 (실서비스)
+     provider "r2": Cloudflare R2 — Pages 프로젝트에 R2 바인딩 PLT_MEDIA 를 연결해야 해요 (README 6-6-1). 전송량이 무료라 사진에 알맞아요.
+     provider "supabase": Supabase Storage 의 community 버킷 (community.sql 이 만들어 둠)
+     base: R2 버킷에 사용자 지정 도메인을 붙였다면 그 주소 (예: "https://media.playtion.kr"). 비우면 /media/... 경로로 홈페이지 서버 기능이 내보내요. */
+  media: { provider: "r2", base: "" },
   toss: {
     clientKey: ""           // 토스페이먼츠 클라이언트 키 (비우면 '예약 신청 후 결제 안내' 방식)
   },
