@@ -399,6 +399,8 @@
   PLT.stations = window.PLT_STATIONS || [];
   PLT.station = function (id) { return PLT.stations.filter(function (s) { return s.id === id; })[0]; };
   PLT.partyStations = function () { return PLT.stations.filter(function (s) { return s.type === 'party'; }); };
+  /* 지점 페이지 주소 — 게임파티룸은 /party/<slug>, 가챠샵은 방문 안내 */
+  PLT.stationUrl = function (s) { if (!s) return PLT.url('stations'); if (s.type === 'gacha') return PLT.url('gacha/visit'); return PLT.url('party/' + (s.slug || ('station?id=' + s.id))); };
   PLT.naverMap = function (s) { return (s.naver && s.naver.place) || 'https://map.naver.com/p/search/' + encodeURIComponent(s.listed || s.name); };
   PLT.kakaoMap = function (s) { return 'https://map.kakao.com/link/search/' + encodeURIComponent(s.addr || s.name); };
 

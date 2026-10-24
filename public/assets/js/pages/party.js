@@ -11,6 +11,8 @@
   var FEAT = P.features || {}, COLS = P.dayCols || ['월~목', '금', '토', '일'];
   var CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
   var OUT = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 5h5v5M19 5l-8 8M18 14v5H5V6h5"/></svg>';
+  /* 검색엔진용 미리 그리기(tools/seo/prerender.mjs) 중에는 오늘 날짜에 따라 바뀌는 표시를 넣지 않아요 */
+  var PRE = !!window.PLT_PRERENDER;
   /* 카카오톡 버튼 아이콘은 CSS(.btn--kakao::before)가 그려요 */
 
   var parties = function () { return PLT.partyStations().filter(function (s) { return s.status !== 'closed'; }); };
@@ -39,7 +41,7 @@
   function stationCard(s, hits) {
     var tags = (s.feat || []).map(function (f) { return '<span class="tag' + (hits && hits.indexOf(f) >= 0 ? ' is-hit' : '') + '">' + esc(FEAT[f] || f) + '</span>'; }).join('');
     var from = PLT.party.from(s);
-    return '<a class="stc" href="' + PLT.url('party/station?id=' + s.id) + '" data-id="' + esc(s.id) + '">' +
+    return '<a class="stc" href="' + PLT.stationUrl(s) + '" data-id="' + esc(s.id) + '">' +
       '<div class="stc__ph"><img src="' + PLT.url('assets/img/' + s.img) + '" alt="' + esc(s.name) + ' 내부" loading="lazy" width="1120" height="840"><span class="stc__sign"><span class="code code--party">' + esc(s.code) + '</span>' + esc(s.area) + '</span></div>' +
       '<div class="stc__body"><div class="stc__name">' + esc(s.name) + '</div><div class="stc__meta">최대 ' + s.max + '명 · PC ' + s.pcs + '대' + (from ? ' · ' + won(from) + '부터' : '') + '</div><div class="stc__tags">' + tags + '</div></div></a>';
   }
@@ -159,7 +161,7 @@
       $('#cmpTable').innerHTML = '<thead><tr><th scope="col">지점</th><th scope="col">최대 인원</th><th scope="col">PC</th>' + cols.map(function (f) { return '<th scope="col">' + esc(FEAT[f]) + '</th>'; }).join('') + '<th scope="col">요금</th><th scope="col"><span class="sr">예약</span></th></tr></thead><tbody>' +
         list.map(function (s) {
           var ok = match(s);
-          return '<tr class="' + (need || on.length ? (ok ? 'is-hit' : 'is-dim') : '') + '"><th scope="row"><a href="' + PLT.url('party/station?id=' + s.id) + '" class="row" style="gap:8px;flex-wrap:nowrap"><span class="code code--party">' + esc(s.code) + '</span>' + esc(s.short) + '</a></th><td class="t-num">' + s.max + '명</td><td class="t-num">' + s.pcs + '대</td>' +
+          return '<tr class="' + (need || on.length ? (ok ? 'is-hit' : 'is-dim') : '') + '"><th scope="row"><a href="' + PLT.stationUrl(s) + '" class="row" style="gap:8px;flex-wrap:nowrap"><span class="code code--party">' + esc(s.code) + '</span>' + esc(s.short) + '</a></th><td class="t-num">' + s.max + '명</td><td class="t-num">' + s.pcs + '대</td>' +
             cols.map(function (f) { return '<td>' + (hasFeat(s, f) ? '<span class="yes" role="img" aria-label="있음">' + CHECK + '</span>' : '<span class="no" role="img" aria-label="없음"></span>') + '</td>'; }).join('') +
             '<td class="t-num" style="white-space:nowrap">' + won(PLT.party.from(s)) + '~</td>' +
             '<td><a class="btn btn--' + (ok && (need || on.length) ? 'party' : 'ghost') + ' btn--s" href="' + bookUrl({ station: s.id }) + '">예약</a></td></tr>';
@@ -179,11 +181,11 @@
   function pricesPage() {
     if (PLT.page !== 'prices') return;
     fill('#timeCards', planCards());
-    var todayCol = PLT.party.dayCol(PLT.ymd());
+    var todayCol = PRE ? -1 : PLT.party.dayCol(PLT.ymd());
     fill('#priceTables', parties().map(function (s) {
       return '<section class="panel pt-price" aria-labelledby="pt-' + esc(s.id) + '"><div class="pt-price__head"><div class="row" style="gap:10px;flex-wrap:nowrap"><span class="code code--party">' + esc(s.code) + '</span><h3 class="t-h3" id="pt-' + esc(s.id) + '">' + esc(s.name) + '</h3></div><span class="t-small">기준 ' + PLT.party.base(s) + '명 · 최대 ' + s.max + '명 · PC ' + s.pcs + '대</span></div>' +
         priceTable(s, todayCol, true) +
-        '<div class="row mt-s" style="gap:8px">' + naverBtn(s, '', '네이버 예약', 'btn--party btn--s pt-go-m') + '<a class="btn btn--quiet btn--s" href="' + PLT.url('party/station?id=' + s.id) + '">지점 자세히</a><a class="btn btn--quiet btn--s" href="' + esc(PLT.naverMap(s)) + '" target="_blank" rel="noopener">네이버 지도</a></div></section>';
+        '<div class="row mt-s" style="gap:8px">' + naverBtn(s, '', '네이버 예약', 'btn--party btn--s pt-go-m') + '<a class="btn btn--quiet btn--s" href="' + PLT.stationUrl(s) + '">지점 자세히</a><a class="btn btn--quiet btn--s" href="' + esc(PLT.naverMap(s)) + '" target="_blank" rel="noopener">네이버 지도</a></div></section>';
     }).join(''));
     fill('#ruleTable', '<thead><tr><th scope="col">항목</th><th scope="col">기준</th></tr></thead><tbody>' + [
       ['기본 요금', '패키지 요금에 기준 인원(' + (P.basePeople || 4) + '명)까지 포함돼요. 두 명이 와도 같은 요금이에요.'],
@@ -221,13 +223,18 @@
   function stationPage() {
     if (PLT.page !== 'station') return;
     var host = $('#stDetail');
-    var s = PLT.station(PLT.param('id'));
+    /* 지점 페이지(/party/sinchon-1 등)는 body 의 data-station 으로, 예전 주소(/party/station?id=)는 id 로 지점을 찾아요 */
+    var fixed = document.body.getAttribute('data-station');
+    var s = PLT.station(fixed || PLT.param('id'));
+    if (!fixed && s && s.slug && !PRE) { location.replace(PLT.stationUrl(s) + location.hash); return; }
     if (!s || s.type !== 'party' || s.status === 'closed') {
       host.innerHTML = '<section class="band"><div class="wrap"><h1 class="t-h1">지점을 골라 주세요</h1><p class="t-lead mt-s">주소가 바뀌었거나 지금은 운영하지 않는 지점이에요.</p><div class="stcards mt-l">' + parties().map(function (x) { return stationCard(x); }).join('') + '</div></div></section>';
       return;
     }
-    document.title = s.name + ' | 플레이션 게임파티룸';
-    var md0 = $('meta[name="description"]'); if (md0) md0.setAttribute('content', s.name + ' — ' + s.desc);
+    if (!fixed) {
+      document.title = s.name + ' | 플레이션 게임파티룸';
+      var md0 = $('meta[name="description"]'); if (md0) md0.setAttribute('content', s.name + ' — ' + s.desc);
+    }
     var others = parties().filter(function (x) { return x.id !== s.id; }).sort(function (a, b) { return (b.area === s.area) - (a.area === s.area); }).slice(0, 4);
     var feats = (s.feat || []).map(function (f) { return '<span class="tag" style="background:var(--party-soft);color:var(--party-deep)">' + esc(FEAT[f] || f) + '</span>'; }).join('');
     var kv = [['주소', s.addr], ['가는 길', s.near], ['층', (s.floor || '') + (s.elevator === true ? ' · 엘리베이터 있음' : s.elevator === false ? ' · 엘리베이터 없음' : '')], ['면적', s.size], ['화장실', s.toilet], ['시설', (s.gear || []).join(', ')], ['주방', s.kitchen], ['주차', s.parking]]
@@ -243,11 +250,11 @@
           '<div class="row mt-s"><a class="btn btn--quiet btn--s" href="' + esc(PLT.naverMap(s)) + '" target="_blank" rel="noopener">네이버 지도·리뷰</a><a class="btn btn--quiet btn--s" href="' + PLT.kakaoMap(s) + '" target="_blank" rel="noopener">카카오맵</a><button class="btn btn--quiet btn--s" type="button" id="stShare">공유</button></div>' +
           (s.id === 'kondae' ? '<p class="note note--gacha mt-m"><span><b>가챠뽑기샵과 같은 동네</b> 건대 가챠뽑기샵까지 걸어서 갈 수 있어요. 놀고 나오는 길에 캡슐 한 판 어때요? <a class="link" href="' + PLT.url('gacha/visit') + '">가챠샵 가는 길</a></span></p>' : '') +
         '</div></div></section>' +
-      '<section class="band band--mist" aria-labelledby="prTitle"><div class="wrap"><div class="sec-head"><div><h2 class="t-h2" id="prTitle">패키지와 요금</h2><p class="t-lead">기준 ' + PLT.party.base(s) + '명 요금이에요. 오늘 요일 칸을 표시해 뒀어요. 예약을 누르면 그 패키지의 네이버 예약 화면이 열려요.</p></div><a class="sec-head__more" href="' + bookUrl({ station: s.id }) + '">날짜로 요금 보기</a></div>' +
-        '<div class="panel">' + priceTable(s, PLT.party.dayCol(PLT.ymd()), true) + '</div>' +
+      '<section class="band band--mist" aria-labelledby="prTitle"><div class="wrap"><div class="sec-head"><div><h2 class="t-h2" id="prTitle">패키지와 요금</h2><p class="t-lead">기준 ' + PLT.party.base(s) + '명 요금이에요. ' + (PRE ? '' : '오늘 요일 칸을 표시해 뒀어요. ') + '예약을 누르면 그 패키지의 네이버 예약 화면이 열려요.</p></div><a class="sec-head__more" href="' + bookUrl({ station: s.id }) + '">날짜로 요금 보기</a></div>' +
+        '<div class="panel">' + priceTable(s, PRE ? -1 : PLT.party.dayCol(PLT.ymd()), true) + '</div>' +
         '<p class="t-small mt-s">추가 1인 ' + won(P.extraPerPerson) + ' · 청소 보증금 ' + won(P.deposit) + '(이용 후 환급) · 예약 가능 여부와 공휴일 요금은 네이버 예약 화면이 기준이에요.</p></div></section>' +
       '<section class="band" aria-labelledby="infoTitle"><div class="wrap split"><div><h2 class="t-h2" id="infoTitle">지점 정보</h2><p class="t-lead mt-s">처음 오셔도 헤매지 않게 적어 뒀어요. 더 궁금한 건 카카오톡으로 물어봐 주세요.</p><div class="mt-m">' + contactBox() + '</div></div><dl class="kv">' + kv + '</dl></div></section>' +
-      '<section class="band band--mist"><div class="wrap"><div class="sec-head"><div><h2 class="t-h2">다른 지점도 보세요</h2></div><a class="sec-head__more" href="' + PLT.url('party/stations') + '">지점 비교표</a></div><div class="stcards">' + others.map(function (x) { return stationCard(x); }).join('') + '</div></div></section>';
+      (fixed ? '' : '<section class="band band--mist"><div class="wrap"><div class="sec-head"><div><h2 class="t-h2">다른 지점도 보세요</h2></div><a class="sec-head__more" href="' + PLT.url('party/stations') + '">지점 비교표</a></div><div class="stcards">' + others.map(function (x) { return stationCard(x); }).join('') + '</div></div></section>');
     $('#stShare').addEventListener('click', function () { PLT.share(s.name, s.desc, location.href); });
   }
 
