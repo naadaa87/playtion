@@ -29,14 +29,14 @@ window.PLT_SITE = {
 
   /* 사업자 정보 — 모든 화면 아래(푸터)에 표시됩니다 */
   company: {
-    name: "주식회사 소셜패밀리",
+    name: "주식회사 블랭크",
     ceo: "최시준",
-    regNo: "",              // 사업자등록번호 예: "000-00-00000"
-    mailOrderNo: "",        // 통신판매업 신고번호 예: "제2026-서울광진-0000호"
-    address: "",            // 본사 주소
+    regNo: "161-86-03494",  // 사업자등록번호
+    mailOrderNo: "",        // 통신판매업 신고번호 예: "제2026-서울강남-0000호" (받으면 넣어 주세요. 비어 있으면 화면에 안 보여요)
+    address: "서울특별시 강남구 영동대로 602, 6층 제트71 (삼성동, 삼성동 미켈란 107)",  // 본점 주소
     phone: "1544-3523",
-    email: "contact@socialfamily.co.kr",
-    privacyOfficer: "",     // 개인정보 보호책임자 예: "최시준 (contact@socialfamily.co.kr)"
+    email: "spaceblank0100@gmail.com",
+    privacyOfficer: "최시준 (대표)",  // 개인정보 보호책임자
     hosting: "Cloudflare, Inc."
   },
 

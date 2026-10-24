@@ -2161,3 +2161,7 @@ a.fm-route:hover .fm-route__go { background: var(--pass); }
 /* ---------- 오락실 메뉴 점 (2026.10.24) ---------- */
 .dot--arc { background: conic-gradient(var(--pass) 0 50%, var(--gacha) 50% 100%); }
 .gnb .dot--arc, .drawer__group .dot--arc, .ft__col .dot--arc { border: 1.5px solid var(--ink); box-sizing: border-box; }
+/* 푸터 사업자 정보 — 주소처럼 긴 값은 좁은 화면에서 줄을 바꿔요 */
+.ft__biz > div { min-width: 0; max-width: 100%; }
+.ft__biz span:has(> [data-site="company.address"]), .ft__biz [data-site="company.address"] { white-space: normal; }
+.ft__biz [data-site="company.address"] { margin-right: 0; }

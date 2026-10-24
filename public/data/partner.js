@@ -10,7 +10,7 @@ window.PLT_PARTNER = {
   /* 문의 받을 곳 */
   contact: {
     phone: "1544-3523",
-    email: "contact@socialfamily.co.kr",
+    email: "spaceblank0100@gmail.com",
     responseDays: 2
   },
 
