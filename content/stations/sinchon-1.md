@@ -12,7 +12,7 @@ related: [sinchon-party-room-guide, lol-custom-game-venue, birthday-party-room]
 - 4~8명 생일파티. 케이크는 냉장고에 넣어 두고 영상 편지는 빔프로젝터로
 - 게임 사이사이 노래방과 레트로 오락기로 쉬어 가는 소규모 모임
 
-열 명이 넘거나 PS5·스위치로 파티 게임을 하고 싶다면 같은 신촌의 [2호점](/party/sinchon-2)이나 [3호점](/party/sinchon-3)이 더 편해요.
+여덟 명이 넘거나 PS5·스위치로 파티 게임을 하고 싶다면 같은 신촌의 [2호점](/party/sinchon-2)이나 [3호점](/party/sinchon-3)이 더 편해요.
 
 ## 게임과 시설
 

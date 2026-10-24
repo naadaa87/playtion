@@ -146,7 +146,7 @@ function compareTableHtml(list, depth) {
     ['최대 인원', (s) => s.max + '명 (기준 ' + (s.base || P.basePeople) + '명)'],
     ['면적·층', (s) => esc(s.size) + ' · ' + esc(s.floor)],
     ['게이밍 PC', (s) => s.pcs + '대'],
-    ['PS5·스위치', (s) => yes((s.feat || []).includes('console'))],
+    ['콘솔', (s) => { const c = (s.gear || []).filter((g) => /PS5|스위치/.test(g)).join(', '); return c ? '<span class="cmp-y">' + esc(c) + '</span>' : '<span class="t-muted">없음</span>'; }],
     ['노래방', (s) => yes((s.feat || []).includes('karaoke'))],
     ['홀덤', (s) => yes((s.feat || []).includes('holdem'))],
     ['요리', (s) => ((s.feat || []).includes('cook') ? '<span class="cmp-y">가능</span>' : '<span class="t-muted">데우기만</span>')],

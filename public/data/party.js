@@ -32,7 +32,7 @@ window.PLT_PARTY = {
 
   /* 지점 시설 이름표 — stations.js 의 feat 코드와 짝을 이룹니다 */
   features: {
-    pc: "PC 내전", console: "PS5·스위치", karaoke: "노래방", holdem: "홀덤",
+    pc: "PC 내전", console: "콘솔 게임", karaoke: "노래방", holdem: "홀덤",
     retro: "레트로 오락기", board: "보드게임", cook: "요리 가능", parking: "주차 가능", stage: "단상·세미나"
   },
 
@@ -73,7 +73,7 @@ window.PLT_PARTY = {
   /* 게임 라인업 (홈·파티룸 안내) */
   lineup: [
     { name: "게이밍 PC", detail: "지점마다 6~8대, 모두 28대. 롤·발로란트·배그를 32인치 게이밍 모니터로" },
-    { name: "PS5 · 스위치", detail: "신촌 2·3호점과 건대 미니. 철권, 마리오카트, 마리오 파티를 대형 화면으로" },
+    { name: "PS5 · 스위치", detail: "PS5는 신촌 2·3호점, 닌텐도 스위치는 신촌 2·3호점과 건대 미니. 철권, 마리오카트, 마리오 파티를 대형 화면으로" },
     { name: "노래방", detail: "신촌 1·2·3호점. 블루투스 마이크와 미러볼까지" },
     { name: "홀덤", detail: "신촌 2·3호점 홀덤 테이블" },
     { name: "보드게임 · 오락기", detail: "루미큐브, 스플렌더, 다빈치코드부터 레트로 오락기까지" },
