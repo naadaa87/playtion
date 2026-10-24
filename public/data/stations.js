@@ -1,8 +1,11 @@
 /* =====================================================================
    지점(정거장) 목록 — stations.js
    ---------------------------------------------------------------------
-   가챠뽑기샵 1곳과 게임파티룸 8곳의 정보입니다. 홈 노선도, 지점 안내,
+   가챠뽑기샵 1곳과 게임파티룸 4곳의 정보입니다. 홈 노선도, 지점 안내,
    예약, 지점 상세, 지도 링크, 검색엔진 정보가 모두 이 파일을 씁니다.
+   게임파티룸 예약은 네이버 예약으로 받고, 예약 관리와 고객 문의는
+   쏘플파티룸 고객센터가 함께 맡아요. 요금과 네이버 예약 주소는 쏘플파티룸
+   관리 화면(ssople.com)의 지점 정보와 똑같이 맞춰 주세요.
 
    - id      : 영문 고유값 (바꾸지 마세요. 예약·주소에 쓰입니다)
    - code    : 노선도에 붙는 역 번호 (P = 게임파티룸, G = 가챠샵, S = SPOT)
@@ -12,6 +15,13 @@
    - img     : assets/img/ 아래 사진 경로. 같은 이름으로 덮어쓰면 사진이 바뀝니다
    - feat    : 지점 비교·필터에 쓰는 시설 코드 (party.js 의 features 이름표 참고)
    - naverBooking : 네이버 예약 주소가 있으면 넣으세요 (비우면 검색 링크 사용)
+
+   게임파티룸만 쓰는 값
+   - base / max  : 기준 인원 / 최대 인원 (기준을 넘으면 party.js 의 extraPerPerson 이 1인당 붙어요)
+   - naver.place : 네이버 지도(플레이스) 주소 — 위치·사진·리뷰·길찾기
+   - naver.booking : 네이버 예약 전체 화면 (패키지를 아직 안 정했을 때)
+   - pkgs        : 패키지별 이용 시간·요금·네이버 예약 주소
+                   p 는 [월~목, 금, 토, 일] 요금, null 이면 그 요일엔 팔지 않는 패키지
    ===================================================================== */
 window.PLT_STATIONS = [
   {
@@ -29,14 +39,25 @@ window.PLT_STATIONS = [
     id: "sc1", code: "P01", type: "party", status: "open",
     name: "플레이션 신촌 1호점", short: "신촌 1호점", area: "신촌", areaEn: "Sinchon",
     listed: "신촌 플레이션 1호점",
-    district: "서울 서대문구", addr: "서울 서대문구 연세로11길 5, 지하 2층",
-    near: "신촌역 도보권 · 엘리베이터 있음",
-    max: 8, pcs: 6, cook: false,
-    feat: ["pc", "karaoke", "retro"],
-    gear: ["PC 6대", "노래방", "레트로 오락기"],
-    kitchen: "전자레인지 조리 가능 (인덕션 없음)",
-    desc: "신촌 첫 번째 정거장. PC 내전과 노래방, 레트로 오락기까지 소규모 크루가 밀도 있게 놀기 좋은 아지트예요.",
-    img: "party/sc1.webp", naverBooking: ""
+    district: "서울 서대문구", addr: "서울 서대문구 연세로11길 5, 이케이빌딩 지하 2층",
+    near: "신촌역 도보권",
+    base: 4, max: 8, pcs: 6, cook: false, size: "10평", floor: "지하 2층", elevator: true, toilet: "내부 · 남녀 공용",
+    feat: ["pc", "karaoke", "retro", "board"],
+    gear: ["PC 6대 (RTX4060 Ti)", "빔프로젝터", "TV 노래방", "레트로 오락기", "보드게임 14종"],
+    kitchen: "취사는 안 돼요. 전자레인지·전기포트·냉장고가 있어요",
+    parking: "건물 주차는 안 돼요. 걸어서 3분 거리 타이거 민영주차장(심야권 18,000원)이나 명신 주차장(1시간 4,000원)을 이용해 주세요.",
+    desc: "신촌 첫 번째 정거장. PC 6대로 내전하고, 빔프로젝터로 영상 보고, 노래방과 레트로 오락기까지. 소규모 크루가 밀도 있게 놀기 좋은 아지트예요.",
+    img: "party/sc1.webp",
+    naver: {
+      place: "https://naver.me/FtuIOGqq",
+      booking: "https://map.naver.com/p/entry/place/1101486757?placePath=%2Fticket%3Ffrom%3Dmap%26fromPanelNum%3D1%26additionalHeight%3D76%26timestamp%3D202610112144%26locale%3Dko%26svcName%3Dmap_pcv5%26entry%3Dbmp&c=15.00,0,0,0,dh"
+    },
+    pkgs: [
+      { id: "day", hours: "11:00 – 16:00", p: [80000, 80000, 100000, 100000], url: "https://booking.naver.com/booking/12/bizes/1145675/items/5884265?area=pll&lang=ko&theme=place" },
+      { id: "night", hours: "19:00 – 다음 날 09:00", p: [120000, 170000, 250000, 120000], url: "https://booking.naver.com/booking/12/bizes/1145675/items/5886138?area=pll&lang=ko&theme=place" },
+      { id: "allday", hours: "12:00 – 22:00", p: [130000, 190000, 350000, 190000], url: "https://booking.naver.com/booking/12/bizes/1145675/items/5886139?area=pll&lang=ko&theme=place" }
+    ],
+    naverBooking: ""
   },
   {
     id: "sc2", code: "P02", type: "party", status: "open",
@@ -44,12 +65,23 @@ window.PLT_STATIONS = [
     listed: "신촌 플레이션 2호점",
     district: "서울 서대문구", addr: "서울 서대문구 연세로5가길 11, 3층",
     near: "신촌역 도보권",
-    max: 14, pcs: 8, cook: true,
-    feat: ["pc", "console", "karaoke", "cook"],
-    gear: ["PC 8대", "PS5·스위치", "노래방"],
-    kitchen: "인덕션·조리도구·냉장고",
-    desc: "PC에 진심인 파티룸. 게임하고, 해 먹고, 노래하고. 신촌 한복판에서 편하게 쉬어 가는 곳이에요.",
-    img: "party/sc2.webp", naverBooking: ""
+    base: 4, max: 14, pcs: 8, cook: true, size: "22평", floor: "3층", elevator: true, toilet: "내부 · 남녀 공용",
+    feat: ["pc", "console", "karaoke", "holdem", "board", "cook"],
+    gear: ["PC 8대 (RTX4060)", "PS5·스위치", "TJ 노래방", "빔프로젝터", "홀덤 테이블보"],
+    kitchen: "인덕션 2구·조리도구·냉장고가 있어요. 고기·생선구이처럼 냄새가 강한 요리는 어려워요",
+    parking: "건물 주차는 안 돼요. 근처 창천 민영주차장(08~22시, 1시간 3,000원)이나 타이거 민영주차장(심야권 18,000원)을 이용해 주세요.",
+    desc: "PC에 진심인 파티룸. PC 8대에 PS5와 스위치, 노래방, 빔프로젝터까지 있어서 게임하고, 해 먹고, 노래하며 쉬어 가기 좋아요.",
+    img: "party/sc2.webp",
+    naver: {
+      place: "https://naver.me/FuzXDAOC",
+      booking: "https://map.naver.com/p/entry/place/1959276014?placePath=%2Fticket%3Ffrom%3Dmap%26fromPanelNum%3D1%26additionalHeight%3D76%26timestamp%3D202610112146%26locale%3Dko%26svcName%3Dmap_pcv5%26entry%3Dbmp&c=15.00,0,0,0,dh"
+    },
+    pkgs: [
+      { id: "day", hours: "11:00 – 16:00", p: [80000, 80000, 100000, 100000], url: "https://booking.naver.com/booking/12/bizes/1370343/items/6601573?area=pll&entry=pll&lang=ko&theme=place" },
+      { id: "night", hours: "19:00 – 다음 날 09:00", p: [140000, 250000, 290000, 140000], url: "https://booking.naver.com/booking/12/bizes/1370343/items/6604831?area=pll&entry=pll&lang=ko&theme=place" },
+      { id: "allday", hours: "12:00 – 22:00", p: [130000, 220000, 400000, 220000], url: "https://booking.naver.com/booking/12/bizes/1370343/items/6604892?area=pll&entry=pll&lang=ko&theme=place" }
+    ],
+    naverBooking: ""
   },
   {
     id: "sc3", code: "P03", type: "party", status: "open",
@@ -57,77 +89,47 @@ window.PLT_STATIONS = [
     listed: "신촌 플레이션 3호점",
     district: "서울 서대문구", addr: "서울 서대문구 연세로5가길 11, 5층",
     near: "신촌역 도보권",
-    max: 14, pcs: 8, cook: true,
-    feat: ["pc", "console", "karaoke", "cook"],
-    gear: ["PC 8대 (RTX5060)", "PS5·스위치2", "노래방"],
-    kitchen: "인덕션·조리도구·냉장고",
-    desc: "최신 사양 PC를 갖춘 신촌권 올인원. PC 내전부터 스위치2 파티 게임, 노래방까지 한 공간에서 다 돼요.",
-    img: "party/sc3.webp", naverBooking: ""
+    base: 4, max: 12, pcs: 8, cook: true, size: "18평", floor: "5층", elevator: true, toilet: "내부 · 남녀 공용",
+    feat: ["pc", "console", "karaoke", "holdem", "board", "cook"],
+    gear: ["PC 8대 (RTX5060)", "PS5·스위치2", "금영 노래방", "홀덤 테이블", "대형 TV"],
+    kitchen: "이동식 인덕션 1구·조리도구·냉장고가 있어요",
+    parking: "건물 주차는 안 돼요. 근처 창천 민영주차장(08~22시, 1시간 3,000원)이나 타이거 민영주차장(심야권 18,000원)을 이용해 주세요.",
+    desc: "최신 사양 PC를 갖춘 신촌권 올인원. PC 내전부터 스위치2 파티 게임, 홀덤과 노래방까지 한 공간에서 다 돼요.",
+    img: "party/sc3.webp",
+    naver: {
+      place: "https://naver.me/xLs3C1eA",
+      booking: "https://map.naver.com/p/entry/place/2004425629?placePath=%2Fticket%3Ffrom%3Dmap%26fromPanelNum%3D1%26additionalHeight%3D76%26timestamp%3D202610112147%26locale%3Dko%26svcName%3Dmap_pcv5%26entry%3Dbmp&c=15.00,0,0,0,dh"
+    },
+    pkgs: [
+      { id: "day", hours: "11:00 – 16:00", p: [80000, 80000, 100000, 100000], url: "https://booking.naver.com/booking/12/bizes/1534488/items/7184715" },
+      { id: "night", hours: "19:00 – 다음 날 09:00", p: [140000, 250000, 280000, 140000], url: "https://booking.naver.com/booking/12/bizes/1534488/items/7195222" },
+      { id: "allday", hours: "12:00 – 22:00", p: [130000, 220000, 380000, 220000], url: "https://booking.naver.com/booking/12/bizes/1534488/items/7195276" }
+    ],
+    naverBooking: ""
   },
   {
-    id: "ydp", code: "P04", type: "party", status: "open",
-    name: "플레이션 영등포점", short: "영등포점", area: "영등포", areaEn: "Yeongdeungpo",
-    listed: "영등포 플레이션",
-    district: "서울 영등포구", addr: "서울 영등포구 영중로 67-1, 지하 1층",
-    near: "영등포시장역 4번 출구 도보 10초",
-    max: 10, pcs: 5, cook: true,
-    feat: ["pc", "console", "karaoke", "cook"],
-    gear: ["PC 5대", "PS5·스위치2", "노래방"],
-    kitchen: "인덕션·조리도구·냉장고",
-    desc: "역에서 나오면 바로 보이는 초역세권 파티룸. 철권 8부터 마리오카트 월드까지 인기 게임을 다 깔아 뒀어요.",
-    img: "party/ydp.webp", naverBooking: ""
-  },
-  {
-    id: "sadang", code: "P05", type: "party", status: "open",
-    name: "플레이션 사당점", short: "사당점", area: "사당", areaEn: "Sadang",
-    listed: "사당 게임플레이션",
-    district: "서울 관악구", addr: "서울 관악구 남현동 1064-3, 4층",
-    near: "사당역 도보권 · 흡연부스 있음",
-    max: 16, pcs: 10, cook: true,
-    feat: ["pc", "karaoke", "holdem", "cook"],
-    gear: ["PC 10대", "노래방 반주기", "10인 홀덤 테이블"],
-    kitchen: "인덕션·조리도구·냉장고",
-    desc: "PC 10대가 나란히 놓인 내전 전용 정거장. 최신 노래방 반주기와 10인 홀덤 테이블이 있어 회식 2차로도 많이 찾아요.",
-    img: "party/sadang.webp", naverBooking: ""
-  },
-  {
-    id: "kondae", code: "P06", type: "party", status: "open",
+    id: "kondae", code: "P04", type: "party", status: "open",
     name: "플레이션 건대 미니", short: "건대 미니", area: "건대", areaEn: "Konkuk Univ.",
-    listed: "건대 플레이션 미니",
+    listed: "건대 플레이션",
     district: "서울 광진구", addr: "서울 광진구 능동로13길 39, 1층",
     near: "건대입구역 도보권 · 가챠샵까지 걸어서 이동",
-    max: 8, pcs: 6, cook: false,
-    feat: ["pc", "console", "retro"],
-    gear: ["PC 6대", "스위치2", "레트로 게임 999종"],
-    kitchen: "전자레인지 조리 가능 (인덕션 없음)",
-    desc: "대학가 한가운데 작은 아지트. 스위치2 마리오카트 월드와 999종 레트로 게임이 기다려요. 가챠샵과 같은 동네예요.",
-    img: "party/kondae.webp", naverBooking: ""
-  },
-  {
-    id: "guui", code: "P07", type: "party", status: "open",
-    name: "플레이션 건대구의점", short: "건대구의점", area: "구의", areaEn: "Guui",
-    listed: "플레이션 건대구의점",
-    district: "서울 광진구", addr: "서울 광진구 아차산로51길 8, 지하 1층",
-    near: "구의역 1번 출구 도보 1분 · 무료 주차 1대",
-    max: 24, pcs: 8, cook: true,
-    feat: ["pc", "console", "cook", "parking", "stage"],
-    gear: ["PC 8대", "PS5·스위치2", "세미나 단상"],
-    kitchen: "인덕션·조리도구·냉장고",
-    desc: "24명이 함께 쓰는 넓은 스테이지. 단상이 있어 MT, 개강 파티, 작은 세미나까지 소화해요.",
-    img: "party/guui.webp", naverBooking: ""
-  },
-  {
-    id: "guri", code: "P08", type: "party", status: "open",
-    name: "플레이션 구리점", short: "구리점", area: "구리", areaEn: "Guri",
-    listed: "구리 게임플레이션",
-    district: "경기 구리시", addr: "경기 구리시 검배로6번길 15, 3층",
-    near: "구리 시내 · 단독 화장실",
-    max: 30, pcs: 6, cook: true,
-    feat: ["pc", "karaoke", "holdem", "retro", "board", "cook"],
-    gear: ["PC 6대", "TJ 노래방", "홀덤 세트", "보드게임 20종", "75인치 TV"],
-    kitchen: "인덕션·조리도구·냉장고",
-    desc: "플레이션에서 가장 넓은 30인 공간. 75인치 TV와 TJ 노래방, 홀덤 세트까지 갖춰 연합 뒤풀이도 거뜬해요.",
-    img: "party/guri.webp", naverBooking: ""
+    base: 4, max: 10, pcs: 6, cook: false, size: "10평", floor: "1층", elevator: false, toilet: "건물 공용 · 남녀 분리",
+    feat: ["pc", "console", "retro", "board"],
+    gear: ["PC 6대 (RTX5060)", "스위치2", "레트로 오락기", "보드게임"],
+    kitchen: "취사는 안 돼요. 전자레인지·냉장고·식기가 있어 배달 음식 먹기 좋아요",
+    parking: "걸어서 2분 거리 화양동 공영주차장(24시간, 1시간 2,400원)을 이용해 주세요.",
+    desc: "대학가 한가운데 작은 아지트. PC 6대와 스위치2 마리오 파티, 레트로 오락기가 기다려요. 가챠샵과 같은 동네예요.",
+    img: "party/kondae.webp",
+    naver: {
+      place: "https://naver.me/xGIpLaex",
+      booking: "https://map.naver.com/p/entry/place/1657884917?placePath=%2Fticket%3Ffrom%3Dmap%26fromPanelNum%3D1%26additionalHeight%3D76%26timestamp%3D202610112144%26locale%3Dko%26svcName%3Dmap_pcv5%26entry%3Dbmp&c=15.00,0,0,0,dh"
+    },
+    pkgs: [
+      { id: "day", hours: "12:00 – 17:00", p: [70000, 70000, 80000, 80000], url: "https://booking.naver.com/booking/12/bizes/1275525/items/6321703?area=pll&lang=ko&theme=place" },
+      { id: "night", hours: "19:00 – 다음 날 10:00", p: [100000, 150000, 200000, 100000], url: "https://booking.naver.com/booking/12/bizes/1275525/items/6336392?area=pll&lang=ko&theme=place" },
+      { id: "allday", hours: "12:00 – 22:00", p: [100000, 140000, 270000, 140000], url: "https://booking.naver.com/booking/12/bizes/1275525/items/6346369?area=pll&lang=ko&theme=place" }
+    ],
+    naverBooking: ""
   }
 ];
 

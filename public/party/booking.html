@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>파티룸 예약하기 | 플레이션</title>
-<meta name="description" content="지점, 날짜, 타임, 인원을 고르면 바로 금액이 나와요. PASS로 예약하면 포인트와 가챠 코인 환승 쿠폰이 함께 쌓여요.">
+<title>게임파티룸 예약 | 네이버 예약으로 연결 | 플레이션</title>
+<meta name="description" content="플레이션 게임파티룸 신촌 1·2·3호점, 건대 미니. 지점과 날짜, 낮·밤·올데이 패키지를 고르면 요금을 보여 드리고 네이버 예약으로 연결해 드려요.">
 <link rel="canonical" href="https://playtion.kr/party/booking">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="플레이션 PLAYTION">
 <meta property="og:locale" content="ko_KR">
-<meta property="og:title" content="파티룸 예약하기 | 플레이션">
-<meta property="og:description" content="지점, 날짜, 타임, 인원을 고르면 바로 금액이 나와요. PASS로 예약하면 포인트와 가챠 코인 환승 쿠폰이 함께 쌓여요.">
+<meta property="og:title" content="게임파티룸 예약 | 플레이션">
+<meta property="og:description" content="플레이션 게임파티룸 신촌 1·2·3호점, 건대 미니. 지점과 날짜, 낮·밤·올데이 패키지를 고르면 요금을 보여 드리고 네이버 예약으로 연결해 드려요.">
 <meta property="og:url" content="https://playtion.kr/party/booking">
 <meta property="og:image" content="https://playtion.kr/assets/img/og/og-party.jpg">
 <meta property="og:image:width" content="1200">
@@ -26,7 +26,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700;900&display=swap">
-<link rel="stylesheet" href="../assets/css/plt.css?v=20261019-renew04">
+<link rel="stylesheet" href="../assets/css/plt.css?v=20261024-party01">
 
 </head>
 <body class="sec-party page-booking" data-root="../" data-section="party" data-page="booking" data-no-helper>
@@ -51,23 +51,30 @@
 <main id="main">
 
 <section class="phero" style="padding-bottom:28px"><div class="wrap">
-  <div class="phero__row"><span class="lb lb--party">BOOKING</span><span class="t-small" data-auth-show="out"><a class="link" href="../pass/login?next=%2Fparty%2Fbooking">PASS로 로그인</a>하면 쿠폰과 포인트를 쓸 수 있어요</span></div>
+  <div class="phero__row"><span class="lb lb--party">BOOKING</span><span class="t-small">예약과 결제는 <b>네이버 예약</b>에서 진행돼요</span></div>
   <h1 class="t-h1" id="bookTitle">파티룸 예약하기</h1>
+  <p class="t-lead">지점과 날짜, 패키지를 고르면 요금을 먼저 보여 드리고 그 지점의 네이버 예약 화면으로 연결해 드려요.</p>
 </div></section>
 <section style="padding-bottom:88px"><div class="wrap">
   <div class="book" id="book">
     <div id="bookMain">
       <section class="bstep" id="bs1" aria-labelledby="bs1h"><div class="bstep__h"><span class="bstep__n">1</span><h2 class="t-h3" id="bs1h">지점</h2><span class="bstep__sum" id="bs1s"></span></div><div class="pick" id="pickStation"></div></section>
       <section class="bstep" id="bs2" aria-labelledby="bs2h"><div class="bstep__h"><span class="bstep__n">2</span><h2 class="t-h3" id="bs2h">날짜</h2><span class="bstep__sum" id="bs2s"></span></div><div id="pickDate"></div></section>
-      <section class="bstep" id="bs3" aria-labelledby="bs3h"><div class="bstep__h"><span class="bstep__n">3</span><h2 class="t-h3" id="bs3h">타임</h2><span class="bstep__sum" id="bs3s"></span></div><div id="pickTime"></div></section>
-      <section class="bstep" id="bs4" aria-labelledby="bs4h"><div class="bstep__h"><span class="bstep__n">4</span><h2 class="t-h3" id="bs4h">인원·옵션</h2><span class="bstep__sum" id="bs4s"></span></div><div id="pickExtra"></div></section>
-      <section class="bstep" id="bs5" aria-labelledby="bs5h"><div class="bstep__h"><span class="bstep__n">5</span><h2 class="t-h3" id="bs5h">예약자·할인</h2><span class="bstep__sum" id="bs5s"></span></div><div id="pickWho"></div></section>
-      <section class="bstep" id="bs6" aria-labelledby="bs6h"><div class="bstep__h"><span class="bstep__n">6</span><h2 class="t-h3" id="bs6h">결제</h2></div><div id="pickPay"></div></section>
+      <section class="bstep" id="bs3" aria-labelledby="bs3h"><div class="bstep__h"><span class="bstep__n">3</span><h2 class="t-h3" id="bs3h">패키지</h2><span class="bstep__sum" id="bs3s"></span></div><div id="pickPlan"></div></section>
+      <section class="bstep" id="bs4" aria-labelledby="bs4h"><div class="bstep__h"><span class="bstep__n">4</span><h2 class="t-h3" id="bs4h">네이버 예약에서 마무리</h2></div>
+        <ol class="pt-next">
+          <li><b>네이버 예약에서 결제</b><span>날짜와 시간을 한 번 더 고르고 결제하면 예약이 확정돼요.</span></li>
+          <li><b>보증금 입금</b><span>확정 후 청소 보증금 안내가 와요. 입실 이틀 전까지 입금해 주세요.</span></li>
+          <li><b>입실 안내 문자</b><span>보증금이 확인되면 출입 방법이 담긴 문자가 와요. 무인으로 입장해요.</span></li>
+        </ol>
+        <p class="t-small mt-m">예약 확인·변경·취소는 네이버 앱 → 예약 내역에서 할 수 있어요. <a class="link" href="../party/guide#refund">취소·환불 기준</a></p>
+      </section>
+      <div class="mt-m" id="bkAll"></div>
     </div>
-    <aside class="book__aside" aria-label="예약 요약"><div class="ticket" id="bookTicket"></div></aside>
+    <aside class="book__aside" aria-label="예약 요약"><div class="ticket" id="bookTicket"></div><div class="mt-m" id="bkContact"></div></aside>
   </div>
 </div></section>
-<div class="paybar" id="paybar"><div class="paybar__sum"><small id="pbInfo">지점과 날짜를 골라 주세요</small><b id="pbTotal">0원</b></div><button class="btn btn--primary" type="button" id="pbGo">예약하기</button></div>
+<div class="paybar" id="paybar"><div class="paybar__sum"><small id="pbInfo">지점을 골라 주세요</small><b id="pbTotal">—</b></div><a class="btn btn--party is-off" id="pbGo" target="_blank" rel="noopener" aria-disabled="true">네이버 예약</a></div>
 
 </main>
 <footer class="ft"><div class="wrap">
@@ -124,11 +131,11 @@
   <div class="drawer__group"><h3><span class="dot dot--pass"></span>PASS 멤버십</h3><a href="../pass/">PASS 소개</a><a href="../pass/me">내 PASS</a><a href="../pass/collection">컬렉션 북</a><a href="../pass/wallet">충전·PASS+·선물</a><a href="../pass/login">로그인·가입</a></div>
   <div class="drawer__group"><h3><span class="dot dot--biz"></span>플레이션</h3><a href="../brand">브랜드 이야기</a><a href="../stations">전 지점 노선도</a><a href="../news">소식·혜택·행사</a><a href="../platform">플랫폼 소개</a><a href="../partner/">창업·제휴</a><a href="../help">고객센터</a><a href="../family">패밀리 사이트</a></div>
 </nav></div>
-<script src="../data/site.js?v=20261019-renew04"></script>
-<script src="../data/stations.js?v=20261019-renew04"></script>
-<script src="../data/party.js?v=20261019-renew04"></script>
-<script src="../data/pass.js?v=20261019-renew04"></script>
-<script src="../assets/js/core.js?v=20261019-renew04"></script>
-<script src="../assets/js/pages/party.js?v=20261019-renew04"></script>
+<script src="../data/site.js?v=20261024-party01"></script>
+<script src="../data/stations.js?v=20261024-party01"></script>
+<script src="../data/party.js?v=20261024-party01"></script>
+<script src="../data/pass.js?v=20261024-party01"></script>
+<script src="../assets/js/core.js?v=20261024-party01"></script>
+<script src="../assets/js/pages/party.js?v=20261024-party01"></script>
 </body>
 </html>

@@ -48,7 +48,7 @@
     }).join('');
     var x = PS.xp || {};
     $('#xpTable').innerHTML = '<thead><tr><th scope="col">XP가 쌓이는 일</th><th scope="col" style="text-align:right">XP</th></tr></thead><tbody>' +
-      [['결제 1,000원마다', x.perThousandWon], ['매장 체크인 (하루 한 번)', x.perVisit], ['파티룸 예약 1건', x.perBooking], ['행사·교환회 참여', x.perEvent]].map(function (r) { return '<tr><td>' + esc(r[0]) + '</td><td style="text-align:right"><b>' + r[1] + '</b></td></tr>'; }).join('') + '</tbody>';
+      [['결제 1,000원마다', x.perThousandWon], ['매장 체크인 (하루 한 번)', x.perVisit], ['행사·교환회 참여', x.perEvent]].filter(function (r) { return r[1]; }).map(function (r) { return '<tr><td>' + esc(r[0]) + '</td><td style="text-align:right"><b>' + r[1] + '</b></td></tr>'; }).join('') + '</tbody>';
     $('#stampSources').innerHTML = ((PS.stamps || {}).sources || []).map(function (s) { return '<li class="tag">' + esc(s) + '</li>'; }).join('');
     var goal = (PS.stamps || {}).goal || 10;
     $('#stampDemo').innerHTML = (me ? '<p class="t-strong">' + esc(me.nick || '내') + ' 스탬프 카드</p>' : '<p class="t-strong">스탬프 카드 예시</p>') + '<div style="display:flex;justify-content:center;margin-top:14px">' + stampCard(me ? me.stamps : 4, goal) + '</div><p class="t-small mt-m">' + (me ? '다음 보상까지 ' + (goal - me.stamps) + '칸' : '10칸을 채우면 코인 ' + PLT.coin(((PS.coupons || {}).stamp10 || {}).value || 0)) + '</p>';
@@ -112,7 +112,7 @@
       $('#authBox').innerHTML = '<form id="signup" novalidate>' +
         '<div class="field"><label class="lbl" for="suNick">닉네임<span class="req">*</span></label><input class="inp" id="suNick" maxlength="12" placeholder="2~12자, 매장과 마켓에서 보여요" autocomplete="nickname"></div>' +
         '<div class="field"><label class="lbl" for="suName">이름 <small>선택 · 예약자 확인용</small></label><input class="inp" id="suName" maxlength="20" autocomplete="name"></div>' +
-        '<div class="field"><span class="lbl">생일 <small>선택 · 생일 달에 파티룸 쿠폰을 드려요</small></span><div class="fieldrow"><label class="sr" for="suBm">생일 월</label><select class="sel" id="suBm"><option value="">월</option>' + months + '</select><label class="sr" for="suBd">생일 일</label><select class="sel" id="suBd"><option value="">일</option>' + days + '</select></div></div>' +
+        '<div class="field"><span class="lbl">생일 <small>선택 · 생일 달에 플레이 코인을 드려요</small></span><div class="fieldrow"><label class="sr" for="suBm">생일 월</label><select class="sel" id="suBm"><option value="">월</option>' + months + '</select><label class="sr" for="suBd">생일 일</label><select class="sel" id="suBd"><option value="">일</option>' + days + '</select></div></div>' +
         '<div class="field"><label class="lbl" for="suInvite">친구 초대 코드 <small>선택</small></label><input class="inp" id="suInvite" placeholder="PLT-XXXXXX" value="' + esc(PLT.ls.get('invite', '') || '') + '"></div>' +
         '<div class="mt-m">' + PLT.consentBlock({ termsLabel: '이용약관과 개인정보 수집·이용에 동의해요', detail: '휴대폰 번호(회원 식별, 예약 확인, 알림 발송), 닉네임, 선택 입력한 이름과 생일. 탈퇴하면 지체 없이 파기하고, 결제 기록은 관계 법령에 따라 보관해요.' }) + '</div>' +
         '<button class="btn btn--pass btn--l btn--block mt-m" type="submit">PASS 만들기</button></form>';
@@ -138,22 +138,21 @@
       $('#authLead').textContent = 'PASS가 만들어졌어요. 가입 선물을 넣어 뒀어요.';
       var cp = PS.coupons || {};
       $('#authBox').innerHTML = '<div class="stack">' + tcard(me) +
-        '<div class="gift-row"><span class="lb lb--pass lb--s">선물</span><span><b>' + esc((cp.welcomeParty || {}).title || '') + '</b></span></div>' +
-        '<div class="gift-row"><span class="lb lb--pass lb--s">선물</span><span><b>' + esc((cp.welcomeDraw || {}).title || '') + '</b></span></div>' +
+                '<div class="gift-row"><span class="lb lb--pass lb--s">선물</span><span><b>' + esc((cp.welcomeDraw || {}).title || '') + '</b></span></div>' +
         '<a class="btn btn--pass btn--l btn--block" id="welcomeGo" href="' + esc(next) + '">' + (PLT.param('next') ? '하던 일 계속하기' : '내 PASS 열기') + '</a>' +
-        '<div class="row" style="justify-content:center"><a class="btn btn--quiet btn--s" href="' + PLT.url('party/booking') + '">첫 예약하기</a><a class="btn btn--quiet btn--s" href="' + PLT.url('gacha/online') + '">1회권으로 뽑기</a></div></div>';
+        '<div class="row" style="justify-content:center"><a class="btn btn--quiet btn--s" href="' + PLT.url('community') + '">커뮤니티 둘러보기</a><a class="btn btn--quiet btn--s" href="' + PLT.url('gacha/online') + '">1회권으로 뽑기</a></div></div>';
     }
   }
 
   /* ------------------------------------------------------------------
      내 PASS
      ------------------------------------------------------------------ */
-  var TABS = [['bookings', '예약'], ['coupons', '쿠폰'], ['box', '보관함'], ['notes', '알림'], ['trades', '교환 판매'], ['subs', '입고 알림'], ['history', '내역'], ['settings', '설정']];
+  var TABS = [['coupons', '쿠폰'], ['box', '보관함'], ['notes', '알림'], ['trades', '교환 판매'], ['subs', '입고 알림'], ['history', '내역'], ['bookings', '파티룸'], ['settings', '설정']];
   function mePage() {
     if (PLT.page !== 'me') return;
     PLT.requireLogin().then(function () {
       var tab = (location.hash || '').replace('#', '');
-      if (!TABS.some(function (t) { return t[0] === tab; })) tab = 'bookings';
+      if (!TABS.some(function (t) { return t[0] === tab; })) tab = 'coupons';
       var top = function () {
         var me = PLT.me, goal = me.stampGoal;
         $('#meTop').innerHTML = tcard(me, { qr: true, big: true }) +
@@ -178,56 +177,24 @@
   }
   function empty(title, body, link, label) { return '<div class="empty"><h3>' + esc(title) + '</h3><p>' + esc(body) + '</p>' + (link ? '<a class="btn btn--ink" href="' + link + '">' + esc(label) + '</a>' : '') + '</div>'; }
 
-  function bookings(host, refresh, redraw) {
-    Promise.all([PLT.db.myBookings(), PLT.db.reviews('')]).then(function (r) {
-      var list = r[0], reviewed = r[1].map(function (x) { return x.bookingId; }), today = PLT.ymd();
-      if (!list.length) { host.innerHTML = empty('아직 예약이 없어요', 'PASS로 예약하면 포인트와 가챠 코인이 함께 쌓여요.', PLT.url('party/booking'), '파티룸 예약하기'); return; }
-      var row = function (b) {
-        var s = PLT.station(b.stationId) || {}, t = PLT.party.time(b.timeId) || { name: '' };
-        var up = b.status !== 'cancelled' && b.date >= today, past = b.status !== 'cancelled' && b.date <= today;
-        var badge = b.status === 'cancelled' ? '<span class="lb lb--ghost lb--s">취소 · 환불 ' + won(b.refund || 0) + '</span>' : b.status === 'requested' ? '<span class="lb lb--warn lb--s">결제 대기</span>' : up ? '<span class="lb lb--ok lb--s">이용 예정</span>' : '<span class="lb lb--ghost lb--s">이용 완료</span>';
-        return '<div class="bk"><div><div class="row" style="gap:8px"><span class="code code--party">' + esc(s.code || '') + '</span><span class="bk__t">' + esc(s.name || '') + '</span>' + badge + '</div>' +
-          '<div class="bk__m">' + esc(PLT.fmtMD(b.date)) + ' · ' + esc(PLT.party.label(b.timeId, b.startHour, b.hours).replace(t.name + ' ', t.name.split(' ·')[0] + ' ')) + ' · ' + b.people + '명 · ' + won(b.quote ? b.quote.total : 0) + '</div><div class="bk__m">예약번호 ' + esc(b.code) + (b.channel && b.channel !== 'own' ? ' · ' + esc(b.channel) : '') + '</div></div>' +
-          '<div class="row">' + (up ? '<button class="btn btn--ghost btn--s" type="button" data-cancel="' + b.id + '">취소</button>' : '') + (past && reviewed.indexOf(b.id) < 0 && b.memberId ? '<button class="btn btn--primary btn--s" type="button" data-review="' + b.id + '">후기 쓰기</button>' : '') + '<a class="btn btn--quiet btn--s" href="' + PLT.url('party/booking?station=' + b.stationId) + '">다시 예약</a></div></div>';
-      };
-      var up = list.filter(function (b) { return b.status !== 'cancelled' && b.date >= today; }).sort(function (a, b) { return a.date < b.date ? -1 : 1; });
-      var rest = list.filter(function (b) { return up.indexOf(b) < 0; });
-      host.innerHTML = (up.length ? '<h2 class="t-h4">다가오는 예약</h2><div class="mt-s">' + up.map(row).join('') + '</div>' : '') + (rest.length ? '<h2 class="t-h4 mt-l">지난 예약</h2><div class="mt-s">' + rest.map(row).join('') + '</div>' : '');
-      $$('[data-cancel]', host).forEach(function (btn) {
-        btn.addEventListener('click', function () {
-          var b = list.filter(function (x) { return x.id === btn.getAttribute('data-cancel'); })[0];
-          var days = Math.round((PLT.parseYmd(b.date) - PLT.parseYmd(today)) / DAY);
-          var rate = days >= 7 ? 1 : days >= 5 ? 0.7 : days >= 3 ? 0.5 : 0;
-          if (!rate) { PLT.toast('이용 2일 전부터는 취소할 수 없어요. 3일 전까지 요청하면 일정 변경은 가능해요.', 'err'); return; }
-          PLT.confirm('예약을 취소할까요?', '지금 취소하면 이용 요금의 ' + Math.round(rate * 100) + '%와 보증금을 돌려드려요. 취소한 예약은 되돌릴 수 없어요.', '예약 취소', 'btn--ink').then(function (yes) {
-            if (!yes) return;
-            PLT.busy(btn, function () { return PLT.db.cancelBooking(b.id).then(function (x) { PLT.toast('취소했어요. 환불 ' + won(x.refund), 'ok'); refresh().then(redraw); }); });
-          });
-        });
-      });
-      $$('[data-review]', host).forEach(function (btn) { btn.addEventListener('click', function () { reviewModal(btn.getAttribute('data-review'), function () { refresh().then(redraw); }); }); });
-    });
-  }
-  function reviewModal(bookingId, done) {
-    var rating = 5;
-    var m = PLT.modal({
-      title: '이용 후기', body: '<form id="rvForm" novalidate><div class="field"><span class="lbl">별점</span><div class="row" id="rvStars" role="radiogroup" aria-label="별점" style="gap:4px"></div></div>' +
-        '<div class="field"><label class="lbl" for="rvText">어땠나요?</label><textarea class="txa" id="rvText" placeholder="좋았던 점, 아쉬웠던 점을 10자 이상 적어 주세요. 다음 팀에게 큰 도움이 돼요."></textarea></div>' +
-        '<div class="field"><label class="lbl" for="rvPhoto">사진 <small>선택 · 사진 후기는 ' + PLT.pt((PS.points || {}).photoReview || 0) + ' 더</small></label><input type="file" id="rvPhoto" accept="image/*"></div>' +
-        '<button class="btn btn--primary btn--block mt-m" type="submit">후기 남기고 ' + PLT.pt((PS.points || {}).review || 0) + ' 받기</button></form>'
-    });
-    var stars = function () { $('#rvStars', m.el).innerHTML = [1, 2, 3, 4, 5].map(function (n) { return '<button type="button" role="radio" aria-checked="' + (n === rating) + '" aria-label="' + n + '점" data-n="' + n + '" style="font-size:30px;line-height:1;color:' + (n <= rating ? 'var(--party)' : 'var(--rule-2)') + '">★</button>'; }).join(''); $$('#rvStars button', m.el).forEach(function (b) { b.addEventListener('click', function () { rating = +b.getAttribute('data-n'); stars(); }); }); };
-    stars();
-    $('#rvForm', m.el).addEventListener('submit', function (e) {
-      e.preventDefault();
-      PLT.busy($('button[type=submit]', m.el), function () {
-        return PLT.db.review({ bookingId: bookingId, rating: rating, text: $('#rvText', m.el).value, photo: !!($('#rvPhoto', m.el).files || [])[0] }).then(function () { m.close(); PLT.toast('고마워요. 포인트를 넣어 드렸어요.', 'ok'); done(); });
-      });
-    });
+  /* 파티룸 — 예약은 네이버 예약에서 받아요. 예전 홈페이지 예약 기록이 있으면 아래에 보여 줘요 */
+  function bookings(host) {
+    var P = window.PLT_PARTY || {}, B = P.booking || {};
+    var info = '<div class="panel panel--line-party"><h2 class="t-h4">게임파티룸 예약은 네이버 예약에서</h2><p class="t-small mt-s">예약 확인·변경·취소는 네이버 앱 → 예약 내역에서 할 수 있어요. 예약 관리와 고객 문의는 ' + esc(B.manager || '쏘플파티룸') + ' 고객센터가 함께 맡고 있어요.</p>' +
+      '<div class="row mt-m" style="gap:8px"><a class="btn btn--party btn--s" href="' + PLT.url('party/booking') + '">파티룸 예약하기</a>' + (B.kakao ? '<a class="btn btn--ghost btn--s" href="' + esc(B.kakao) + '" target="_blank" rel="noopener" data-kakao="party">카카오톡 문의</a>' : '') + '</div></div>';
+    host.innerHTML = info;
+    if (!PLT.db.myBookings) return;
+    PLT.db.myBookings().then(function (list) {
+      if (!list || !list.length) return;
+      host.innerHTML = info + '<h2 class="t-h4 mt-l">예전 홈페이지 예약</h2><div class="mt-s">' + list.map(function (b) {
+        var s = PLT.station(b.stationId) || {};
+        return '<div class="bk"><div><div class="row" style="gap:8px"><span class="bk__t">' + esc(s.name || '지점') + '</span>' + (b.status === 'cancelled' ? '<span class="lb lb--ghost lb--s">취소</span>' : '') + '</div><div class="bk__m">' + esc(PLT.fmtMD(b.date)) + ' · 예약번호 ' + esc(b.code) + '</div></div></div>';
+      }).join('') + '</div><p class="t-micro mt-s">변경·취소가 필요하면 카카오톡으로 예약번호를 알려 주세요.</p>';
+    }, function () { });
   }
   function coupons(host) {
     PLT.db.coupons().then(function (list) {
-      if (!list.length) { host.innerHTML = empty('쿠폰이 없어요', '파티룸 예약, 가챠샵 체크인, 이벤트로 쿠폰이 들어와요.'); return; }
+      if (!list.length) { host.innerHTML = empty('쿠폰이 없어요', '가챠샵 체크인과 이벤트로 쿠폰이 들어와요.'); return; }
       var now = Date.now();
       host.innerHTML = list.map(function (c) {
         var used = !!c.usedAt, exp = c.expired;
@@ -337,9 +304,9 @@
         '<label class="check"><input type="checkbox" id="stSms"' + (c.mktSms ? ' checked' : '') + '> <span>문자로 혜택·신상 소식 받기</span></label>' +
         '<label class="check"><input type="checkbox" id="stKakao"' + (c.mktKakao ? ' checked' : '') + '> <span>카카오톡으로 혜택·신상 소식 받기</span></label>' +
         '<label class="check"><input type="checkbox" id="stNight"' + (c.mktNight ? ' checked' : '') + '> <span>밤 9시~아침 8시에도 입고 알림 받기</span></label></div>' +
-        '<p class="t-micro mt-s">예약 확정, 입장 비밀번호 같은 거래 알림은 설정과 관계없이 보내 드려요.</p>' +
+        '<p class="t-micro mt-s">보관함 수령, 결제 같은 거래 알림은 설정과 관계없이 보내 드려요.</p>' +
         '<button class="btn btn--ink btn--block mt-m" type="submit">저장</button></form>' +
-      '<div class="stack"><div class="panel panel--line-pass"><h2 class="t-h4">친구 초대</h2><p class="t-small mt-s">초대 코드로 가입한 친구가 첫 예약을 마치면 두 사람 모두 ' + PLT.pt((PS.points || {}).invite || 0) + '를 받아요.</p><p class="mt-s"><span class="code code--pass" style="height:32px;font-size:15px">' + esc(me.code) + '</span></p><div class="row mt-s"><button class="btn btn--pass btn--s" type="button" id="stShare">초대 링크 보내기</button><button class="btn btn--ghost btn--s" type="button" id="stCopy">코드 복사</button></div></div>' +
+      '<div class="stack"><div class="panel panel--line-pass"><h2 class="t-h4">친구 초대</h2><p class="t-small mt-s">내 코드로 친구를 초대해 보세요. 초대 혜택은 새로 준비하고 있어요.</p><p class="mt-s"><span class="code code--pass" style="height:32px;font-size:15px">' + esc(me.code) + '</span></p><div class="row mt-s"><button class="btn btn--pass btn--s" type="button" id="stShare">초대 링크 보내기</button><button class="btn btn--ghost btn--s" type="button" id="stCopy">코드 복사</button></div></div>' +
         '<div class="panel"><h2 class="t-h4">계정</h2><div class="row mt-s"><button class="btn btn--ghost btn--s" type="button" id="stOut">로그아웃</button><button class="btn btn--quiet btn--s" type="button" id="stDel">탈퇴하기</button></div><p class="t-micro mt-s">탈퇴하면 포인트, 코인, 쿠폰, 보관함이 모두 사라지고 되돌릴 수 없어요. 남은 코인과 보관함 상품은 먼저 정리해 주세요.</p></div></div></div>';
     $('#stForm').addEventListener('submit', function (e) {
       e.preventDefault();
@@ -349,7 +316,7 @@
         return PLT.db.updateProfile({ nick: $('#stNick').value.trim() || me.nick, name: $('#stName').value.trim(), birth: birth, consents: { mktSms: $('#stSms').checked, mktKakao: $('#stKakao').checked, mktNight: $('#stNight').checked } }).then(function () { PLT.toast('저장했어요.', 'ok'); refresh(); });
       });
     });
-    $('#stShare').addEventListener('click', function () { PLT.share('플레이션 PASS 초대', '플레이션 PASS 같이 쓰자! 가입하면 첫 예약 할인이랑 뽑기 1회권 줘.', inviteUrl); });
+    $('#stShare').addEventListener('click', function () { PLT.share('플레이션 PASS 초대', '플레이션 PASS 같이 쓰자! 가입하면 온라인 뽑기 1회권 줘.', inviteUrl); });
     $('#stCopy').addEventListener('click', function () { PLT.copy(me.code, '초대 코드를 복사했어요'); });
     $('#stOut').addEventListener('click', function () { PLT.db.logout().then(function () { location.href = PLT.url(''); }); });
     $('#stDel').addEventListener('click', function () {

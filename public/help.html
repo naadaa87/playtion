@@ -4,13 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>고객센터 | 플레이션</title>
-<meta name="description" content="플레이션 자주 묻는 질문, 예약 조회와 취소, 기기 고장 접수, 1:1 문의.">
+<meta name="description" content="플레이션 자주 묻는 질문, 게임파티룸 예약·문의 안내, 기기 고장 접수, 1:1 문의.">
 <link rel="canonical" href="https://playtion.kr/help">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="플레이션 PLAYTION">
 <meta property="og:locale" content="ko_KR">
 <meta property="og:title" content="고객센터 | 플레이션">
-<meta property="og:description" content="플레이션 자주 묻는 질문, 예약 조회와 취소, 기기 고장 접수, 1:1 문의.">
+<meta property="og:description" content="플레이션 자주 묻는 질문, 게임파티룸 예약·문의 안내, 기기 고장 접수, 1:1 문의.">
 <meta property="og:url" content="https://playtion.kr/help">
 <meta property="og:image" content="https://playtion.kr/assets/img/og/og-main.jpg">
 <meta property="og:image:width" content="1200">
@@ -26,7 +26,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700;900&display=swap">
-<link rel="stylesheet" href="assets/css/plt.css?v=20261019-renew04">
+<link rel="stylesheet" href="assets/css/plt.css?v=20261024-party01">
 
 </head>
 <body class="sec-hub page-help" data-root="" data-section="hub" data-page="help">
@@ -54,7 +54,7 @@
   <div class="phero__row"><span class="lb lb--all">HELP</span></div>
   <h1 class="t-h1">고객센터</h1>
   <p class="t-lead">자주 묻는 질문을 먼저 찾아보고, 해결이 안 되면 문의를 남겨 주세요. 상담은 <span data-site="hours.cs">평일 10:00 – 19:00</span>이에요.</p>
-  <div class="mt-m" style="max-width:560px"><label class="sr" for="faqQ">자주 묻는 질문 검색</label><input class="inp" id="faqQ" type="search" placeholder="예: 환불, 주차, 보관함, 입고 알림"></div>
+  <div class="mt-m" style="max-width:560px"><label class="sr" for="faqQ">자주 묻는 질문 검색</label><input class="inp" id="faqQ" type="search" placeholder="예: 네이버 예약, 환불, 보증금, 보관함, 입고 알림"></div>
 </div></section>
 <section class="band--tight" style="padding-top:0"><div class="wrap split">
   <div>
@@ -62,21 +62,21 @@
     <div class="faq mt-m" id="faqList"></div>
   </div>
   <div class="stack">
-    <div class="panel">
-      <h2 class="t-h3">예약 조회·취소</h2>
-      <p class="t-small mt-s">비회원으로 예약했다면 예약번호와 전화번호로 찾을 수 있어요.</p>
-      <form id="lookup" class="mt-m" novalidate>
-        <div class="field"><label class="lbl" for="lkCode">예약번호</label><input class="inp" id="lkCode" name="code" placeholder="PT261015-ABCD" autocomplete="off"></div>
-        <div class="field"><label class="lbl" for="lkPhone">전화번호</label><input class="inp" id="lkPhone" name="phone" placeholder="010-0000-0000"></div>
-        <button class="btn btn--ink btn--block mt-m" type="submit">예약 찾기</button>
-      </form>
-      <div id="lookupOut" class="mt-m"></div>
+    <div class="panel panel--line-party" id="helpParty">
+      <h2 class="t-h3">게임파티룸 예약·문의</h2>
+      <p class="t-small mt-s">게임파티룸 예약은 <b>네이버 예약</b>으로 받아요. 예약 확인·변경·취소는 네이버 앱 → 예약 내역에서 할 수 있어요.</p>
+      <p class="t-small mt-s">예약 관리와 고객 문의는 <b>쏘플파티룸 고객센터</b>가 함께 맡고 있어요. 입실, 보증금, 세금계산서, 분실물도 여기로 물어봐 주세요.</p>
+      <div class="stack-s mt-m">
+        <a class="btn btn--party btn--block btn--kakao" href="https://pf.kakao.com/_mufLd/chat" target="_blank" rel="noopener" data-kakao="party">쏘플파티룸 카카오톡 상담</a>
+        <a class="btn btn--ghost btn--block" href="party/booking">네이버 예약으로 예약하기</a>
+      </div>
+      <p class="t-micro mt-s">상담 <span data-party-hours>월~목 10:00 – 19:00 · 금~일 10:00 – 22:00</span> · <a class="link" href="tel:1544-3523">1544-3523</a></p>
     </div>
     <div class="panel" id="ask">
       <h2 class="t-h3">1:1 문의 남기기</h2>
       <form id="inq" class="mt-m" novalidate>
         <div class="field"><label class="lbl" for="iqType">문의 종류<span class="req">*</span></label>
-          <select class="sel" id="iqType" name="type"><option value="gacha">가챠뽑기샵·온라인 뽑기</option><option value="party">파티룸 예약·이용</option><option value="machine">기기 고장·환급</option><option value="market">커뮤니티·교환 판매</option><option value="pass">PASS·포인트·쿠폰</option><option value="general">그 밖의 문의</option></select></div>
+          <select class="sel" id="iqType" name="type"><option value="gacha">가챠뽑기샵·온라인 뽑기</option><option value="party">파티룸 이용 (예약 문의는 쏘플파티룸 카카오톡)</option><option value="machine">기기 고장·환급</option><option value="market">커뮤니티·교환 판매</option><option value="pass">PASS·포인트·쿠폰</option><option value="general">그 밖의 문의</option></select></div>
         <div class="field"><label class="lbl" for="iqText">내용<span class="req">*</span></label><textarea class="txa" id="iqText" name="text" placeholder="언제, 어디서, 무슨 일이 있었는지 적어 주세요. 카드 번호 전체는 적지 마세요."></textarea></div>
         <div class="field"><label class="lbl" for="iqContact">답변 받을 연락처 <small>선택</small></label><input class="inp" id="iqContact" name="contact" placeholder="010-0000-0000"></div>
         <button class="btn btn--primary btn--block mt-m" type="submit">문의 보내기</button>
@@ -147,12 +147,12 @@
   <div class="drawer__group"><h3><span class="dot dot--pass"></span>PASS 멤버십</h3><a href="pass/">PASS 소개</a><a href="pass/me">내 PASS</a><a href="pass/collection">컬렉션 북</a><a href="pass/wallet">충전·PASS+·선물</a><a href="pass/login">로그인·가입</a></div>
   <div class="drawer__group"><h3><span class="dot dot--biz"></span>플레이션</h3><a href="brand">브랜드 이야기</a><a href="stations">전 지점 노선도</a><a href="news">소식·혜택·행사</a><a href="platform">플랫폼 소개</a><a href="partner/">창업·제휴</a><a href="help">고객센터</a><a href="family">패밀리 사이트</a></div>
 </nav></div>
-<script src="data/site.js?v=20261019-renew04"></script>
-<script src="data/stations.js?v=20261019-renew04"></script>
-<script src="data/party.js?v=20261019-renew04"></script>
-<script src="data/gacha.js?v=20261019-renew04"></script>
-<script src="data/pass.js?v=20261019-renew04"></script>
-<script src="assets/js/core.js?v=20261019-renew04"></script>
-<script src="assets/js/pages/hub.js?v=20261019-renew04"></script>
+<script src="data/site.js?v=20261024-party01"></script>
+<script src="data/stations.js?v=20261024-party01"></script>
+<script src="data/party.js?v=20261024-party01"></script>
+<script src="data/gacha.js?v=20261024-party01"></script>
+<script src="data/pass.js?v=20261024-party01"></script>
+<script src="assets/js/core.js?v=20261024-party01"></script>
+<script src="assets/js/pages/hub.js?v=20261024-party01"></script>
 </body>
 </html>

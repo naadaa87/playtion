@@ -467,7 +467,6 @@ begin
       case when coalesce(p ->> 'birth', '') ~ '^\d{2}-\d{2}$' then p ->> 'birth' else '' end, v_code, upper(left(coalesce(p ->> 'invite', ''), 12)),
       jsonb_build_object('terms', true, 'age', true, 'mktSms', coalesce((p ->> 'mktSms')::boolean, false), 'mktKakao', coalesce((p ->> 'mktKakao')::boolean, false),
         'mktNight', coalesce((p ->> 'mktNight')::boolean, false), 'at', private.ts(now()), 'ver', '2026-10'), left(coalesce(p ->> 'firstTouch', 'web'), 40));
-  perform private.issue(u, 'welcomeParty', 'welcome');
   perform private.issue(u, 'welcomeDraw', 'welcome');
   update private.bookings set member_id = u where member_id is null and phone = ph;
   update private.regs set member_id = u where member_id is null and phone = ph;
@@ -476,7 +475,7 @@ begin
     perform private.ledger_add(u, 'gift', '선물 받은 코인', 0, g.amount);
     perform private.note(u, '선물이 도착했어요', to_char(g.amount, 'FM999,999') || 'C' || case when g.message <> '' then ' · ' || g.message else '' end);
   end loop;
-  perform private.note(u, 'PASS에 오신 걸 환영해요', '첫 예약 할인과 온라인 뽑기 1회권을 넣어 뒀어요.', 'pass/me#coupons');
+  perform private.note(u, 'PASS에 오신 걸 환영해요', '가입 선물로 온라인 뽑기 1회권을 넣어 뒀어요.', 'pass/me#coupons');
   return private.me_json(u);
 end $$;
 
