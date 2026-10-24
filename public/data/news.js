@@ -11,6 +11,11 @@ window.PLT_NEWS = {
 
   notices: [
     {
+      id: "n004", date: "2026-10-24", line: "party",
+      title: "게임파티룸 예약은 네이버 예약으로 받아요",
+      body: "이제 게임파티룸은 네이버 예약에서 날짜를 고르고 결제하면 예약이 끝나요. 운영 지점은 신촌 1·2·3호점과 건대 미니, 모두 네 곳이에요. 예약 관리와 이용 문의는 쏘플파티룸 고객센터가 함께 맡고 있어서, 궁금한 점은 쏘플파티룸 카카오톡으로 물어보시면 돼요."
+    },
+    {
       id: "n003", date: "2026-10-09", line: "all",
       title: "플레이션 통합 홈페이지를 열었어요",
       body: "가챠뽑기샵과 게임파티룸, PASS 멤버십을 한곳에서 볼 수 있게 홈페이지를 하나로 합쳤어요. 예전 주소로 들어와도 새 화면으로 안내돼요. 쓰다가 불편한 점은 고객센터로 알려 주세요."
@@ -19,30 +24,23 @@ window.PLT_NEWS = {
       id: "n002", date: "2026-10-04", line: "gacha",
       title: "플레이션 건대 가챠샵 오픈 준비 중이에요",
       body: "건대 한아름 건물 1층에 캡슐토이 기기를 설치하고 있어요. 영업 시작일과 운영시간은 확정되는 대로 이 화면과 홈 화면에서 알려 드릴게요. 상품 목록은 오픈과 함께 실제 상품으로 바뀝니다."
-    },
-    {
-      id: "n001", date: "2026-07-01", line: "party",
-      title: "8개 지점 모두 운영 중이에요",
-      body: "신촌 1·2·3호점, 영등포, 사당, 건대 미니, 건대구의, 구리까지 8개 지점 모두 예약을 받고 있어요."
     }
   ],
 
   promos: [
-    { id: "welcome", line: "pass", active: true, title: "PASS 가입하면 첫 예약 10,000원 할인", body: "가입하는 순간 첫 예약 할인 쿠폰과 온라인 뽑기 1회권이 PASS에 들어와요.", period: "상시", link: "pass/login" },
-    { id: "transfer", line: "pass", active: true, title: "파티룸 ↔ 가챠샵 환승 쿠폰", body: "파티룸을 예약하면 가챠 코인 3,000C, 가챠샵에 세 번 체크인하면 파티룸 평일 5,000원 쿠폰이 나와요.", period: "상시", link: "pass/" },
-    { id: "happyhour", line: "party", active: true, title: "평일 해피아워 30%", body: "평일 16~20시에 시작하는 시간제 예약은 30% 할인돼요.", period: "평일 상시", link: "party/booking" },
-    { id: "review", line: "party", active: true, title: "후기 남기면 2,000P", body: "이용 후기를 남기면 2,000포인트, 사진 후기는 1,000포인트를 더 드려요.", period: "상시", link: "pass/me" },
-    { id: "invite", line: "pass", active: true, title: "친구 초대, 둘 다 5,000P", body: "초대한 친구가 첫 예약을 마치면 두 사람 모두 5,000포인트를 받아요.", period: "상시", link: "pass/me" }
+    { id: "welcome", line: "pass", active: true, title: "PASS 가입하면 온라인 뽑기 1회권", body: "가입하는 순간 온라인 뽑기 1회권이 PASS에 들어와요. 생일 달에는 플레이 코인 3,000C도 넣어 드려요.", period: "상시", link: "pass/login" },
+    { id: "stamp", line: "gacha", active: true, title: "스탬프 10개 모으면 5,000C", body: "가챠샵 체크인, 교환회 참여, 빈 캡슐 반납마다 스탬프가 하나씩 쌓여요. 10개를 채우면 플레이 코인 5,000C를 드려요.", period: "상시", link: "pass" },
+    { id: "naver", line: "party", active: true, title: "파티룸은 네이버 예약으로 바로", body: "지점과 패키지를 고르면 그 지점 네이버 예약 화면으로 바로 넘어가요. 예약 문의는 쏘플파티룸 카카오톡으로 주세요.", period: "상시", link: "party/booking" }
   ],
 
   events: [
     {
       id: "cup-s1", line: "party", type: "대회", status: "open",
       title: "PLAYTION CUP 시즌 1 — 전 지점 대항전",
-      summary: "8개 지점 크루가 맞붙는 리그 오브 레전드 대항전이에요. 지점 예선을 거쳐 결승은 유튜브로 중계하고, 우승 크루에게는 밤타임 이용권과 트로피를 드려요.",
-      date: "", time: "예선 일정은 참가 크루가 모이면 공지", place: "8개 지점 + 결승 지점 추후 공지",
+      summary: "신촌·건대 네 지점의 크루가 맞붙는 리그 오브 레전드 대항전이에요. 지점 예선을 거쳐 결승은 유튜브로 중계하고, 우승 크루에게는 밤 패키지 이용권과 트로피를 드려요.",
+      date: "", time: "예선 일정은 참가 크루가 모이면 공지", place: "신촌 1·2·3호점, 건대 미니 (결승 지점은 추후 공지)",
       target: "5인 크루 (만 19세 이상)", capacity: 32, fee: "크루 단위 예약 요금만",
-      rules: ["크루 대표 1명이 신청하고, 팀원은 PASS 회원이면 함께 기록돼요.", "예선은 각 지점 밤타임 예약으로 진행해요.", "비매너 행위가 확인되면 실격 처리될 수 있어요."]
+      rules: ["크루 대표 1명이 신청하고, 팀원은 PASS 회원이면 함께 기록돼요.", "예선은 각 지점 밤 패키지 예약으로 진행해요. 예약은 네이버 예약에서 해 주세요.", "비매너 행위가 확인되면 실격 처리될 수 있어요."]
     },
     {
       id: "swap-01", line: "club", type: "교환회", status: "planned",

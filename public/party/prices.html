@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>파티룸 요금·패키지 | 플레이션</title>
-<meta name="description" content="플레이션 게임파티룸 밤타임·낮타임·시간제 요금, 추가 인원, 해피아워, 옵션과 패키지, 환불 규정을 정리했어요.">
+<title>게임파티룸 요금 | 지점별 낮·밤·올데이 요금표 | 플레이션</title>
+<meta name="description" content="플레이션 게임파티룸 신촌 1·2·3호점, 건대 미니의 낮·밤·올데이 패키지 요금을 월~목·금·토·일로 정리했어요. 예약은 네이버 예약으로 연결돼요.">
 <link rel="canonical" href="https://playtion.kr/party/prices">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="플레이션 PLAYTION">
 <meta property="og:locale" content="ko_KR">
-<meta property="og:title" content="파티룸 요금·패키지 | 플레이션">
-<meta property="og:description" content="플레이션 게임파티룸 밤타임·낮타임·시간제 요금, 추가 인원, 해피아워, 옵션과 패키지, 환불 규정을 정리했어요.">
+<meta property="og:title" content="게임파티룸 요금 | 플레이션">
+<meta property="og:description" content="플레이션 게임파티룸 신촌 1·2·3호점, 건대 미니의 낮·밤·올데이 패키지 요금을 월~목·금·토·일로 정리했어요. 예약은 네이버 예약으로 연결돼요.">
 <meta property="og:url" content="https://playtion.kr/party/prices">
 <meta property="og:image" content="https://playtion.kr/assets/img/og/og-party.jpg">
 <meta property="og:image:width" content="1200">
@@ -26,7 +26,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700;900&display=swap">
-<link rel="stylesheet" href="../assets/css/plt.css?v=20261019-renew04">
+<link rel="stylesheet" href="../assets/css/plt.css?v=20261024-party01">
 
 </head>
 <body class="sec-party page-prices" data-root="../" data-section="party" data-page="prices">
@@ -53,37 +53,23 @@
 <section class="phero"><div class="wrap">
   <div class="phero__row"><span class="lb lb--party">PRICE</span></div>
   <h1 class="t-h1">요금·패키지</h1>
-  <p class="t-lead">모든 지점 요금이 같아요. 기본 <span data-v="party.basePeople|num">4</span>인 기준이고, 인원이 늘면 1인당 <span data-v="party.extraPerPerson|won">10,000원</span>이 더해져요.</p>
+  <p class="t-lead">낮·밤·올데이 세 가지 패키지가 있고, 지점과 요일(월~목·금·토·일)마다 요금이 달라요. 기준 <span data-v="party.basePeople|num">4</span>명 요금이고, 인원이 늘면 1인당 <span data-v="party.extraPerPerson|won">10,000원</span>이 더해져요.</p>
 </div></section>
 <section class="band--tight" style="padding-top:0"><div class="wrap"><div class="tcs" id="timeCards"></div></div></section>
-
-<section class="band band--mist" aria-labelledby="calcTitle"><div class="wrap split">
-  <div><h2 class="t-h2" id="calcTitle">얼마 나올지<br>먼저 계산해 보세요</h2><p class="t-lead mt-s">날짜를 정하기 전에 대략적인 금액을 볼 수 있어요. 쿠폰과 포인트는 예약 화면에서 적용돼요.</p></div>
-  <div class="panel" id="calc"></div>
+<section class="band band--mist" aria-labelledby="tblTitle"><div class="wrap">
+  <div class="sec-head"><div><h2 class="t-h2" id="tblTitle">지점별 요금표</h2><p class="t-lead">오늘 요일 칸을 표시해 뒀어요. 예약을 누르면 그 지점·패키지의 네이버 예약 화면이 열려요.</p></div><a class="sec-head__more" href="../party/booking">날짜로 요금 보기</a></div>
+  <div class="pt-prices" id="priceTables"></div>
 </div></section>
-
 <section class="band" aria-labelledby="ruleTitle"><div class="wrap">
   <div class="sec-head"><div><h2 class="t-h2" id="ruleTitle">이렇게 계산해요</h2></div></div>
   <div class="tbl-scroll"><table class="tbl" id="ruleTable"></table></div>
 </div></section>
-
-<section class="band band--mist" aria-labelledby="optTitle"><div class="wrap">
-  <div class="sec-head"><div><h2 class="t-h2" id="optTitle">추가 옵션</h2><p class="t-lead">예약할 때 고르면 입장 전에 세팅해 둬요.</p></div></div>
-  <div class="tbl-scroll"><table class="tbl" id="optTable"></table></div>
-</div></section>
-
-<section class="band" id="pkg" aria-labelledby="pkgTitle"><div class="wrap">
-  <div class="sec-head"><div><h2 class="t-h2" id="pkgTitle">패키지</h2><p class="t-lead">모임 성격에 맞는 타임과 옵션을 묶어 뒀어요. 고른 뒤에도 예약 화면에서 바꿀 수 있어요.</p></div></div>
+<section class="band band--mist" id="pkg" aria-labelledby="pkgTitle"><div class="wrap">
+  <div class="sec-head"><div><h2 class="t-h2" id="pkgTitle">이런 모임엔 이 패키지</h2><p class="t-lead">모임 성격에 맞는 패키지와 지점을 골라 봤어요. 추가 요금 상품이 아니라 고르는 데 도움을 드리는 추천이에요.</p></div></div>
   <div class="pkgs" id="pkgCards"></div>
 </div></section>
-
-<section class="band band--mist" aria-labelledby="perkTitle"><div class="wrap split">
-  <div><span class="lb lb--pass">PASS</span><h2 class="t-h2 mt-s" id="perkTitle">PASS로 예약하면<br>달라지는 것</h2><a class="btn btn--pass mt-m" href="../pass/">PASS 알아보기</a></div>
-  <ul class="rows" id="passPerks"></ul>
-</div></section>
-
-<section class="band"><div class="wrap split">
-  <div><h2 class="t-h2">취소·환불</h2><p class="t-lead mt-s">이용일을 기준으로 계산해요. 예약 조회 화면이나 내 PASS에서 바로 취소할 수 있어요.</p><a class="btn btn--ghost mt-m" href="../help#lookup">예약 조회·취소</a></div>
+<section class="band" id="refund"><div class="wrap split">
+  <div><h2 class="t-h2">취소·환불</h2><p class="t-lead mt-s">이용일을 기준으로 계산해요. 예약 확인·변경·취소는 네이버 앱의 예약 내역에서 할 수 있어요.</p><div class="mt-m" id="prContact"></div></div>
   <div><div class="tbl-scroll"><table class="tbl" id="refundTable"></table></div><p class="note mt-m" id="refundNote"></p></div>
 </div></section>
 
@@ -142,11 +128,11 @@
   <div class="drawer__group"><h3><span class="dot dot--pass"></span>PASS 멤버십</h3><a href="../pass/">PASS 소개</a><a href="../pass/me">내 PASS</a><a href="../pass/collection">컬렉션 북</a><a href="../pass/wallet">충전·PASS+·선물</a><a href="../pass/login">로그인·가입</a></div>
   <div class="drawer__group"><h3><span class="dot dot--biz"></span>플레이션</h3><a href="../brand">브랜드 이야기</a><a href="../stations">전 지점 노선도</a><a href="../news">소식·혜택·행사</a><a href="../platform">플랫폼 소개</a><a href="../partner/">창업·제휴</a><a href="../help">고객센터</a><a href="../family">패밀리 사이트</a></div>
 </nav></div>
-<script src="../data/site.js?v=20261019-renew04"></script>
-<script src="../data/stations.js?v=20261019-renew04"></script>
-<script src="../data/party.js?v=20261019-renew04"></script>
-<script src="../data/pass.js?v=20261019-renew04"></script>
-<script src="../assets/js/core.js?v=20261019-renew04"></script>
-<script src="../assets/js/pages/party.js?v=20261019-renew04"></script>
+<script src="../data/site.js?v=20261024-party01"></script>
+<script src="../data/stations.js?v=20261024-party01"></script>
+<script src="../data/party.js?v=20261024-party01"></script>
+<script src="../data/pass.js?v=20261024-party01"></script>
+<script src="../assets/js/core.js?v=20261024-party01"></script>
+<script src="../assets/js/pages/party.js?v=20261024-party01"></script>
 </body>
 </html>
