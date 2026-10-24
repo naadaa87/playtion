@@ -8,6 +8,7 @@
    관리 화면(ssople.com)의 지점 정보와 똑같이 맞춰 주세요.
 
    - id      : 영문 고유값 (바꾸지 마세요. 예약·주소에 쓰입니다)
+   - slug    : 지점 페이지 주소 (게임파티룸만. 예: "sinchon-1" → playtion.kr/party/sinchon-1). 바꾸면 검색 노출이 처음부터 다시 쌓이니 되도록 그대로 두세요
    - code    : 노선도에 붙는 역 번호 (P = 게임파티룸, G = 가챠샵, S = SPOT)
    - name    : 화면에 보이는 이름. 표기 규칙 "플레이션 [지역] [호수/포맷]"
    - listed  : 네이버·스페이스클라우드에 현재 등록된 이름 (검색 링크에 사용)
@@ -36,7 +37,7 @@ window.PLT_STATIONS = [
     img: "gacha/front.webp", naverBooking: ""
   },
   {
-    id: "sc1", code: "P01", type: "party", status: "open",
+    id: "sc1", slug: "sinchon-1", code: "P01", type: "party", status: "open",
     name: "플레이션 신촌 1호점", short: "신촌 1호점", area: "신촌", areaEn: "Sinchon",
     listed: "신촌 플레이션 1호점",
     district: "서울 서대문구", addr: "서울 서대문구 연세로11길 5, 이케이빌딩 지하 2층",
@@ -60,7 +61,7 @@ window.PLT_STATIONS = [
     naverBooking: ""
   },
   {
-    id: "sc2", code: "P02", type: "party", status: "open",
+    id: "sc2", slug: "sinchon-2", code: "P02", type: "party", status: "open",
     name: "플레이션 신촌 2호점", short: "신촌 2호점", area: "신촌", areaEn: "Sinchon",
     listed: "신촌 플레이션 2호점",
     district: "서울 서대문구", addr: "서울 서대문구 연세로5가길 11, 3층",
@@ -84,7 +85,7 @@ window.PLT_STATIONS = [
     naverBooking: ""
   },
   {
-    id: "sc3", code: "P03", type: "party", status: "open",
+    id: "sc3", slug: "sinchon-3", code: "P03", type: "party", status: "open",
     name: "플레이션 신촌 3호점", short: "신촌 3호점", area: "신촌", areaEn: "Sinchon",
     listed: "신촌 플레이션 3호점",
     district: "서울 서대문구", addr: "서울 서대문구 연세로5가길 11, 5층",
@@ -108,7 +109,7 @@ window.PLT_STATIONS = [
     naverBooking: ""
   },
   {
-    id: "kondae", code: "P04", type: "party", status: "open",
+    id: "kondae", slug: "kondae-mini", code: "P04", type: "party", status: "open",
     name: "플레이션 건대 미니", short: "건대 미니", area: "건대", areaEn: "Konkuk Univ.",
     listed: "건대 플레이션",
     district: "서울 광진구", addr: "서울 광진구 능동로13길 39, 1층",

@@ -67,7 +67,7 @@
       '<p class="t-micro">' + (isG ? esc(s.machines) + ' · ' : '최대 ' + s.max + '명 · ' + PLT.won(PLT.party.from(s)) + '부터 · ') + esc(s.near) + '</p>' +
       '<div class="row">' + (isG
         ? '<a class="btn btn--gacha btn--s" href="' + PLT.url('gacha/') + '">가챠샵 보기</a><a class="btn btn--ghost btn--s" href="' + PLT.url('gacha/visit') + '">오시는 길</a>'
-        : '<a class="btn btn--party btn--s" href="' + PLT.url('party/booking?station=' + s.id) + '">이 지점 예약</a><a class="btn btn--ghost btn--s" href="' + PLT.url('party/station?id=' + s.id) + '">지점 보기</a>') + '</div>' + (isG ? '' : '<p class="t-micro">예약은 네이버 예약으로 받아요</p>');
+        : '<a class="btn btn--party btn--s" href="' + PLT.url('party/booking?station=' + s.id) + '">이 지점 예약</a><a class="btn btn--ghost btn--s" href="' + PLT.stationUrl(s) + '">지점 보기</a>') + '</div>' + (isG ? '' : '<p class="t-micro">예약은 네이버 예약으로 받아요</p>');
   }
   function routeMap() {
     var host = $('#routemap'); if (!host) return;
@@ -90,7 +90,7 @@
       var s = PLT.station(id); if (!s) return '';
       var g = s.type === 'gacha';
       return '<li class="vline__item' + (g ? ' vline__item--gacha' : '') + '"><span class="vline__node"></span>' +
-        '<a href="' + PLT.url(g ? 'gacha/' : 'party/station?id=' + s.id) + '"><span class="vline__name">' + esc(s.name) + '</span><span class="vline__sub" style="display:block">' + (g ? esc(s.machines) + ' · ' + esc((G.shop || {}).statusLabel || '') : '최대 ' + s.max + '명 · ' + esc(s.gear.slice(0, 2).join(', '))) + '</span></a>' +
+        '<a href="' + (g ? PLT.url('gacha/') : PLT.stationUrl(s)) + '"><span class="vline__name">' + esc(s.name) + '</span><span class="vline__sub" style="display:block">' + (g ? esc(s.machines) + ' · ' + esc((G.shop || {}).statusLabel || '') : '최대 ' + s.max + '명 · ' + esc(s.gear.slice(0, 2).join(', '))) + '</span></a>' +
         '<a class="btn btn--s ' + (g ? 'btn--gacha' : 'btn--ghost') + '" href="' + PLT.url(g ? 'gacha/visit' : 'party/booking?station=' + s.id) + '">' + (g ? '가는 길' : '예약') + '</a></li>';
     }).join('');
   }
@@ -160,7 +160,7 @@
           '<h3 class="sign"><span class="sign__ko t-h3">' + esc(s.name) + '</span><span class="sign__en">' + esc(s.areaEn) + '</span></h3>' +
           '<p class="t-small">' + esc(s.desc) + '</p>' +
           '<dl class="kv" style="margin-top:10px"><dt>주소</dt><dd>' + esc(s.addr) + '</dd><dt>가는 길</dt><dd>' + esc(s.near) + '</dd><dt>' + (g ? '규모' : '정원') + '</dt><dd>' + (g ? esc(s.machines) : '최대 ' + s.max + '인 · PC ' + s.pcs + '대') + '</dd><dt>시설</dt><dd>' + esc((s.gear || []).join(', ')) + '</dd></dl>' +
-          '<div class="row" style="margin-top:12px">' + (g ? '<a class="btn btn--gacha btn--s" href="' + PLT.url('gacha/') + '">가챠샵 보기</a>' : '<a class="btn btn--primary btn--s" href="' + PLT.url('party/booking?station=' + s.id) + '">예약하기</a><a class="btn btn--ghost btn--s" href="' + PLT.url('party/station?id=' + s.id) + '">지점 상세</a>') +
+          '<div class="row" style="margin-top:12px">' + (g ? '<a class="btn btn--gacha btn--s" href="' + PLT.url('gacha/') + '">가챠샵 보기</a>' : '<a class="btn btn--primary btn--s" href="' + PLT.url('party/booking?station=' + s.id) + '">예약하기</a><a class="btn btn--ghost btn--s" href="' + PLT.stationUrl(s) + '">지점 상세</a>') +
           '<a class="btn btn--quiet btn--s" href="' + PLT.naverMap(s) + '" target="_blank" rel="noopener">네이버 지도</a></div></div></article>';
       }).join('') + '</div>';
       $$('button', chips).forEach(function (b) { b.addEventListener('click', function () { cur = b.getAttribute('data-a'); draw(); }); });

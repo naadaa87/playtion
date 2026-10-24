@@ -77,7 +77,7 @@
         '<div class="rp-station__tags">' + tags + '</div>' +
         '<div class="rp-station__cta">' + (g
           ? '<a class="btn btn--primary btn--s" href="' + url('gacha/') + '">가챠뽑기샵 보기</a><a class="btn btn--ghost btn--s" href="' + url('gacha/visit') + '">오시는 길</a>'
-          : '<a class="btn btn--party btn--s" href="' + url('party/booking?station=' + s.id) + '">예약</a><a class="btn btn--ghost btn--s" href="' + url('party/station?id=' + s.id) + '">지점 보기</a>') +
+          : '<a class="btn btn--party btn--s" href="' + url('party/booking?station=' + s.id) + '">예약</a><a class="btn btn--ghost btn--s" href="' + (window.PLT && PLT.stationUrl ? PLT.stationUrl(s) : url('party/' + (s.slug || 'station?id=' + s.id))) + '">지점 보기</a>') +
         '</div></div></article>';
     };
     host.innerHTML = gacha.concat(party).map(card).join('');

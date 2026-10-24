@@ -1,5 +1,5 @@
 /* 플레이션 서비스 워커 — 화면과 이미지를 조금 저장해 두고, 연결이 끊기면 마지막 화면을 보여 줍니다 */
-const CACHE = 'plt-20261024-biz02';
+const CACHE = 'plt-20261024-seo01';
 self.addEventListener('install', (e) => { self.skipWaiting(); });
 self.addEventListener('activate', (e) => { e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener('fetch', (e) => {
