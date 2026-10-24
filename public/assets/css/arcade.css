@@ -111,7 +111,8 @@ a.arc-cab:hover .arc-cab__sc img { transform: translateY(-4px) scale(1.04); }
 /* ---------- 게임 화면 ---------- */
 body.page-game { padding-bottom: 0 !important; }
 body.page-game .ft, body.page-game .tabbar, body.page-game .helper-fab, body.page-game .helper { display: none !important; }
-body.page-game .topbar__notice { display: none; }
+body.page-game #plt-topbar, body.page-game .arc-sub { display: none; }
+body.page-game main { min-height: 100vh; min-height: 100dvh; }
 body.page-game .hd, body.page-game .subnav { position: static; }
 .arc-stage { max-width: 480px; margin: 0 auto; padding: 0 var(--gut) 16px; }
 .arc-top { display: flex; align-items: center; gap: 10px; padding: 8px 0 6px; }
@@ -223,3 +224,20 @@ body.page-game .hd, body.page-game .subnav { position: static; }
 .arc-home__cab small { font-size: 11px; color: var(--ink-3); font-weight: 800; }
 .arc-home .t-lead { color: #E8E5E1; }
 @media (max-width: 860px) { .arc-home__in { grid-template-columns: 1fr; } .arc-home__cabs { justify-content: flex-start; flex-wrap: wrap; } .arc-home__cab { width: calc(33.33% - 8px); } }
+
+/* 점수판을 한 줄로 — 휴대폰에서 게임 판이 크게 보이도록 (2026.10.24) */
+.arc-hud__next { display: flex; align-items: center; justify-content: flex-end; gap: 6px; margin-top: 4px; }
+.arc-hud__next canvas { width: 36px; height: 36px; }
+@media (max-width: 720px) {
+  .arc-stage { padding-bottom: 10px; }
+  .arc-top { padding: 6px 0 4px; }
+  .arc-modepick { margin-bottom: 4px; gap: 6px; }
+  .arc-modepick .chip { height: 30px; padding: 0 10px; font-size: 12.5px; }
+  .arc-hud { padding: 4px 2px 6px; }
+  .arc-hud__big { font-size: 28px; }
+  .arc-ctrl { margin-top: 8px; }
+  .arc-ctrl .btn { --bh: 42px; font-size: 14.5px; }
+  .arc-stage > .t-micro { display: none; }
+  .sort-board { padding-top: 48px; min-height: 0; }
+  .sort-rows { gap: 34px; }
+}

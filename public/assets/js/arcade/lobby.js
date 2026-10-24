@@ -29,8 +29,13 @@
 
   function tiles(p) {
     var cap = ARC.capsuleToday(), got = cap ? (A.dailyCapsule.filter(function (c) { return c.id === cap.got; })[0] || {}).name : '';
+    /* 연속 출석: 오늘 한 판 하거나 오늘의 퀘스트를 하나 깨면 이어져요 */
+    var st = p.streak, today = ARC.day(), yday = PLT.addDays(today, -1), y2 = PLT.addDays(today, -2);
+    var streakToday = st.last === today, alive = streakToday || st.last === yday || (st.last === y2 && st.shields > 0);
+    var streakNum = alive && st.count ? st.count + '일째' : '시작 전';
+    var streakSub = streakToday ? '오늘 출석 완료 · 방석 ' + st.shields + '/' + A.streak.shieldMax : (alive && st.count ? '오늘 한 판 하면 ' + (st.count + 1) + '일째' : '오늘 한 판 하면 1일째');
     $('#arcTiles').innerHTML =
-      '<div class="arc-tile"><img src="' + ARC.img('daruma', true) + '" alt=""><div><small>연속 출석 · 다루</small><b>' + (p.streak.count || 0) + '일째</b><small>방석 ' + p.streak.shields + '/' + A.streak.shieldMax + '</small></div></div>' +
+      '<div class="arc-tile' + (streakToday ? ' arc-tile--done' : '') + '"><img src="' + ARC.img('daruma', true) + '" alt=""><div><small>연속 출석 · 다루</small><b>' + streakNum + '</b><small>' + streakSub + '</small></div></div>' +
       '<button type="button" class="arc-tile ' + (cap ? 'arc-tile--done' : 'arc-tile--hot') + '" id="arcCap"' + (cap ? ' disabled' : '') + '><img src="' + ARC.img('cat', true) + '" alt=""><div><small>오늘의 캡슐 · 복냥</small><b>' + (cap ? got : '열기') + '</b><small>' + (cap ? '내일 ' + ARC.untilReset() + ' 뒤' : '하루 한 번 무료') + '</small></div></button>';
     var b = $('#arcCap'); if (b && !cap) b.addEventListener('click', function () {
       var out = ARC.openCapsule(); if (!out) return;

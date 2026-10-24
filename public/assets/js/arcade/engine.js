@@ -14,7 +14,11 @@
     function resize() {
       var box = canvas.parentNode.getBoundingClientRect();
       var availW = Math.min(box.width || w, maxW || 480);
-      var availH = Math.max(380, (window.innerHeight || 800) - 150);
+      /* 화면 높이에서 게임 위(제목·모드·점수판)와 아래(버튼) 몫을 빼고 남는 만큼 쓴다 */
+      var top = PLT.$('#arcTop'), y0 = top ? top.getBoundingClientRect().top : 0;
+      var above = canvas.getBoundingClientRect().top - y0;
+      var ctrl = PLT.$('.arc-ctrl'), below = ctrl ? ctrl.offsetHeight + 16 : 70;
+      var availH = Math.max(280, (window.innerHeight || 800) - above - below - 8);
       var s = Math.min(availW / w, availH / h);
       var dpr = Math.min(2, window.devicePixelRatio || 1);
       canvas.style.width = Math.floor(w * s) + 'px'; canvas.style.height = Math.floor(h * s) + 'px';
@@ -23,7 +27,18 @@
       E.scale = s;
     }
     resize(); window.addEventListener('resize', PLT.debounce(resize, 120));
+    /* 글꼴이 늦게 들어와 위쪽 높이가 바뀌면 한 번 더 맞춘다 */
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { resize(); E.toStage(); });
+    E.toStage();
     return { ctx: ctx, resize: resize, pos: function (ev) { var r = canvas.getBoundingClientRect(); var t = ev.touches ? ev.touches[0] : (ev.changedTouches ? ev.changedTouches[0] : ev); return { x: (t.clientX - r.left) / r.width * w, y: (t.clientY - r.top) / r.height * h }; } };
+  };
+
+  /* 휴대폰: 사이트 머리말을 위로 밀어 올리고 게임 제목 줄부터 보이게 */
+  E.toStage = function () {
+    if ((window.innerWidth || 1024) > 720) return;
+    var top = PLT.$('#arcTop'); if (!top) return;
+    var y = top.getBoundingClientRect().top + (window.scrollY || 0) - 4;
+    if (y > 0) window.scrollTo(0, y);
   };
 
   /* ---------- 루프: 1/60초 고정 간격으로 update, 화면 주기로 render ---------- */

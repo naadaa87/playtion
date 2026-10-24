@@ -10,16 +10,16 @@
   /* ------------------------------------------------------------------
      노선도
      ------------------------------------------------------------------ */
+  /* 지점 좌표 [x, y, 이름 위치(t 위 · b 아래)] — 신촌 세 곳에서 출발해 건대(가챠샵 환승)로 이어지는 노선 */
   var POS = {
-    ydp: [60, 215, 'b'], sc1: [225, 100, 't'], sc2: [305, 100, 'b'], sc3: [385, 100, 't'],
-    sadang: [600, 215, 'b'], kondae: [710, 215, 'b'], guui: [810, 215, 'b'], guri: [905, 215, 'b'],
-    'kd-gacha': [710, 100, 't']
+    sc1: [170, 100, 't'], sc2: [310, 100, 'b'], sc3: [450, 100, 't'],
+    kondae: [710, 215, 'b'], 'kd-gacha': [710, 100, 't']
   };
-  var NEXT = [975, 215];
+  var NEXT = [920, 215];
   function routeSvg() {
     var party = PLT.stations.filter(function (s) { return s.type === 'party' && POS[s.id]; });
     var gacha = PLT.stations.filter(function (s) { return s.type === 'gacha' && POS[s.id]; });
-    var main = 'M60 215 L145 130 Q175 100 205 100 L405 100 Q435 100 465 130 L550 215 L905 215';
+    var main = 'M110 100 L480 100 Q510 100 540 130 L625 215 L800 215';
     var branch = 'M710 215 L710 100';
     var nodes = '';
     var i = 0;
@@ -47,7 +47,7 @@
     return '<svg viewBox="0 0 1040 300" role="group" aria-label="플레이션 노선도">' +
       '<path class="rm-rail" d="' + main + '" stroke="var(--party)" stroke-width="10"/>' +
       '<path class="rm-rail" d="' + branch + '" stroke="var(--gacha-rail)" stroke-width="10"/>' +
-      '<path d="M905 215 L975 215" fill="none" stroke="var(--rule-2)" stroke-width="6" stroke-dasharray="2 10" stroke-linecap="round"/>' +
+      '<path d="M800 215 L920 215" fill="none" stroke="var(--rule-2)" stroke-width="6" stroke-dasharray="2 10" stroke-linecap="round"/>' +
       nodes + transfer + next + '</svg>';
   }
   function panelFor(id) {
@@ -64,10 +64,10 @@
       '<div class="sign"><span class="sign__ko t-h3">' + esc(s.name) + '</span><span class="sign__en">' + esc(s.areaEn) + ' · ' + esc(s.district) + '</span></div>' +
       '<p class="t-small">' + esc(s.desc) + '</p>' +
       '<div class="chips">' + (s.gear || []).map(function (g) { return '<span class="tag">' + esc(g) + '</span>'; }).join('') + '</div>' +
-      '<p class="t-micro">' + (isG ? esc(s.machines) + ' · ' : '최대 ' + s.max + '인 · ') + esc(s.near) + '</p>' +
+      '<p class="t-micro">' + (isG ? esc(s.machines) + ' · ' : '최대 ' + s.max + '명 · ' + PLT.won(PLT.party.from(s)) + '부터 · ') + esc(s.near) + '</p>' +
       '<div class="row">' + (isG
         ? '<a class="btn btn--gacha btn--s" href="' + PLT.url('gacha/') + '">가챠샵 보기</a><a class="btn btn--ghost btn--s" href="' + PLT.url('gacha/visit') + '">오시는 길</a>'
-        : '<a class="btn btn--primary btn--s" href="' + PLT.url('party/booking?station=' + s.id) + '">이 지점 예약</a><a class="btn btn--ghost btn--s" href="' + PLT.url('party/station?id=' + s.id) + '">지점 보기</a>') + '</div>';
+        : '<a class="btn btn--party btn--s" href="' + PLT.url('party/booking?station=' + s.id) + '">이 지점 예약</a><a class="btn btn--ghost btn--s" href="' + PLT.url('party/station?id=' + s.id) + '">지점 보기</a>') + '</div>' + (isG ? '' : '<p class="t-micro">예약은 네이버 예약으로 받아요</p>');
   }
   function routeMap() {
     var host = $('#routemap'); if (!host) return;
@@ -85,12 +85,12 @@
     });
     select(PLT.param('station') || 'kd-gacha');
     /* 휴대폰: 세로 노선 */
-    var order = ['kd-gacha', 'ydp', 'sc1', 'sc2', 'sc3', 'sadang', 'kondae', 'guui', 'guri'];
+    var order = ['kd-gacha'].concat(PLT.partyStations().filter(function (x) { return x.status !== 'closed'; }).map(function (x) { return x.id; }));
     list.innerHTML = order.map(function (id) {
       var s = PLT.station(id); if (!s) return '';
       var g = s.type === 'gacha';
       return '<li class="vline__item' + (g ? ' vline__item--gacha' : '') + '"><span class="vline__node"></span>' +
-        '<a href="' + PLT.url(g ? 'gacha/' : 'party/station?id=' + s.id) + '"><span class="vline__name">' + esc(s.name) + '</span><span class="vline__sub" style="display:block">' + (g ? esc(s.machines) + ' · ' + esc((G.shop || {}).statusLabel || '') : '최대 ' + s.max + '인 · ' + esc(s.gear.slice(0, 2).join(', '))) + '</span></a>' +
+        '<a href="' + PLT.url(g ? 'gacha/' : 'party/station?id=' + s.id) + '"><span class="vline__name">' + esc(s.name) + '</span><span class="vline__sub" style="display:block">' + (g ? esc(s.machines) + ' · ' + esc((G.shop || {}).statusLabel || '') : '최대 ' + s.max + '명 · ' + esc(s.gear.slice(0, 2).join(', '))) + '</span></a>' +
         '<a class="btn btn--s ' + (g ? 'btn--gacha' : 'btn--ghost') + '" href="' + PLT.url(g ? 'gacha/visit' : 'party/booking?station=' + s.id) + '">' + (g ? '가는 길' : '예약') + '</a></li>';
     }).join('');
   }
@@ -220,7 +220,7 @@
      ------------------------------------------------------------------ */
   function flywheel() {
     var host = $('#flywheel'); if (!host) return;
-    var steps = [['정거장이 늘어나요', '가챠샵·파티룸·SPOT·파트너'], ['회원이 늘어나요', '환승 쿠폰과 스탬프'], ['기록이 쌓여요', '판매·방문·입고 알림 수요'], ['고르는 근거가 생겨요', '상품 교체, 입지, 창업 손익'], ['파트너가 합류해요', '창업·입점·브랜드 제휴']];
+    var steps = [['정거장이 늘어나요', '가챠샵·파티룸·SPOT·파트너'], ['회원이 늘어나요', '스탬프와 커뮤니티'], ['기록이 쌓여요', '판매·방문·입고 알림 수요'], ['고르는 근거가 생겨요', '상품 교체, 입지, 창업 손익'], ['파트너가 합류해요', '창업·입점·브랜드 제휴']];
     var cx = 260, cy = 210, R = 150, n = steps.length, svg = '';
     var pt = function (i, r) { var a = -Math.PI / 2 + i * 2 * Math.PI / n; return [cx + r * Math.cos(a), cy + r * Math.sin(a)]; };
     svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + R + '" fill="none" stroke="var(--rule-2)" stroke-width="3" stroke-dasharray="3 9" stroke-linecap="round"/>';
@@ -251,6 +251,8 @@
     var P = window.PLT_PARTY || {}, PS = window.PLT_PASS || {};
     var passFaq = PS.faq || [];
     var groups = [['gacha', '가챠뽑기샵', (window.PLT_GACHA || {}).faq || []], ['party', '파티룸', P.faq || []], ['pass', 'PASS', passFaq]];
+    var hb = $('#helpParty'), B = P.booking || {};
+    if (hb && B.kakao) { hb.querySelectorAll('[data-kakao]').forEach(function (a) { a.setAttribute('href', B.kakao); }); var hh = $('[data-party-hours]', hb); if (hh) hh.textContent = B.hours || ''; }
     var cat = 'all', q = '';
     var cats = $('#faqCats');
     var draw = function () {
@@ -269,24 +271,21 @@
     $('#faqQ').addEventListener('input', PLT.debounce(function (e) { q = e.target.value.trim(); draw(); }, 150));
     draw();
 
-    var lk = $('#lookup'); PLT.bindPhone($('#lkPhone'));
-    lk.addEventListener('submit', function (e) {
-      e.preventDefault();
-      var out = $('#lookupOut'), btn = $('button', lk);
-      PLT.busy(btn, function () {
-        return PLT.db.findBooking($('#lkCode').value, $('#lkPhone').value).then(function (b) {
-          var st = PLT.station(b.stationId), t = PLT.party.time(b.timeId);
-          out.innerHTML = '<div class="ticket"><div class="ticket__head"><b>' + esc(st ? st.name : '') + '</b>' + (b.status === 'cancelled' ? '<span class="lb lb--err lb--s">취소됨</span>' : '<span class="lb lb--ok lb--s">확정</span>') + '</div>' +
-            '<div class="ticket__line"><span>예약번호</span><b>' + esc(b.code) + '</b></div><div class="ticket__line"><span>일시</span><b>' + esc(PLT.fmtMD(b.date) + ' ' + (t ? t.name : '')) + '</b></div><div class="ticket__line"><span>인원</span><b>' + b.people + '명</b></div><div class="ticket__line"><span>결제</span><b>' + PLT.won(b.quote.total) + '</b></div>' +
-            (b.status !== 'cancelled' ? '<button class="btn btn--ghost btn--block mt-m" type="button" id="lkCancel">예약 취소하기</button>' : '') + '</div>';
-          var c = $('#lkCancel'); if (c) c.addEventListener('click', function () {
-            PLT.confirm('예약을 취소할까요?', '환불 규정에 따라 처리돼요. 취소한 예약은 되돌릴 수 없어요.', '취소하기', 'btn--ink').then(function (yes) {
-              if (!yes) return; PLT.db.cancelBooking(b.id).then(function (x) { PLT.toast('예약을 취소했어요. 환불 ' + PLT.won(x.refund), 'ok'); lk.dispatchEvent(new Event('submit')); }, function (er) { PLT.toast(er.message, 'err'); });
-            });
-          });
-        }, function (er) { out.innerHTML = '<p class="note note--warn">' + esc(er.message) + '</p>'; });
+    /* 파티룸 예약 확인은 네이버 예약에서 — 예전 예약 조회 폼이 남아 있으면 그대로 동작해요 */
+    var lk = $('#lookup');
+    if (lk) {
+      PLT.bindPhone($('#lkPhone'));
+      lk.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var out = $('#lookupOut'), btn = $('button', lk);
+        PLT.busy(btn, function () {
+          return PLT.db.findBooking($('#lkCode').value, $('#lkPhone').value).then(function (b) {
+            var st = PLT.station(b.stationId);
+            out.innerHTML = '<div class="ticket"><div class="ticket__head"><b>' + esc(st ? st.name : '') + '</b></div><div class="ticket__line"><span>예약번호</span><b>' + esc(b.code) + '</b></div><div class="ticket__line"><span>날짜</span><b>' + esc(PLT.fmtMD(b.date)) + '</b></div><p class="t-small mt-s">예약 변경·취소는 쏘플파티룸 카카오톡으로 문의해 주세요.</p></div>';
+          }, function (er) { out.innerHTML = '<p class="note note--warn">' + esc(er.message) + '</p>'; });
+        });
       });
-    });
+    }
     var iq = $('#inq'); PLT.bindPhone($('#iqContact'));
     iq.addEventListener('submit', function (e) {
       e.preventDefault(); var d = PLT.formData(iq);

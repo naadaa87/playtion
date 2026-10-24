@@ -219,7 +219,7 @@
       sprites = TIERS.map(function (t, i) { return E.capsuleSprite(im[t.friend], t.r * (mode === 'narrow' ? 0.82 : 1), RING[i], { gold: !!t.gold }); });
       $('#mgBest').textContent = PLT.num(p.bests.merge ? p.bests.merge.score : 0);
       if (chal && chal.g === 'merge') { mode = chal.m || 'normal'; $('#mgChal').innerHTML = '<div class="arc-chal">' + ARC.avatar('flea', '', 34) + '<span><b>' + esc(chal.n) + '</b> 님의 도전장 · ' + PLT.num(chal.sc) + '점<br><small class="t-micro">같은 캡슐 순서로 겨뤄요. 끝나면 결과를 나란히 보여 드려요.</small></span></div>'; }
-      modes(); bindInput(); start(mode);
+      modes(); fit.resize(); E.toStage(); bindInput(); start(mode);
       /* 모드가 바뀌면 캡슐 크기도 바뀌므로 스프라이트를 다시 만든다 */
       PLT.$$('[data-mode]').forEach(function (b) { b.addEventListener('click', function () { sprites = TIERS.map(function (t, i) { return E.capsuleSprite(im[t.friend], tierR(i), RING[i], { gold: !!t.gold }); }); drawNext(); }); });
     });

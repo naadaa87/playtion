@@ -101,7 +101,7 @@
     var starsTxt = '★'.repeat(stars) + '☆'.repeat(3 - stars);
     var title = mode === 'daily' ? '오늘의 캡슐 정리 #' + ARC.dayNo() : '창고 정리 ' + stage + '단계';
     ARC.showResult(out, {
-      friend: 'tanuki', big: starsTxt, tag: title,
+      friend: 'tanuki', big: starsTxt, tag: title, retryLabel: mode === 'stage' ? '다음 단계' : '한 판 더',
       sub: movesN + '수 · ' + ARC.fmtTime(time) + ' · 기준 ' + par + '수' + (usedHint ? ' · 힌트 사용' : ''),
       onRetry: function () { chal = null; $('#stChal').innerHTML = ''; if (mode === 'stage') { stage++; } build(); modes(); },
       onChallenge: function () { var url = ARC.challengeLink(run, movesN, { st: stars }); ARC.share('너굴의 캡슐 정리', A.share.sort.replace('{no}', mode === 'daily' ? ARC.dayNo() : 'S' + stage).replace('{stars}', starsTxt).replace('{moves}', movesN).replace('{time}', ARC.fmtTime(time)), url); },
@@ -134,6 +134,6 @@
     $('#stUndo').addEventListener('click', undo); $('#stHint').addEventListener('click', hint); $('#stRestart').addEventListener('click', restart);
     document.addEventListener('keydown', function (e) { if (/^[1-8]$/.test(e.key)) tap(+e.key - 1); if (e.key === 'z') undo(); });
     if (chal && chal.g === 'sort') { mode = chal.m || 'daily'; if (chal.m === 'stage' && chal.st) stage = 1; $('#stChal').innerHTML = '<div class="arc-chal">' + ARC.avatar('tanuki', '', 34) + '<span><b>' + esc(chal.n) + '</b> 님의 도전장 · ' + chal.sc + '수' + (chal.st ? ' ' + '★'.repeat(chal.st) : '') + '<br><small class="t-micro">같은 문제예요. ' + chal.sc + '수 이하로 풀면 이겨요.</small></span></div>'; }
-    modes(); build();
+    modes(); build().then(function () { E.toStage(); });
   });
 })();

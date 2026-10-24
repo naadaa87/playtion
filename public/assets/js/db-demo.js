@@ -124,7 +124,7 @@
     /* ---------------- 회원 ---------------- */
     me: function () {
       var m = meRaw();
-      /* 생일 달 쿠폰 — 그해 한 번 */
+      /* 생일 달 코인 — 그해 한 번 */
       if (m && m.birth && /^\d{2}-\d{2}$/.test(m.birth) && +m.birth.slice(0, 2) === new Date().getMonth() + 1) {
         var y = String(new Date().getFullYear());
         if (!db.coupons.some(function (c) { return c.memberId === m.id && c.defId === 'birthday' && c.createdAt.slice(0, 4) === y; })) { issue(m.id, 'birthday', 'birthday'); save(); }
@@ -160,14 +160,14 @@
       };
       db.members[m.id] = m;
       PLT.ls.set(SKEY, m.id);
-      issue(m.id, 'welcomeParty', 'welcome'); issue(m.id, 'welcomeDraw', 'welcome');
+      issue(m.id, 'welcomeDraw', 'welcome');
       /* 같은 번호로 했던 비회원 예약 연결 */
       db.bookings.forEach(function (b) { if (!b.memberId && b.phone === phone) b.memberId = m.id; });
       db.regs.forEach(function (r) { if (!r.memberId && r.phone === phone) r.memberId = m.id; });
       /* 받은 선물 */
       db.gifts.forEach(function (g) { if (g.toPhone === phone && !g.claimedAt) { g.claimedAt = now(); ledger(m.id, { type: 'gift', coins: g.amount, memo: '선물 받은 코인' }); note(m.id, '선물이 도착했어요', PLT.coin(g.amount) + (g.message ? ' · ' + g.message : '')); } });
       PLT.ss.set('verified', '');
-      note(m.id, 'PASS에 오신 걸 환영해요', '첫 예약 할인과 온라인 뽑기 1회권을 넣어 뒀어요.', 'pass/me#coupons');
+      note(m.id, 'PASS에 오신 걸 환영해요', '가입 선물로 온라인 뽑기 1회권을 넣어 뒀어요.', 'pass/me#coupons');
       save();
       return ok(view(m));
     },

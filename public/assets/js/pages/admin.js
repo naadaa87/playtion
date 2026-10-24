@@ -1,5 +1,5 @@
 /* =====================================================================
-   PLAYTION — 운영 콘솔 (예약·회원·가챠 상태·입고·문의·상담·마켓·보관함·QR)
+   PLAYTION — 운영 콘솔 (회원·가챠 상태·입고·문의·상담·마켓·보관함·QR · 파티룸은 네이버 예약 바로가기)
    체험 모드 비밀번호는 data/site.js 의 demo.adminPin 입니다.
    실서비스에서는 Supabase 운영자 계정으로 로그인합니다.
    ===================================================================== */
@@ -59,63 +59,41 @@
   }
 
   /* 한눈에 보기 */
+  var NAVER_PARTNER = 'https://partner.booking.naver.com';
+  var partyLinks = function () {
+    var B = (window.PLT_PARTY || {}).booking || {};
+    return '<ul class="stack-s mt-s t-small">' + PLT.partyStations().map(function (st) {
+      var nv = st.naver || {};
+      return '<li><b>' + esc(st.short) + '</b> · ' + (nv.booking ? '<a class="link" href="' + esc(nv.booking) + '" target="_blank" rel="noopener">네이버 예약 화면</a>' : '네이버 예약 주소 없음') + (nv.place ? ' · <a class="link" href="' + esc(nv.place) + '" target="_blank" rel="noopener">지도</a>' : '') + '</li>';
+    }).join('') + '</ul><div class="row mt-m" style="gap:8px"><a class="btn btn--ink btn--s" href="' + NAVER_PARTNER + '" target="_blank" rel="noopener">네이버 예약 관리</a>' + (B.managerSite ? '<a class="btn btn--ghost btn--s" href="' + esc(B.managerSite.replace(/\/$/, '') + '/admin') + '" target="_blank" rel="noopener">' + esc(B.manager || '쏘플파티룸') + ' 관리</a>' : '') + '</div>';
+  };
   function dash(main) {
-    Promise.all([PLT.db.adminStats(), PLT.db.adminList('bookings')]).then(function (r) {
-      var s = r[0], today = PLT.ymd();
+    PLT.db.adminStats().then(function (s) {
       var bars = function (key, color) {
         var max = Math.max.apply(null, s.days.map(function (d) { return d[key]; }).concat([1]));
         return '<div class="bars" style="margin-bottom:26px">' + s.days.map(function (d) { return '<i style="height:' + Math.max(3, Math.round(d[key] / max * 100)) + '%;background:' + color + '" title="' + esc(PLT.fmtMD(d.date) + ' ' + d[key]) + '"><span>' + PLT.parseYmd(d.date).getDate() + '</span></i>'; }).join('') + '</div>';
       };
-      var todays = r[1].filter(function (b) { return b.date === today && b.status !== 'cancelled'; });
-      main.innerHTML = head('한눈에 보기', PLT.mode === 'demo' ? '체험 모드 숫자예요. 이 브라우저에서 만든 예약·가입·뽑기만 집계돼요.' : '') +
-        '<div class="kpis"><div class="kpi"><span>PASS 회원</span><b>' + PLT.num(s.members) + '</b></div><div class="kpi"><span>다가오는 예약</span><b>' + PLT.num(s.upcoming) + '</b><small>전체 ' + PLT.num(s.bookings) + '건</small></div><div class="kpi"><span>예약 결제 합계</span><b>' + won(s.revenue) + '</b></div><div class="kpi"><span>오늘 체크인</span><b>' + PLT.num(s.checkinsToday) + '</b></div>' +
-        '<div class="kpi"><span>온라인 뽑기</span><b>' + PLT.num(s.draws) + '개</b></div><div class="kpi"><span>남은 코인 (부채)</span><b>' + PLT.coin(s.coinsOutstanding) + '</b></div><div class="kpi"><span>환승률</span><b>' + s.transferRate + '%</b><small>파티룸·가챠 둘 다 이용한 회원</small></div><div class="kpi"><span>처리할 일</span><b>' + (s.leadsNew + s.inquiriesOpen + s.tradesOpen) + '</b><small>상담 ' + s.leadsNew + ' · 문의 ' + s.inquiriesOpen + ' · 거래 ' + s.tradesOpen + '</small></div></div>' +
-        '<div class="grid g3 mt-m"><div class="panel"><h2 class="t-h4">예약 (14일)</h2>' + bars('bookings', 'var(--party)') + '</div><div class="panel"><h2 class="t-h4">체크인 (14일)</h2>' + bars('checkins', 'var(--pass-rail)') + '</div><div class="panel"><h2 class="t-h4">새 회원 (14일)</h2>' + bars('members', 'var(--gacha-rail)') + '</div></div>' +
-        '<div class="panel mt-m"><h2 class="t-h4">오늘 예약 ' + todays.length + '건</h2>' + (todays.length ? '<ul class="stack-s mt-s t-small">' + todays.map(function (b) { return '<li><b>' + esc(stName(b.stationId)) + '</b> · ' + esc(PLT.party.label(b.timeId, b.startHour, b.hours)) + ' · ' + b.people + '명 · ' + esc(b.name || '') + ' ' + esc(PLT.phone.fmt(b.phone)) + '</li>'; }).join('') + '</ul>' : '<p class="t-small mt-s">오늘은 아직 없어요.</p>') + '</div>';
+      main.innerHTML = head('한눈에 보기', PLT.mode === 'demo' ? '체험 모드 숫자예요. 이 브라우저에서 만든 가입·체크인·뽑기만 집계돼요.' : '') +
+        '<div class="kpis"><div class="kpi"><span>PASS 회원</span><b>' + PLT.num(s.members) + '</b></div><div class="kpi"><span>오늘 체크인</span><b>' + PLT.num(s.checkinsToday) + '</b></div>' +
+        '<div class="kpi"><span>온라인 뽑기</span><b>' + PLT.num(s.draws) + '개</b></div><div class="kpi"><span>남은 코인 (부채)</span><b>' + PLT.coin(s.coinsOutstanding) + '</b></div><div class="kpi"><span>처리할 일</span><b>' + (s.leadsNew + s.inquiriesOpen + s.tradesOpen) + '</b><small>상담 ' + s.leadsNew + ' · 문의 ' + s.inquiriesOpen + ' · 거래 ' + s.tradesOpen + '</small></div></div>' +
+        '<div class="grid g3 mt-m"><div class="panel"><h2 class="t-h4">체크인 (14일)</h2>' + bars('checkins', 'var(--pass-rail)') + '</div><div class="panel"><h2 class="t-h4">새 회원 (14일)</h2>' + bars('members', 'var(--gacha-rail)') + '</div>' +
+        '<div class="panel panel--line-party"><h2 class="t-h4">파티룸 예약</h2><p class="t-small mt-s">예약은 네이버 예약으로 받고, 예약 관리와 문의는 쏘플파티룸에서 맡아요.</p>' + partyLinks() + '</div></div>';
     });
   }
 
-  /* 파티룸 예약 */
+  /* 파티룸 예약 — 네이버 예약으로 옮겼어요. 예전 홈페이지 예약 기록만 읽기용으로 남겨 둬요 */
   function bookings(main) {
-    var f = { st: '', from: PLT.ymd(), to: PLT.addDays(PLT.ymd(), 30), status: '' };
-    var draw = function () {
-      PLT.db.adminList('bookings').then(function (list) {
-        var rows = list.filter(function (b) { return (!f.st || b.stationId === f.st) && (!f.from || b.date >= f.from) && (!f.to || b.date <= f.to) && (!f.status || b.status === f.status); }).sort(function (a, b) { return a.date === b.date ? a.span[0] - b.span[0] : a.date < b.date ? -1 : 1; });
-        var stOpts = [['', '전 지점']].concat(PLT.partyStations().map(function (s) { return [s.id, s.short]; }));
-        var statusOpts = [['confirmed', '확정'], ['requested', '결제 대기'], ['done', '이용 완료'], ['noshow', '노쇼'], ['cancelled', '취소']];
-        main.innerHTML = head('파티룸 예약', '홈페이지 예약과 다른 채널 예약을 한 장부로 봐요. 다른 채널 예약을 넣어 두면 홈페이지에서 그 시간이 마감으로 보여요.', '<button class="btn btn--ghost btn--s" type="button" id="bkCsv">CSV</button><button class="btn btn--ink btn--s" type="button" id="bkAdd">다른 채널 예약 넣기</button>') +
-          '<div class="row" style="gap:8px">' + sel('st', stOpts, f.st, 'class="sel" style="width:auto;height:40px"') + '<input class="inp" type="date" id="bkFrom" value="' + f.from + '" style="width:auto;height:40px"><input class="inp" type="date" id="bkTo" value="' + f.to + '" style="width:auto;height:40px">' + sel('status', [['', '모든 상태']].concat(statusOpts), f.status, 'class="sel" style="width:auto;height:40px"') + '</div><div class="mt-m">' +
-          table(['날짜', '지점', '시간', '인원', '예약자', '채널', '금액', '상태'], rows.map(function (b) {
-            return [esc(PLT.fmtDate(b.date)), esc(stName(b.stationId)), esc(PLT.party.label(b.timeId, b.startHour, b.hours)), b.people + '명', esc(b.name || '') + '<br><span class="t-micro">' + esc(PLT.phone.fmt(b.phone)) + ' · ' + esc(b.code) + '</span>' + (b.memo ? '<br><span class="t-micro">메모: ' + esc(b.memo) + '</span>' : ''), esc(CH[b.channel] || b.channel || ''), won(b.quote ? b.quote.total : 0), sel('status', statusOpts, b.status, 'data-patch="' + b.id + '"')];
-          }), '조건에 맞는 예약이 없어요') + '</div>';
-        $$('[data-f="st"]', main)[0].addEventListener('change', function (e) { f.st = e.target.value; draw(); });
-        $$('[data-f="status"]', main)[0].addEventListener('change', function (e) { f.status = e.target.value; draw(); });
-        $('#bkFrom').addEventListener('change', function (e) { f.from = e.target.value; draw(); });
-        $('#bkTo').addEventListener('change', function (e) { f.to = e.target.value; draw(); });
-        bindPatch(main, 'bookings', draw);
-        $('#bkCsv').addEventListener('click', function () { csv('bookings', ['날짜', '지점', '타임', '시작', '시간', '인원', '이름', '전화', '예약번호', '채널', '결제', '보증금', '상태', '메모'], rows.map(function (b) { return [b.date, stName(b.stationId), b.timeId, b.startHour, b.hours, b.people, b.name, PLT.phone.fmt(b.phone), b.code, CH[b.channel] || b.channel, b.quote ? b.quote.pay : '', b.quote ? b.quote.deposit : '', b.status, b.memo]; })); });
-        $('#bkAdd').addEventListener('click', addModal);
-      });
-    };
-    var addModal = function () {
-      var m = PLT.modal({
-        wide: true, title: '다른 채널 예약 넣기', body: '<form id="axForm" novalidate><div class="fieldrow"><div class="field"><label class="lbl" for="axSt">지점</label><select class="sel" id="axSt">' + PLT.partyStations().map(function (s) { return '<option value="' + s.id + '">' + esc(s.short) + '</option>'; }).join('') + '</select></div><div class="field"><label class="lbl" for="axCh">채널</label><select class="sel" id="axCh"><option value="naver">네이버 예약</option><option value="spacecloud">스페이스클라우드</option><option value="phone">전화</option><option value="block">예약 막기 (청소·점검)</option></select></div></div>' +
-          '<div class="fieldrow"><div class="field"><label class="lbl" for="axDate">날짜</label><input class="inp" type="date" id="axDate" value="' + PLT.ymd() + '"></div><div class="field"><label class="lbl" for="axTime">타임</label><select class="sel" id="axTime">' + (window.PLT_PARTY.times || []).map(function (t) { return '<option value="' + t.id + '">' + esc(t.name) + '</option>'; }).join('') + '</select></div></div>' +
-          '<div class="fieldrow"><div class="field"><label class="lbl" for="axStart">시작 (시간제)</label><select class="sel" id="axStart">' + PLT.party.hourlyStarts().map(function (h) { return '<option value="' + h + '">' + PLT.pad(h) + ':00</option>'; }).join('') + '</select></div><div class="field"><label class="lbl" for="axHours">시간 (시간제)</label><input class="inp" type="number" id="axHours" min="2" max="8" value="2"></div></div>' +
-          '<div class="fieldrow"><div class="field"><label class="lbl" for="axName">예약자</label><input class="inp" id="axName"></div><div class="field"><label class="lbl" for="axPhone">전화</label><input class="inp" id="axPhone"></div></div>' +
-          '<div class="fieldrow"><div class="field"><label class="lbl" for="axPeople">인원</label><input class="inp" type="number" id="axPeople" min="1" max="30" value="4"></div><div class="field"><label class="lbl" for="axMemo">메모</label><input class="inp" id="axMemo"></div></div>' +
-          '<button class="btn btn--ink btn--block mt-m" type="submit">장부에 넣기</button></form>'
-      });
-      PLT.bindPhone($('#axPhone', m.el));
-      $('#axForm', m.el).addEventListener('submit', function (e) {
-        e.preventDefault();
-        var g = function (id) { return $('#' + id, m.el).value; };
-        PLT.busy($('button[type=submit]', m.el), function () {
-          return PLT.db.adminAddBooking({ stationId: g('axSt'), channel: g('axCh'), date: g('axDate'), timeId: g('axTime'), startHour: +g('axStart'), hours: +g('axHours'), name: g('axName'), phone: g('axPhone'), people: +g('axPeople'), memo: g('axMemo') }).then(function () { m.close(); PLT.toast('장부에 넣었어요.', 'ok'); draw(); });
-        });
-      });
-    };
-    draw();
+    PLT.db.adminList('bookings').then(function (list) {
+      var rows = (list || []).slice().sort(function (a, b) { return a.date < b.date ? 1 : a.date > b.date ? -1 : 0; });
+      main.innerHTML = head('파티룸 예약', '게임파티룸 예약은 네이버 예약으로 받아요. 예약 확인·변경·취소와 고객 문의는 네이버 예약 관리와 쏘플파티룸 관리 화면에서 처리해 주세요.') +
+        '<div class="panel panel--line-party"><h2 class="t-h4">지점별 네이버 예약</h2>' + partyLinks() + '</div>' +
+        (rows.length ? '<h2 class="t-h4 mt-l">예전 홈페이지 예약 기록</h2><p class="t-small mt-s">네이버 예약으로 옮기기 전에 홈페이지에서 받은 예약이에요. 새 예약은 여기에 쌓이지 않아요.</p><div class="mt-m">' +
+          table(['날짜', '지점', '인원', '예약자', '채널', '상태'], rows.map(function (b) {
+            return [esc(PLT.fmtDate(b.date)), esc(stName(b.stationId)), (b.people || 0) + '명', esc(b.name || '') + '<br><span class="t-micro">' + esc(PLT.phone.fmt(b.phone || '')) + ' · ' + esc(b.code || '') + '</span>', esc(CH[b.channel] || b.channel || ''), esc(b.status || '')];
+          }), '') + '</div>' : '');
+    }, function () {
+      main.innerHTML = head('파티룸 예약', '게임파티룸 예약은 네이버 예약으로 받아요.') + '<div class="panel panel--line-party"><h2 class="t-h4">지점별 네이버 예약</h2>' + partyLinks() + '</div>';
+    });
   }
 
   /* 회원 */

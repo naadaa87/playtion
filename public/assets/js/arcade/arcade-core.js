@@ -191,6 +191,7 @@
       }
     });
     if (!p.daily.all && p.daily.items.every(function (i) { return i.done; })) { p.daily.all = true; out.xp += X.dailyAll || 40; out.shards += SH.dailyAll || 10; out.notes.push('오늘의 퀘스트 완주 보너스'); }
+    if (dailyAfter) touchStreak(p, out);
     if (dailyAfter) p.weekly.items.forEach(function (it) { if (advance(it, { kind: 'dailyQuest' }, p, 'week')) weeklyDone(p, it, out); });
     p.weekly.items.forEach(function (it) { if (advance(it, ev, p, 'week')) weeklyDone(p, it, out); });
     if (!p.weekly.all && p.weekly.items.every(function (i) { return i.done; })) {
@@ -228,6 +229,11 @@
   ARC.meet = function (friendId, aff) { var p = ARC.me(), out = { xp: 0, shards: 0, quests: [], notes: [] }; var isNew = meet(p, friendId, out); if (aff) bumpAff(p, friendId, aff, out); if (out.cards && out.cards.length) applyEvent(p, { kind: 'card' }, out); finish(p, out); save(); return isNew; };
 
   /* ---------- 연속 출석 ---------- */
+  function markDay(p) {
+    var day = dayOf();
+    if (p.days.indexOf(day) < 0) { p.days.push(day); if (p.days.length > 90) p.days = p.days.slice(-90); }
+  }
+  /* 연속 출석은 '한 판 이상' 또는 '오늘의 퀘스트 하나' 로만 이어진다 (기획서 4.6) */
   function touchStreak(p, out) {
     var day = dayOf(), s = p.streak;
     if (s.last === day) return false;
@@ -236,7 +242,7 @@
     else if (s.last === y2 && s.shields > 0) { s.shields--; s.count++; s.usedShield = y; if (out) out.notes.push('어제는 다루 방석이 기록을 지켰어요'); }
     else s.count = 1;
     s.last = day; s.max = Math.max(s.max || 0, s.count);
-    if (p.days.indexOf(day) < 0) { p.days.push(day); if (p.days.length > 90) p.days = p.days.slice(-90); }
+    markDay(p);
     if (out) out.streak = { count: s.count, extended: true };
     if (s.count >= 2) bumpAff(p, 'daruma', 5, out);
     (A.streak.milestones || []).forEach(function (m) { if (s.count === m) { unlockTitle(p, m + '일 개근', out); if (out) out.notes.push(m + '일 연속 출석!'); } });
@@ -363,7 +369,7 @@
     if (kind === 'beat') p.stats.beats++;
     if (kind === 'deco') bumpAff(p, 'moonjar', 10, out);
     if (kind === 'story') { if (extra && p.stories.indexOf(extra) < 0) p.stories.push(extra); }
-    if (kind === 'visit') { var d = dayOf(); if (p.affDay.day !== d) { p.affDay.day = d; bumpAff(p, 'gachabot', 5, out); touchStreak(p, out); } else return out; }
+    if (kind === 'visit') { var d = dayOf(); if (p.affDay.day !== d) { p.affDay.day = d; bumpAff(p, 'gachabot', 5, out); markDay(p); } else return out; }
     if (kind === 'rank') { var dd = dayOf(); if (p.affDay.rank !== dd) { p.affDay.rank = dd; bumpAff(p, 'goblin', 3, out); } else return out; }
     applyEvent(p, { kind: kind }, out);
     if (out.cards && out.cards.length && kind !== 'card') applyEvent(p, { kind: 'card' }, out);
@@ -380,7 +386,7 @@
     for (var i = 0; i < A.dailyCapsule.length; i++) { acc += A.dailyCapsule[i].p; if (r < acc) { got = A.dailyCapsule[i]; break; } }
     p.capsule = { day: dayOf(), got: got.id };
     var out = { xp: 0, shards: got.shards, quests: [], notes: [] };
-    bumpAff(p, 'cat', 5, out); touchStreak(p, out);
+    bumpAff(p, 'cat', 5, out); markDay(p);
     applyEvent(p, { kind: 'capsule' }, out);
     if (out.cards && out.cards.length) applyEvent(p, { kind: 'card' }, out);
     finish(p, out); save();
@@ -546,7 +552,7 @@
       (ARC.isGuest() ? '<div class="arc-nudge"><b>이 기록, 랭킹에 올릴까요?</b> 전화번호 인증 한 번이면 지금 기록 그대로 PASS에 저장돼요. <a class="link" href="' + PLT.loginLink() + '">PASS 만들기</a></div>' : '') +
       '</div>';
     var actions = [
-      { label: '한 판 더', kind: 'btn--primary', onClick: function () { if (opt.onRetry) opt.onRetry(); } },
+      { label: opt.retryLabel || '한 판 더', kind: 'btn--primary', onClick: function () { if (opt.onRetry) opt.onRetry(); } },
       { label: '이 판으로 도전장', kind: 'btn--pass', keep: true, onClick: function () { if (opt.onChallenge) opt.onChallenge(); return false; } },
       { label: '랭킹 보기', kind: 'btn--ghost', onClick: function () { location.href = PLT.url('arcade/rank?g=' + out.game); } }
     ];

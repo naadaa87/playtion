@@ -17,7 +17,7 @@ window.PLT_PARTNER = {
   /* 함께하는 방식 (게이트웨이 첫 화면) */
   programs: [
     { id: "gacha", line: "gacha", title: "가챠샵 창업", who: "5평부터 시작하는 무인 캡슐토이 매장", href: "partner/gacha", points: ["최소 5평, 추천 10~30평", "기기 구매·렌탈·무상 설치 중 선택", "상품 공급과 온라인 판매 채널 연결"] },
-    { id: "party", line: "party", title: "게임파티룸 창업", who: "8개 직영 지점에서 다듬은 무인 파티룸", href: "partner/party", points: ["8~30인 규모별 표준 모델", "예약·출입·정산 자동화", "PASS 회원과 예약 채널 연결"] },
+    { id: "party", line: "party", title: "게임파티룸 창업", who: "직영 지점에서 다듬은 무인 파티룸", href: "partner/party", points: ["8~14인 규모별 표준 모델", "네이버 예약과 무인 입실 운영", "청소·점검 기준과 고객 응대 방식"] },
     { id: "spot", line: "pass", title: "SPOT · 공간 제휴", who: "카페·호텔·상가의 빈 코너, 비어 있는 1층", href: "partner/spot", points: ["2~5평, 15~30대 소형 가챠존", "기기·상품·운영은 플레이션이", "매출을 나누는 수익 배분형"] },
     { id: "network", line: "pass", title: "플레이션 파트너스 입점", who: "이미 운영 중인 가챠샵·파티룸·보드게임 카페", href: "partner/network", points: ["노선도와 지도에 매장 등록", "PASS 체크인·적립 연동", "재고·입고 알림 시스템"] },
     { id: "business", line: "biz", title: "기업 · 브랜드 · 작가", who: "단체 행사, 프로모션 캡슐, 콜라보", href: "partner/business", points: ["팀 빌딩·대관·체험존", "브랜드 캡슐과 매장 광고", "작가 캡슐 펀딩"] }
@@ -89,11 +89,11 @@ window.PLT_PARTNER = {
   party: {
     models: [
       { id: "s", name: "S 모델", people: "8~10인", area: "", pcs: "PC 5~6대", note: "역세권 소형 상가, 지하·2층도 가능" },
-      { id: "m", name: "M 모델", people: "14~16인", area: "", pcs: "PC 8~10대", note: "대학가·회식 상권의 표준 모델" },
-      { id: "l", name: "L 모델", people: "24~30인", area: "", pcs: "PC 6~8대 + 단상·홀덤", note: "단체·MT·행사 수요가 있는 넓은 공간" }
+      { id: "m", name: "M 모델", people: "12~14인", area: "", pcs: "PC 8대 + 노래방·홀덤", note: "대학가·회식 상권의 표준 모델" },
+      { id: "l", name: "L 모델", people: "20인 이상", area: "", pcs: "PC 8대 이상 + 단상·홀덤", note: "단체·MT 수요가 있는 넓은 공간. 직영점보다 큰 규모라 상담에서 함께 설계해요" }
     ],
     auto: [
-      { step: "예약·결제", customer: "플랫폼·자사 채널에서 예약", system: "확정 즉시 알림톡과 도어락 비밀번호 자동 발송" },
+      { step: "예약·결제", customer: "네이버 예약에서 예약·결제", system: "예약 확정 후 보증금 안내, 입금이 확인되면 입실 안내 문자 발송" },
       { step: "입실·이용", customer: "예약 시간에 입장", system: "조명·냉난방 자동 제어, PC 원격 관리" },
       { step: "퇴실", customer: "정리 후 퇴실", system: "퇴실 10분 전 알림, CCTV로 상태 확인" },
       { step: "청소·정비", customer: "—", system: "청소 매니저 호출, 점검 결과를 장부에 기록" }

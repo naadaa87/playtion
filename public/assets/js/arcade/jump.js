@@ -100,8 +100,9 @@
     s.flags.forEach(function (fl) {
       var fy = H - 80 - fl.v * PX_PER_M; if (fy < s.cam - 40 || fy > s.cam + H + 40) return;
       ctx.setLineDash([6, 6]); ctx.strokeStyle = fl.ghost ? 'rgba(17,17,17,.3)' : '#063BCC'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(0, fy); ctx.lineTo(W, fy); ctx.stroke(); ctx.setLineDash([]);
-      ctx.fillStyle = fl.ghost ? '#6F6C67' : '#063BCC'; E.rr(ctx, 8, fy - 22, 14 + fl.nick.length * 13, 20, 4); ctx.fill();
-      E.text(ctx, fl.nick + ' ' + fl.v + 'm', 14, fy - 7, { size: 12, color: '#fff', weight: 800 });
+      var lab = fl.nick + ' ' + fl.v + 'm'; ctx.font = '800 12px "Noto Sans KR",sans-serif';
+      ctx.fillStyle = fl.ghost ? '#6F6C67' : '#063BCC'; E.rr(ctx, 8, fy - 22, Math.ceil(ctx.measureText(lab).width) + 14, 20, 4); ctx.fill();
+      E.text(ctx, lab, 15, fy - 7, { size: 12, color: '#fff', weight: 800 });
     });
     /* 발판 */
     s.plats.forEach(function (p) { if (p.broken) return; E.drawMachine(ctx, p.x, p.y, p.w, 22, p.col, { spring: p.kind === 's', crack: p.kind === 'b' }); if (p.kind === 'm') { ctx.fillStyle = '#111'; ctx.fillRect(p.x + p.w / 2 - 8, p.y + 20, 16, 3); } });
@@ -188,7 +189,7 @@
     return E.loadImages({ rabbit: ARC.img('rabbit') }).then(function (im) {
       imgs = im;
       if (chal && chal.g === 'jump') { $('#jpChal').innerHTML = '<div class="arc-chal">' + ARC.avatar('rabbit', '', 34) + '<span><b>' + esc(chal.n) + '</b> 님의 도전장 · ' + chal.sc + 'm<br><small class="t-micro">같은 발판 배치로 겨뤄요. 더 높이 오르면 이겨요.</small></span></div>'; }
-      modes(); bindInput(); start(mode);
+      modes(); fit.resize(); E.toStage(); bindInput(); start(mode);
     });
   });
 })();
