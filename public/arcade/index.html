@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>플레이션 오락실 | 설치 없이 하는 무료 캡슐 웹게임</title>
+<meta name="description" content="캡슐에서 나온 친구들과 3분만 놀다 가요. 캡슐 머지, 캡슐 정리, 토토 점프. 레벨을 올리고 퀘스트를 깨고 이번 주 랭킹에 오르는 플레이션 오락실.">
+<link rel="canonical" href="https://playtion.kr/arcade/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="플레이션 PLAYTION">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:title" content="플레이션 오락실 | 설치 없이 하는 무료 캡슐 웹게임">
+<meta property="og:description" content="캡슐에서 나온 친구들과 3분만 놀다 가요. 캡슐 머지, 캡슐 정리, 토토 점프. 레벨을 올리고 퀘스트를 깨고 이번 주 랭킹에 오르는 플레이션 오락실.">
+<meta property="og:url" content="https://playtion.kr/arcade/">
+<meta property="og:image" content="https://playtion.kr/assets/img/og/og-main.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#FFFFFF">
+<meta name="color-scheme" content="only light">
+<meta name="format-detection" content="telephone=no">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700;900&display=swap">
+<link rel="stylesheet" href="../assets/css/plt.css?v=20261024-seo01">
+<link rel="alternate" type="application/rss+xml" title="플레이션 매거진" href="https://playtion.kr/rss.xml">
+<link rel="stylesheet" href="../assets/css/arcade.css?v=20261024-seo01">
+
+<script type="application/ld+json" data-seo="breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://playtion.kr/"},{"@type":"ListItem","position":2,"name":"오락실","item":"https://playtion.kr/arcade/"}]}</script>
+</head>
+<body class="sec-gacha sec-arcade page-arcade-lobby" data-root="../" data-section="arcade" data-page="arcade">
+<a class="skip" href="#main">본문으로 건너뛰기</a>
+<div id="plt-topbar"></div>
+<header class="hd"><div class="wrap hd__in">
+  <a class="logo" href="../" aria-label="플레이션 홈"><img class="logo__mark" src="../assets/img/brand/symbol.svg" alt="" width="29" height="40"><img class="logo__word" src="../assets/img/brand/wordmark.svg" alt="플레이션" width="90" height="30"></a>
+  <nav class="gnb" aria-label="주 메뉴">
+    <a href="../gacha/"><span class="dot dot--gacha"></span>가챠뽑기샵</a>
+    <a href="../party/"><span class="dot dot--party"></span>게임파티룸</a>
+    <a href="../community/"><span class="dot dot--cm"></span>커뮤니티</a>
+    <a href="../arcade/" aria-current="page"><span class="dot dot--arc"></span>오락실</a>
+    <a href="../pass/"><span class="dot dot--pass"></span>PASS</a>
+    <a href="../partner/"><span class="dot dot--biz"></span>창업·제휴</a>
+  </nav>
+  <div class="hd__right">
+    <span data-auth-slot><a class="hd__pass" href="../pass/login"><span class="avatar">P</span><span class="lbl">로그인</span></a></span>
+    <a class="btn btn--primary btn--s hd__cta" href="../party/booking">파티룸 예약</a>
+    <button class="hd__menu" id="hdMenu" type="button" aria-label="전체 메뉴 열기" aria-expanded="false" aria-controls="drawer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+  </div>
+</div></header>
+<nav class="subnav arc-sub" aria-label="오락실 메뉴" id="arcNav"></nav>
+<main id="main">
+
+<section class="arc-hero" aria-labelledby="arcTitle">
+  <div class="wrap arc-hero__in">
+    <div>
+      <p class="rp-eyebrow"><i class="rp-capsule rp-capsule--yellow"></i>PLAYTION ARCADE</p>
+      <h1 class="t-h1" id="arcTitle">플레이션 <span class="rp-pop rp-pop--red">오락실</span></h1>
+      <p class="t-lead mt-s">캡슐에서 나온 친구들이 오락기를 하나씩 열어 뒀어요. 가입 없이 바로 한 판, 3분이면 충분해요. 기록을 지키고 싶어지면 그때 PASS에 담으면 돼요.</p>
+      <div id="arcMe" class="mt-m"></div>
+      <div class="arc-row2" id="arcTiles"></div>
+    </div>
+    <div class="arc-hero__art">
+      <img src="../assets/img/arcade/town.webp" alt="플레이션 캡슐 타운 — 오락기와 가챠 기계가 늘어선 작은 마을" width="1200" height="1200">
+      <div class="arc-hero__bub" id="arcBub"><img src="../assets/img/arcade/ch/s/gachabot.webp" alt=""><span>처음이면 내가 길을 알려 줄게. 아래 오락기 아무거나 눌러 봐!</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="band band--tight" aria-labelledby="cabTitle">
+  <div class="wrap">
+    <div class="sec-head"><div><p class="rp-eyebrow"><i class="rp-capsule"></i>오락기</p><h2 class="t-h2" id="cabTitle">오늘은 어떤 걸 해 볼까</h2><p class="t-lead">세 대가 열려 있어요. 나머지는 친구들이 준비하는 중이에요.</p></div><a class="sec-head__more" href="rank">이번 주 랭킹</a></div>
+    <div class="arc-cabs" id="arcCabs"></div>
+  </div>
+</section>
+
+<section class="band band--tight band--mist" aria-labelledby="qTitle">
+  <div class="wrap arc-side">
+    <div>
+      <h2 class="t-h3" id="qTitle">오늘 할 일</h2>
+      <div id="arcQuests"></div>
+      <div id="arcWeekly" class="mt-m"></div>
+    </div>
+    <div>
+      <div class="arc-mini"><div class="arc-mini__head"><span>이번 주 트로피</span><a href="rank?g=trophy">전체 보기</a></div><div id="arcRank"></div></div>
+      <div class="arc-mini"><div class="arc-mini__head"><span>캡슐 도감</span><a href="dex">도감 열기</a></div><div class="arc-dexbar" id="arcDex"></div><p class="t-micro mt-s" id="arcDexNote"></p></div>
+      <div class="arc-mini"><div class="arc-mini__head"><span>캡슐 타운 이야기</span></div><p class="t-small">건대 가챠뽑기샵에는 기계 600대가 줄지어 서 있어요. 문을 닫고 불이 꺼지면 기계 안쪽 깊은 곳, 캡슐 타운에 하나둘 불이 켜져요. 손님이 한 판 할 때마다 타운에 불빛이 하나씩 더 켜진답니다.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="band band--tight" aria-labelledby="ruleTitle">
+  <div class="wrap">
+    <h2 class="t-h3" id="ruleTitle">오락실 약속</h2>
+    <div class="g3 mt-m">
+      <div class="panel panel--s panel--line-gacha"><b>돈으로 이기는 장치가 없어요</b><p class="t-small mt-s">별조각은 돈으로 살 수 없고 코인·포인트로 바뀌지도 않아요. 순위는 실력과 꾸준함으로만 바뀌어요.</p></div>
+      <div class="panel panel--s panel--line-party"><b>기록이 쌓이면 회원이 돼요</b><p class="t-small mt-s">게스트로 시작해도 돼요. PASS에 가입하면 지금까지 기록이 그대로 합쳐지고 랭킹에 이름이 올라가요.</p></div>
+      <div class="panel panel--s panel--line-pass"><b>붙잡지 않아요</b><p class="t-small mt-s">오늘의 퀘스트는 10분이면 끝나고, XP는 하루 상한이 있어요. 내일 또 오는 게 목표예요.</p></div>
+    </div>
+  </div>
+</section>
+
+<!--seo:related--><section class="band mg-rel" aria-labelledby="mgRelTitle"><div class="wrap"><div class="sec-head"><div><span class="lb lb--all lb--s">PLAYTION MAGAZINE</span><h2 class="t-h2 mt-s" id="mgRelTitle">함께 읽어 보세요</h2></div><a class="sec-head__more" href="../magazine/">매거진 전체</a></div><div class="mg-cards"><a class="mg-card" href="../magazine/capsule-web-games"><div class="mg-card__ph"><img src="../assets/img/scenes/scene-jump.webp" alt="" loading="lazy" width="1600" height="900"></div><div class="mg-card__body"><span class="lb lb--pass lb--s">오락실</span><b class="mg-card__t">설치 없이 바로 하는 캡슐 웹게임, 플레이션 오락실</b><span class="mg-card__d">앱을 깔지 않아도 휴대폰 브라우저에서 바로 하는 플레이션 오락실. 같은 캡슐을 합치는 캡슐 머지, 매일 아침 새 문제가 나오는 캡슐 정리, 위로 뛰어오르는 토토 점프를 소개해요.</span></div></a></div></div></section><!--/seo:related-->
+</main>
+
+<footer class="ft"><div class="wrap">
+  <div class="ft__top">
+    <div class="ft__brand">
+      <a class="logo" href="../"><img class="logo__mark" src="../assets/img/brand/symbol.svg" alt="" width="29" height="40" loading="lazy"><img class="logo__word" src="../assets/img/brand/wordmark-w.svg" alt="플레이션" width="90" height="30" loading="lazy"></a>
+      <p>가챠뽑기샵과 게임파티룸, 플레이션은 즐거움을 파는 곳이에요. 작은 캡슐, 큰 즐거움. PLAY · COLLECT · SHARE</p>
+      <div class="ft__tel"><a href="tel:1544-3523" data-site="company.phone">1544-3523</a></div>
+      <p class="t-small" style="margin-top:4px">상담 <span data-site="hours.cs">평일 10:00 – 19:00</span> · 예약 24시간</p>
+      <div class="row" style="margin-top:14px;gap:8px">
+        <a class="btn btn--ghost btn--s" data-site-href="channels.kakao" href="#" hidden target="_blank" rel="noopener">카카오톡 채널</a>
+        <a class="btn btn--ghost btn--s" data-site-href="channels.instagram" href="#" hidden target="_blank" rel="noopener">인스타그램</a>
+        <a class="btn btn--ghost btn--s" data-site-href="channels.youtube" href="#" hidden target="_blank" rel="noopener">유튜브</a>
+      </div>
+    </div>
+    <div class="ft__col"><h4><span class="dot dot--gacha"></span>가챠뽑기샵</h4><a href="../gacha/">가챠뽑기샵 홈</a><a href="../gacha/products">상품 찾기</a><a href="../gacha/online">온라인 뽑기</a><a href="../gacha/club">컬렉터 클럽</a></div>
+    <div class="ft__col"><h4><span class="dot dot--party"></span>게임파티룸</h4><a href="../party/">파티룸 홈</a><a href="../party/stations">지점 비교</a><a href="../party/sinchon">신촌 게임파티룸</a><a href="../party/prices">요금·패키지</a><a href="../party/booking">예약하기</a><a href="../party/guide">이용안내</a></div>
+    <div class="ft__col"><h4><span class="dot dot--cm"></span>커뮤니티</h4><a href="../community/">자랑하기</a><a href="../community/market">교환 판매</a><a href="../community/inbox">문의함</a><a href="../community/me">내 활동</a><a href="../community/guide">이용 안내</a></div>
+    <div class="ft__col"><h4><span class="dot dot--pass"></span>PASS</h4><a href="../pass/">PASS 소개</a><a href="../pass/me">내 PASS</a><a href="../pass/wallet">충전·PASS+·선물</a><a href="../pass/login">로그인·가입</a></div>
+    <div class="ft__col"><h4><span class="dot dot--biz"></span>플레이션</h4><a href="../brand">브랜드 이야기</a><a href="../magazine/">매거진</a><a href="../arcade/">오락실</a><a href="../stations">전 지점</a><a href="../news">소식·혜택</a><a href="../platform">플랫폼 소개</a><a href="../partner/">창업·제휴</a><a href="../help">고객센터</a><a href="../family">패밀리 사이트</a></div>
+  </div>
+  <nav class="ft__family" aria-label="패밀리 사이트">
+    <div class="ft__family-head"><h4>패밀리 사이트</h4><a href="../family">전체 보기</a></div>
+    <ul><li><a href="https://ssople.com" target="_blank" rel="noopener" data-family="ssople"><b>쏘플파티룸</b><small>전국 무인 파티룸</small></a></li><li><a href="https://megaspot.kr" target="_blank" rel="noopener" data-family="megaspot"><b>메가스팟</b><small>대형 공간 대관</small></a></li><li><a href="https://socialfactory.co.kr" target="_blank" rel="noopener" data-family="socialfactory"><b>소셜팩토리</b><small>세미나실 · 코워킹</small></a></li><li><a href="https://hellomingle.kr" target="_blank" rel="noopener" data-family="mingle"><b>밍글</b><small>무인 디저트카페</small></a></li><li><a href="https://vacancy.co.kr" target="_blank" rel="noopener" data-family="gongbaek"><b>공백 공간백서</b><small>공실개발</small></a></li><li><a href="https://orbis-estate.com" target="_blank" rel="noopener" data-family="orbis"><b>오르비스 부동산 중개법인</b><small>상가 · 빌딩 중개</small></a></li><li><a href="https://coremood.kr" target="_blank" rel="noopener" data-family="coremood"><b>코어무드</b><small>공간 브랜딩 · 인테리어</small></a></li><li><a href="https://choisijun.com" target="_blank" rel="noopener" data-family="choisijun"><b>최시준</b><small>공간사업가</small></a></li><li><a href="https://yeodeol.kr" target="_blank" rel="noopener" data-family="yeodeol"><b>여덟글자</b><small>오늘의 색 · 감정 기록</small></a></li></ul>
+  </nav>
+  <div class="ft__biz">
+    <div>
+      <span>상호 <span data-site="company.name">주식회사 블랭크</span></span>
+      <span>대표 <span data-site="company.ceo">최시준</span></span>
+      <span data-site-wrap>사업자등록번호 <span data-site="company.regNo" data-site-hide>161-86-03494</span></span>
+      <span data-site-wrap>통신판매업 신고 <span data-site="company.mailOrderNo" data-site-hide></span></span>
+      <span data-site-wrap>주소 <span data-site="company.address" data-site-hide>서울특별시 강남구 영동대로 602, 6층 제트71 (삼성동, 삼성동 미켈란 107)</span></span><br>
+      <span>전화 <span data-site="company.phone">1544-3523</span></span>
+      <span>이메일 <span data-site="company.email">spaceblank0100@gmail.com</span></span>
+      <span data-site-wrap>개인정보 보호책임자 <span data-site="company.privacyOfficer" data-site-hide>최시준 (대표)</span></span>
+      <span>호스팅 <span data-site="company.hosting">Cloudflare, Inc.</span></span>
+    </div>
+    <div class="ft__legal"><a href="../terms">이용약관</a><a href="../privacy"><b>개인정보처리방침</b></a><span style="margin-left:14px">© 2026 PLAYTION</span></div>
+  </div>
+</div></footer>
+<nav class="tabbar" aria-label="빠른 메뉴">
+  <a href="../"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-6 8 6v8a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1z"/></svg><span>홈</span></a>
+  <a href="../gacha/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M4 12h16"/><circle cx="12" cy="12" r="2.2"/></svg><span>가챠뽑기샵</span></a>
+  <a href="../community/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-10a3.9 3.9 0 0 1 7-2.3A3.9 3.9 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg><span>커뮤니티</span></a>
+  <a href="../party/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="11" rx="4"/><path d="M8 10v5M5.5 12.5h5"/><circle cx="15.5" cy="11.5" r="1"/><circle cx="18" cy="14" r="1"/></svg><span>파티룸</span></a>
+  <button type="button" id="tabMore"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span>전체</span></button>
+</nav>
+<div class="drawer" id="drawer"><div class="drawer__bg" data-drawer-x></div><nav class="drawer__panel" aria-label="전체 메뉴">
+  <div class="drawer__top"><a class="logo" href="../"><img class="logo__mark" src="../assets/img/brand/symbol.svg" alt="" width="29" height="40"><img class="logo__word" src="../assets/img/brand/wordmark.svg" alt="플레이션" width="90" height="30"></a><button class="modal__x" style="position:static" type="button" data-drawer-x aria-label="메뉴 닫기"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="row drawer__cta" style="margin-bottom:12px"><a class="btn btn--primary" href="../gacha/">가챠뽑기샵</a><a class="btn btn--party" href="../party/booking">파티룸 예약</a></div>
+  <div class="drawer__group"><h3><span class="dot dot--gacha"></span>가챠뽑기샵</h3><a href="../gacha/">가챠뽑기샵 홈</a><a href="../gacha/products">상품 찾기</a><a href="../gacha/calendar">입고 캘린더</a><a href="../gacha/online">온라인 뽑기</a><a href="../community/market">교환 판매</a><a href="../gacha/club">컬렉터 클럽</a><a href="../gacha/visit">방문 안내</a></div>
+  <div class="drawer__group"><h3><span class="dot dot--party"></span>게임파티룸</h3><a href="../party/">파티룸 홈</a><a href="../party/stations">지점 비교</a><a href="../party/sinchon">신촌 게임파티룸</a><a href="../party/prices">요금·패키지</a><a href="../party/booking">예약하기</a><a href="../party/guide">이용안내</a></div>
+  <div class="drawer__group"><h3><span class="dot dot--cm"></span>커뮤니티</h3><a href="../community/">자랑하기</a><a href="../community/market">교환 판매</a><a href="../community/write">자랑 올리기</a><a href="../community/inbox">문의함</a><a href="../community/me">내 활동</a><a href="../community/guide">이용 안내</a></div>
+  <div class="drawer__group"><h3><span class="dot dot--arc"></span>오락실</h3><a href="../arcade/">오락실 로비</a><a href="../arcade/merge">캡슐 머지</a><a href="../arcade/sort">캡슐 정리</a><a href="../arcade/jump">토토 점프</a><a href="../arcade/rank">랭킹</a><a href="../arcade/dex">도감</a><a href="../arcade/quests">퀘스트·업적</a></div>
+  <div class="drawer__group"><h3><span class="dot dot--pass"></span>PASS 멤버십</h3><a href="../pass/">PASS 소개</a><a href="../pass/me">내 PASS</a><a href="../pass/collection">컬렉션 북</a><a href="../pass/wallet">충전·PASS+·선물</a><a href="../pass/login">로그인·가입</a></div>
+  <div class="drawer__group"><h3><span class="dot dot--biz"></span>플레이션</h3><a href="../brand">브랜드 이야기</a><a href="../magazine/">매거진</a><a href="../stations">전 지점 노선도</a><a href="../news">소식·혜택·행사</a><a href="../platform">플랫폼 소개</a><a href="../partner/">창업·제휴</a><a href="../help">고객센터</a><a href="../family">패밀리 사이트</a></div>
+</nav></div>
+<script src="../data/site.js?v=20261024-seo01"></script>
+<script src="../data/stations.js?v=20261024-seo01"></script>
+<script src="../data/party.js?v=20261024-seo01"></script>
+<script src="../data/gacha.js?v=20261024-seo01"></script>
+<script src="../data/community.js?v=20261024-seo01"></script>
+<script src="../data/pass.js?v=20261024-seo01"></script>
+<script src="../data/news.js?v=20261024-seo01"></script>
+<script src="../data/arcade.js?v=20261024-seo01"></script>
+<script src="../assets/js/vendor/qrcode.js?v=20261024-seo01"></script>
+<script src="../assets/js/core.js?v=20261024-seo01"></script>
+<script src="../assets/js/arcade/arcade-core.js?v=20261024-seo01"></script>
+<script src="../assets/js/arcade/engine.js?v=20261024-seo01"></script>
+<script src="../assets/js/arcade/lobby.js?v=20261024-seo01"></script>
+</body>
+</html>

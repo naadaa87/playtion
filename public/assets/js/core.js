@@ -399,11 +399,28 @@
   PLT.stations = window.PLT_STATIONS || [];
   PLT.station = function (id) { return PLT.stations.filter(function (s) { return s.id === id; })[0]; };
   PLT.partyStations = function () { return PLT.stations.filter(function (s) { return s.type === 'party'; }); };
-  PLT.naverMap = function (s) { return 'https://map.naver.com/p/search/' + encodeURIComponent(s.listed || s.name); };
+  /* 지점 페이지 주소 — 게임파티룸은 /party/<slug>, 가챠샵은 방문 안내 */
+  PLT.stationUrl = function (s) { if (!s) return PLT.url('stations'); if (s.type === 'gacha') return PLT.url('gacha/visit'); return PLT.url('party/' + (s.slug || ('station?id=' + s.id))); };
+  PLT.naverMap = function (s) { return (s.naver && s.naver.place) || 'https://map.naver.com/p/search/' + encodeURIComponent(s.listed || s.name); };
   PLT.kakaoMap = function (s) { return 'https://map.kakao.com/link/search/' + encodeURIComponent(s.addr || s.name); };
 
   var P = window.PLT_PARTY || {};
   PLT.party = {
+    /* ---- 네이버 예약 (지금 쓰는 방식) ---- */
+    booking: P.booking || {},
+    kakao: function () { return (P.booking && P.booking.kakao) || ''; },
+    plan: function (id) { return (P.plans || []).filter(function (x) { return x.id === id; })[0] || { id: id, name: id }; },
+    /* 요금 칸: 0 월~목 · 1 금 · 2 토 · 3 일 */
+    dayCol: function (date) { var d = PLT.dow(date); return d === 0 ? 3 : d === 6 ? 2 : d === 5 ? 1 : 0; },
+    pkg: function (st, id) { return ((st && st.pkgs) || []).filter(function (k) { return k.id === id; })[0]; },
+    priceOn: function (st, id, date) { var k = PLT.party.pkg(st, id); if (!k) return null; var v = k.p[PLT.party.dayCol(date)]; return v == null ? null : v; },
+    /* 지점에서 가장 싼 패키지 요금 */
+    from: function (st) { var min = 0; ((st && st.pkgs) || []).forEach(function (k) { (k.p || []).forEach(function (v) { if (v && (!min || v < min)) min = v; }); }); return min; },
+    /* 네이버 예약 주소 — 패키지 → 지점 전체 → 네이버 지도 검색 순서 */
+    naverUrl: function (st, id) { var k = id ? PLT.party.pkg(st, id) : null; return (k && k.url) || (st && st.naver && st.naver.booking) || (st && st.naverBooking) || (st ? PLT.naverMap(st) : ''); },
+    base: function (st) { return (st && st.base) || P.basePeople || 4; },
+
+    /* ---- 아래는 예전 홈페이지 직접 예약용 (지금은 화면에서 쓰지 않아요) ---- */
     time: function (id) { return (P.times || []).filter(function (t) { return t.id === id; })[0]; },
     isWeekendRate: function (date, timeId) { var d = PLT.dow(date); return d === 0 || d === 6 || (d === 5 && timeId === 'night'); },
     /* 예약 구간 [start, end) — 시 단위, 다음 날 새벽은 24 이상 */
@@ -584,7 +601,7 @@
     return {
       version: VER,
       stations: (window.PLT_STATIONS || []).map(function (s) { return { id: s.id, code: s.code, type: s.type, name: s.name, short: s.short, max: s.max || 0, status: s.status }; }),
-      party: pick(P0, ['times', 'basePeople', 'extraPerPerson', 'deposit', 'happyHour', 'offPeak', 'options', 'packages']),
+      party: pick(P0, ['booking', 'plans', 'basePeople', 'extraPerPerson', 'deposit', 'extraHour']),
       pass: pick(S0, ['levels', 'xp', 'stamps', 'points', 'coupons', 'transfer', 'plus', 'coins', 'gift']),
       gacha: { series: (G0.series || []).map(function (s) { return { id: s.id, name: s.name, price: s.price, lineup: s.lineup, online: !!s.online, onlineStock: s.onlineStock || 0 }; }), online: G0.online || {}, market: pick(G0.market || {}, ['feeRate', 'feeMin']) }
     };
@@ -738,21 +755,27 @@
     });
   }
   PLT.helperAnswers = function () {
-    var t = function (id) { var x = PLT.party.time(id); return x ? x : { wd: 0, we: 0 }; };
     var link = function (p, l) { return ' <a href="' + PLT.url(p) + '">' + l + '</a>'; };
+    var ext = function (u, l) { return u ? ' <a href="' + esc(u) + '" target="_blank" rel="noopener">' + l + '</a>' : ''; };
+    var B = P.booking || {};
+    var kakao = ext(B.kakao, '쏘플파티룸 카카오톡 상담');
+    var froms = PLT.partyStations().filter(function (x) { return x.status !== 'closed'; }).map(function (x) { return PLT.party.from(x); }).filter(Boolean);
+    var minFrom = froms.length ? Math.min.apply(null, froms) : 0;
+    var names = PLT.partyStations().filter(function (x) { return x.status !== 'closed'; }).map(function (x) { return x.short; });
     return [
       { label: '가챠뽑기샵', keys: ['가챠', '캡슐', '뽑기', '입고', '재고'], html: '건대 한아름 건물 1층에 600대 규모로 준비 중이에요. 상품 찾기에서 기기 위치와 재고를, 입고 캘린더에서 신상 일정을 볼 수 있어요.' + link('gacha/', '가챠뽑기샵 보기') },
       { label: '자랑·교환 판매', keys: ['자랑', '커뮤니티', '교환', '판매', '중복', '문의함', '하트', '댓글', '사진'], html: '뽑은 캡슐과 피규어를 사진으로 올려 자랑하고, 중복은 회원끼리 교환하거나 판매할 수 있어요. 결제와 배송은 회원끼리 직접 정하고 플레이션은 글과 문의함만 제공해요.' + link('community/', '자랑하기') + link('community/market', '교환 판매') },
-      { label: '예약 방법', keys: ['예약', '방법', '어떻게'], html: '지점, 날짜, 타임, 인원을 고르면 바로 금액이 보여요. 예약이 확정되면 알림톡으로 도어락 비밀번호가 와요.' + link('party/booking', '예약하러 가기') },
-      { label: '요금', keys: ['요금', '가격', '얼마', '비용', '올나잇', '밤타임', '낮타임', '시간제'], html: '시간제 ' + PLT.won(t('hourly').wd) + '/시간(주말 ' + PLT.won(t('hourly').we) + '), 낮타임 ' + PLT.won(t('day').wd) + '(주말 ' + PLT.won(t('day').we) + '), 밤타임·올나잇 ' + PLT.won(t('night').wd) + '(금·토 ' + PLT.won(t('night').we) + ')이에요. 기본 4인, 추가 1인당 ' + PLT.won(P.extraPerPerson) + '이에요.' + link('party/prices', '요금 자세히') },
-      { label: '지점 위치', keys: ['위치', '주소', '지점', '어디', '역'], html: '신촌 1·2·3호점, 영등포, 사당, 건대 미니, 건대구의, 구리까지 8개 지점과 건대 가챠샵이 있어요.' + link('stations', '전 지점 보기') },
-      { label: 'PASS 혜택', keys: ['PASS', '패스', '멤버십', '포인트', '스탬프', '쿠폰', '등급', '환승'], html: '전화번호 하나로 가입하면 첫 예약 10,000원 할인과 온라인 뽑기 1회권을 드려요. 파티룸을 예약하면 가챠 코인, 가챠샵에 세 번 오면 파티룸 쿠폰이 나오는 환승 혜택도 있어요.' + link('pass/', 'PASS 보기') },
-      { label: '환불 규정', keys: ['환불', '취소', '변경'], html: '이용 7일 전까지 100%, 5일 전 70%, 3일 전 50% 환불돼요. 2일 전부터는 환불이 어렵지만 3일 전까지 요청하면 일정 변경 1회가 가능해요.' + link('party/guide', '이용안내') },
+      { label: '예약 방법', keys: ['예약', '방법', '어떻게', '네이버'], html: '게임파티룸 예약은 네이버 예약에서 받아요. 지점과 패키지(낮·밤·올데이)를 고르면 그 지점의 네이버 예약 화면으로 넘어가고, 결제와 확정도 거기서 해요. 예약 관리와 문의는 쏘플파티룸 고객센터가 함께 맡고 있어요.' + link('party/booking', '예약하러 가기') + kakao },
+      { label: '요금', keys: ['요금', '가격', '얼마', '비용', '올나잇', '올데이', '밤', '낮', '패키지'], html: '지점과 요일(월~목·금·토·일)마다 달라요. 낮·밤·올데이 패키지가 있고 ' + PLT.won(minFrom) + '부터예요. 기준 4명, 추가 1인당 ' + PLT.won(P.extraPerPerson) + '이고 청소 보증금 ' + PLT.won(P.deposit) + '은 이용 후 돌려드려요.' + link('party/prices', '지점별 요금표') },
+      { label: '지점 위치', keys: ['위치', '주소', '지점', '어디', '역'], html: '게임파티룸은 ' + names.join(', ') + ' 이렇게 ' + names.length + '곳이고, 건대에 가챠뽑기샵이 있어요.' + link('stations', '전 지점 보기') },
+      { label: 'PASS 혜택', keys: ['PASS', '패스', '멤버십', '포인트', '스탬프', '쿠폰', '등급'], html: '전화번호 하나로 가입하면 온라인 뽑기 1회권을 드려요. 가챠샵 체크인 스탬프, 플레이 코인, 생일 코인, 커뮤니티 활동이 한 장의 PASS에 쌓여요. 파티룸은 네이버 예약으로 받고 있어 PASS 할인은 적용되지 않아요.' + link('pass/', 'PASS 보기') },
+      { label: '환불 규정', keys: ['환불', '취소', '변경', '보증금'], html: '이용일 8일 전까지 취소하면 전액 환불되고, 7일 전부터는 환불이 어려워요. 당일 예약은 취소·환불이 안 돼요. 확인·변경·취소는 네이버 앱의 예약 내역에서 해요. 청소 보증금은 이용일 다음 주 수요일 무렵 돌려드려요.' + link('party/guide', '이용안내') },
       { label: '창업 문의', keys: ['창업', '가맹', '입점', '제휴', '투자', '공실'], html: '가챠샵 창업은 5평부터, 추천 10~30평이고 평당 50~70만 원(냉난방기·간판 별도)이에요. 파티룸 창업, SPOT 제휴, 입점도 한곳에서 상담해요.' + link('partner/', '창업·제휴 보기') },
-      { label: '주차', keys: ['주차', '차'], html: '건대구의점은 무료 주차 1대가 가능하고, 다른 지점은 가까운 공영주차장을 권해 드려요.' },
-      { label: '미성년자', keys: ['미성년', '청소년', '학생', '나이'], html: '만 19세 미만은 22시 이후(밤타임·올나잇) 파티룸 이용이 어렵고, 낮 시간 이용은 보호자 동의가 필요해요. 가챠샵은 누구나 이용할 수 있어요.' },
-      { label: '음식 반입', keys: ['음식', '배달', '취사', '요리', '술', '주류'], html: '전 지점 배달 음식 반입이 돼요. 신촌 2·3호점, 사당, 구의, 구리, 영등포는 인덕션으로 요리도 할 수 있어요.' },
-      { label: '분실물', keys: ['분실', '두고', '잃어'], html: '고객센터나 카카오톡 채널로 알려 주세요. 분실물은 30일 동안 보관해요.' },
+      { label: '주차', keys: ['주차', '차'], html: '게임파티룸은 모두 건물 주차가 안 돼요. 지점 안내에 가까운 공영·민영주차장을 적어 뒀어요.' + link('party/stations', '지점 안내') },
+      { label: '미성년자', keys: ['미성년', '청소년', '학생', '나이'], html: '미성년자끼리는 게임파티룸 낮·올데이 패키지만 이용할 수 있고, 전원 보호자 동의서(손글씨 서명)가 필요해요. 가챠샵은 누구나 이용할 수 있어요.' },
+      { label: '음식 반입', keys: ['음식', '배달', '취사', '요리', '술', '주류'], html: '모든 지점에서 배달 음식과 외부 음식 반입이 돼요. 신촌 2·3호점은 인덕션으로 요리도 할 수 있어요.' },
+      { label: '분실물', keys: ['분실', '두고', '잃어'], html: '파티룸에 두고 온 물건은 쏘플파티룸 카카오톡이나 1544-3523으로 알려 주세요. 분실물은 30일 동안 보관해요.' + kakao },
+      { label: '파티룸 문의', keys: ['문의', '상담', '카톡', '카카오', '쏘플', '도어락', '비밀번호', '입실', '세금계산서', '영수증'], html: '플레이션 게임파티룸의 예약 관리와 고객 문의는 쏘플파티룸 고객센터가 함께 맡고 있어요. 상담 시간은 ' + esc(B.hours || '') + '이에요.' + kakao + ' <a href="tel:' + esc(B.phone || '') + '">' + esc(B.phone || '') + '</a>' },
       { label: '대관·다른 공간', keys: ['대관', '세미나', '행사', '워크숍', '워크샵', '단체', '스터디', '회의', '강의', '코워킹', '사무실', '디저트', '카페', '200명', '100명', '50명'], html: '게임 없이 파티만 한다면 전국 120여 곳의 쏘플파티룸, 30명이 넘는 행사는 건대 한아름 건물 2층 메가스팟(최대 200명), 세미나·스터디·코워킹은 같은 건물 4층 소셜팩토리가 맞아요. 디저트와 동네 모임은 24시간 무인카페 밍글에서.' + link('family', '패밀리 사이트 보기') },
       { label: '상가·인테리어', keys: ['상가', '점포', '부동산', '임대', '매물', '상권', '인테리어', '브랜딩', '간판', '시공', '빌딩'], html: '가게 자리와 상권분석은 오르비스 부동산 중개법인, 오래 비어 있는 상가를 살리는 일은 공백 공간백서, 브랜딩과 인테리어는 코어무드가 도와요. 가챠뽑기샵·게임파티룸 창업은 플레이션 창업·제휴에서 상담해요.' + link('family#build', '공간을 여는 사람들') },
       { label: '온라인 뽑기', keys: ['온라인', '보관함', '배송', '수령'], html: '온라인으로 뽑은 상품은 PASS 보관함에 담겨요. 건대 가챠샵에서 무료로 받거나 배송을 신청할 수 있어요.' + link('gacha/online', '온라인 뽑기') }

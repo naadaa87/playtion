@@ -2088,3 +2088,174 @@ a.fm-route:hover .fm-route__go { background: var(--pass); }
 }
 /* 운영 콘솔 머리글이 좁은 화면에서 넘치지 않게 */
 @media (max-width: 560px) { .sec-admin .hd__in { gap: 8px; } .sec-admin #admMode { display: none; } .sec-admin .logo__word { display: none; } .sec-admin .hd__right { margin-left: auto; } }
+
+/* ---------- 게임파티룸: 네이버 예약 · 쏘플파티룸 카카오톡 (2026-10-24) ---------- */
+/* 카카오톡 버튼 — 카카오 노랑, 말풍선 아이콘 */
+.btn.btn--kakao { background: #FEE500; color: #191919; border-color: var(--ink); }
+.btn.btn--kakao:hover { background: #F2D900; color: #191919; }
+.btn--kakao::before { content: ""; width: 18px; height: 18px; flex: none; background: currentColor; -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 4C6.9 4 3 7.1 3 11c0 2.5 1.6 4.6 4.1 5.9l-.9 3.3c-.1.3.3.6.6.4l3.9-2.6c.4 0 .9.1 1.3.1 5.1 0 9-3.1 9-7s-3.9-7.1-9-7.1z'/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 4C6.9 4 3 7.1 3 11c0 2.5 1.6 4.6 4.1 5.9l-.9 3.3c-.1.3.3.6.6.4l3.9-2.6c.4 0 .9.1 1.3.1 5.1 0 9-3.1 9-7s-3.9-7.1-9-7.1z'/%3E%3C/svg%3E") center / contain no-repeat; }
+
+/* 지점 요금표 — 패키지 × 요일 */
+.ptab { min-width: 520px; }
+.ptab th, .ptab td { vertical-align: middle; }
+.ptab th[scope="row"] b { display: block; font-weight: 800; color: var(--ink); }
+.ptab .pt-hrs { display: block; margin-top: 2px; font-size: 12.5px; font-weight: 600; color: var(--ink-3); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.ptab td.t-num { font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ptab .is-on { background: var(--party-soft); }
+.ptab thead th.is-on { color: var(--party-deep); }
+.ptab .pt-on { display: block; font-size: 11px; font-weight: 700; color: var(--party); letter-spacing: 0; }
+.ptab td:last-child .btn { margin: 0; }
+
+/* 패키지 카드의 지점별 이용 시간 */
+.pt-hrs-list { display: flex; flex-direction: column; gap: 3px; }
+.pt-hrs-list small { margin-left: 4px; font-size: 12px; font-weight: 600; color: var(--ink-3); }
+
+/* 요금 페이지 — 지점별 요금표 */
+.pt-prices { display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; }
+.pt-prices > * { min-width: 0; }
+.pt-price { padding: 22px 24px; background: #fff; }
+.pt-price__head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; margin-bottom: 14px; }
+.pt-price .row .btn { margin: 0; }
+@media (max-width: 560px) { .pt-price { padding: 18px 14px; } }
+
+/* 쏘플파티룸 상담 안내 상자 */
+.pt-contact { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 16px; padding: 18px 20px; border: 2px solid var(--ink); border-radius: 16px; background: #FFFBE0; }
+.pt-contact b { display: block; font-weight: 800; line-height: 1.45; }
+.pt-contact p { margin-top: 4px; }
+.pt-contact .btn { margin: 0; }
+.book__aside .pt-contact { flex-direction: column; align-items: stretch; }
+.book__aside .pt-contact .row { justify-content: flex-start; }
+
+/* 파티룸 홈 — 지점 골라 바로 예약 */
+.pt-nb { border: 2.5px solid var(--ink); border-radius: 20px; background: #fff; padding: 22px 24px; box-shadow: 5px 5px 0 var(--party); }
+.pt-nb__head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 10px 16px; margin-bottom: 16px; }
+.pt-nb__head b { display: block; font-size: clamp(19px, 2vw, 23px); font-weight: 800; letter-spacing: -0.03em; }
+.pt-nb__head .t-small { display: block; margin-top: 2px; color: var(--ink-3); }
+.pt-nb__head .btn { margin: 0; }
+.pt-nb__list { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.pt-quick { position: relative; display: flex; flex-direction: column; gap: 4px; padding: 16px 44px 16px 16px; border: 2px solid var(--ink); border-radius: 14px; background: var(--paper, #fff); color: var(--ink); text-decoration: none; transition: transform .12s var(--ease), box-shadow .12s var(--ease), background .15s var(--ease); }
+.pt-quick .code { align-self: flex-start; }
+.pt-quick b { font-size: 17px; font-weight: 800; letter-spacing: -0.02em; }
+.pt-quick small { font-size: 13px; font-weight: 600; color: var(--ink-3); }
+.pt-quick svg { position: absolute; right: 14px; top: 16px; color: var(--party); }
+.pt-quick:hover { background: var(--party-soft); transform: translate(-2px, -2px); box-shadow: 3px 3px 0 var(--ink); }
+@media (max-width: 960px) { .pt-nb__list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .pt-nb { padding: 18px 14px; box-shadow: 4px 4px 0 var(--party); } .pt-nb__list { gap: 10px; } .pt-quick { padding: 14px 36px 14px 12px; } .pt-quick b { font-size: 15.5px; } .pt-quick svg { right: 10px; top: 14px; } }
+
+/* 예약 화면 — 네이버 예약 다음 순서 */
+.pt-next { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 10px; counter-reset: ptn; }
+.pt-next li { position: relative; display: flex; flex-direction: column; gap: 2px; padding: 12px 14px 12px 52px; border: 2px solid var(--ink); border-radius: 12px; background: #fff; counter-increment: ptn; }
+.pt-next li::before { content: counter(ptn); position: absolute; left: 12px; top: 12px; width: 28px; height: 28px; border-radius: 50%; background: var(--party); color: #fff; font-weight: 800; font-size: 14px; display: grid; place-items: center; }
+.pt-next b { font-weight: 800; }
+.pt-next span { font-size: 14px; color: var(--ink-2); }
+/* 휴대폰에서는 요금표를 화면 폭에 맞추고, 줄마다 있는 예약 버튼 대신 아래 네이버 예약 버튼을 써요 */
+.pt-go-m { display: none; }
+@media (max-width: 560px) {
+  .ptab { min-width: 0; }
+  .ptab .pt-go { display: none; }
+  .ptab th, .ptab td { padding-left: 5px; padding-right: 5px; font-size: 13.5px; }
+  .ptab .pt-hrs { white-space: normal; font-size: 11.5px; }
+  .ptab th[scope="row"] { width: 30%; }
+  .pt-go-m { display: inline-flex; }
+}
+/* ---------- 오락실 메뉴 점 (2026.10.24) ---------- */
+.dot--arc { background: conic-gradient(var(--pass) 0 50%, var(--gacha) 50% 100%); }
+.gnb .dot--arc, .drawer__group .dot--arc, .ft__col .dot--arc { border: 1.5px solid var(--ink); box-sizing: border-box; }
+/* 푸터 사업자 정보 — 주소처럼 긴 값은 좁은 화면에서 줄을 바꿔요 */
+.ft__biz > div { min-width: 0; max-width: 100%; }
+.ft__biz span:has(> [data-site="company.address"]), .ft__biz [data-site="company.address"] { white-space: normal; }
+.ft__biz [data-site="company.address"] { margin-right: 0; }
+
+/* ---------- 검색 노출: 매거진 · 지점 페이지 · 신촌 모아보기 (2026.10.24) ---------- */
+/* 경로(빵부스러기) */
+.bc { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 14px; font-size: 13px; font-weight: 600; color: var(--ink-3); }
+.bc a { color: var(--ink-2); text-decoration: none; }
+.bc a:hover { color: var(--ink); text-decoration: underline; }
+.bc span[aria-hidden] { color: var(--rule-2); }
+
+/* 매거진 글 */
+.mg-hero { padding: 40px 0 8px; background: #fff; }
+.mg-title { margin-top: 14px; font-size: clamp(28px, 4.2vw, 44px); line-height: 1.22; font-weight: 900; letter-spacing: -0.04em; color: var(--ink); word-break: keep-all; }
+.mg-lead { margin-top: 14px; font-size: clamp(16px, 1.6vw, 18.5px); line-height: 1.7; color: var(--ink-2); word-break: keep-all; }
+.mg-meta { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 16px; font-size: 13px; font-weight: 600; color: var(--ink-3); }
+.mg-meta > * + *::before { content: "·"; margin-right: 14px; color: var(--rule-2); }
+.mg-wrap { padding-bottom: 56px; }
+.mg-cover { margin: 24px 0 0; border: 2.5px solid var(--ink); border-radius: 20px; overflow: hidden; box-shadow: 6px 6px 0 var(--party); background: var(--mist-2); }
+.mg-cover img { display: block; width: 100%; height: auto; max-height: 520px; object-fit: cover; }
+.mg-toc { margin-top: 28px; padding: 18px 20px; border: 2px solid var(--ink); border-radius: 16px; background: var(--mist); }
+.mg-toc b { display: block; font-size: 13px; font-weight: 800; letter-spacing: .02em; color: var(--ink-3); }
+.mg-toc ol { margin: 8px 0 0; padding-left: 20px; display: grid; gap: 4px; }
+.mg-toc a { color: var(--ink); font-weight: 700; text-decoration: none; }
+.mg-toc a:hover { text-decoration: underline; }
+.mg-body { margin-top: 28px; font-size: 16.5px; line-height: 1.85; color: var(--ink-2); word-break: keep-all; overflow-wrap: anywhere; }
+.mg-body > * + * { margin-top: 16px; }
+.mg-body h2 { margin-top: 44px; font-size: clamp(21px, 2.4vw, 26px); line-height: 1.35; font-weight: 900; letter-spacing: -0.035em; color: var(--ink); scroll-margin-top: 90px; }
+.mg-body h3 { margin-top: 28px; font-size: 18px; line-height: 1.45; font-weight: 800; letter-spacing: -0.02em; color: var(--ink); }
+.mg-body h4 { margin-top: 24px; font-size: 16.5px; line-height: 1.5; font-weight: 800; color: var(--ink); }
+.st-more .mg-body h3, .mg-body h3[id] { margin-top: 40px; font-size: clamp(19px, 2.1vw, 22px); font-weight: 900; letter-spacing: -0.03em; }
+.mg-body h2 + *, .mg-body h3 + *, .mg-body h4 + * { margin-top: 10px; }
+.mg-body b { color: var(--ink); font-weight: 800; }
+.mg-body ul, .mg-body ol { padding-left: 22px; display: grid; gap: 6px; }
+.mg-body ul { list-style: disc; }
+.mg-body ol { list-style: decimal; }
+.mg-toc ol { list-style: decimal; }
+.mg-body li::marker { color: var(--party); font-weight: 800; }
+.mg-body .tbl-scroll { border: 2px solid var(--ink); border-radius: 14px; background: #fff; }
+.mg-body .tbl { width: 100%; font-size: 14.5px; line-height: 1.55; }
+.mg-body .tbl th, .mg-body .tbl td { padding: 10px 12px; vertical-align: top; }
+.mg-body .tbl thead th { background: var(--mist); }
+.mg-body .mg-tbl { word-break: keep-all; }
+.mg-body .mg-tbl th, .mg-body .mg-tbl td { min-width: 76px; }
+.mg-body .mg-tbl tbody th { min-width: 88px; }
+.mg-body .tbl tbody th { white-space: nowrap; color: var(--ink); }
+.mg-body .ptab td, .mg-body .ptab th { vertical-align: middle; }
+.mg-tip { padding: 16px 18px 16px 20px; border: 2px solid var(--ink); border-left-width: 8px; border-left-color: var(--pass); border-radius: 14px; background: #FFFBE0; }
+.mg-tip__t { display: block; color: var(--ink); font-weight: 800; }
+.mg-tip p { margin-top: 4px; font-size: 15px; }
+.mg-fig { margin: 24px 0 0; }
+.mg-fig img { display: block; width: 100%; height: auto; border: 2px solid var(--ink); border-radius: 16px; }
+.mg-fig figcaption { margin-top: 8px; font-size: 13px; color: var(--ink-3); }
+.mg-stcards { margin-top: 20px; }
+.mg-kw { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 28px; font-size: 13px; color: var(--ink-3); }
+.mg-kw > span:first-child { margin-right: 4px; font-weight: 700; }
+.cmp-tbl th[scope="col"] { white-space: nowrap; }
+.cmp-tbl td, .cmp-tbl th { padding: 10px 12px; }
+.cmp-y { color: var(--party-deep); font-weight: 800; }
+
+/* 글 끝 안내 상자 */
+.mg-cta { margin-top: 40px; padding: 22px 22px 24px; border: 2.5px solid var(--ink); border-radius: 20px; background: #fff; box-shadow: 5px 5px 0 var(--ink); }
+.mg-cta--party { box-shadow: 5px 5px 0 var(--party); }
+.mg-cta--gacha { box-shadow: 5px 5px 0 var(--gacha); }
+.mg-cta--biz { box-shadow: 5px 5px 0 var(--biz); }
+.mg-cta__head b { display: block; margin-top: 10px; font-size: 20px; line-height: 1.4; font-weight: 900; letter-spacing: -0.03em; color: var(--ink); }
+.mg-cta__head p { margin-top: 6px; font-size: 14.5px; color: var(--ink-2); }
+.mg-cta .pt-nb__list { margin-top: 16px; }
+.mg-cta .btn { margin: 0; }
+@media (max-width: 560px) { .mg-cta { padding: 18px 14px 20px; } .mg-body { font-size: 16px; } .mg-hero { padding-top: 28px; } }
+
+/* 글 카드 */
+.mg-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+.mg-card { display: flex; flex-direction: column; border: 2px solid var(--ink); border-radius: 18px; overflow: hidden; background: #fff; color: var(--ink); text-decoration: none; transition: transform .12s var(--ease), box-shadow .12s var(--ease); }
+.mg-card:hover { transform: translate(-2px, -2px); box-shadow: 4px 4px 0 var(--ink); }
+.mg-card__ph { aspect-ratio: 16 / 10; overflow: hidden; background: var(--mist-2); border-bottom: 2px solid var(--ink); }
+.mg-card__ph img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.mg-card__body { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; padding: 14px 16px 18px; }
+.mg-card__t { font-size: 17px; line-height: 1.4; font-weight: 800; letter-spacing: -0.03em; word-break: keep-all; }
+.mg-card__d { font-size: 13.5px; line-height: 1.6; color: var(--ink-3); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+@media (max-width: 960px) { .mg-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .mg-cards { grid-template-columns: minmax(0, 1fr); gap: 14px; } }
+.mg-rel { background: #fff; }
+
+/* 매거진 첫 화면 */
+.mg-index-hero .chips { flex-wrap: wrap; }
+.mg-lead-card { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); border: 2.5px solid var(--ink); border-radius: 22px; overflow: hidden; background: #fff; color: var(--ink); text-decoration: none; box-shadow: 6px 6px 0 var(--party); }
+.mg-lead-card__ph { min-height: 260px; background: var(--mist-2); }
+.mg-lead-card__ph img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.mg-lead-card__body { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 12px; padding: 28px; border-left: 2.5px solid var(--ink); }
+.mg-lead-card__body b { font-size: clamp(22px, 2.6vw, 30px); line-height: 1.3; font-weight: 900; letter-spacing: -0.04em; word-break: keep-all; }
+.mg-lead-card__body p { color: var(--ink-2); line-height: 1.65; }
+@media (max-width: 760px) { .mg-lead-card { grid-template-columns: minmax(0, 1fr); } .mg-lead-card__ph { min-height: 0; aspect-ratio: 16 / 9; } .mg-lead-card__body { border-left: 0; border-top: 2.5px solid var(--ink); padding: 20px 16px; } }
+
+/* 지점 페이지 아래 자세한 안내 */
+.st-more { background: #fff; }
+.st-more .mg-body { margin-top: 16px; }
