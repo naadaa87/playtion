@@ -4,6 +4,7 @@ seoTitle: 가챠 뜻 — 캡슐토이·가챠샵 처음 가는 사람을 위한 
 description: 가챠는 동전을 넣고 손잡이를 돌리면 캡슐에 든 장난감이 랜덤으로 나오는 뽑기예요. 가챠라는 말이 어디서 왔는지, 요즘 가챠샵이 왜 늘었는지, 처음 갔을 때 무엇부터 고르면 좋은지 정리했어요.
 category: gacha
 keywords: [가챠 뜻, 가챠샵, 캡슐토이, 가챠 뽑기, 가샤폰, 캡슐토이 매장]
+updated: 2026-10-29
 date: 2026-10-24
 image: gacha/wall-collect.webp
 imageAlt: 캡슐토이 기계가 벽면 가득 늘어선 가챠샵 모습
@@ -46,7 +47,7 @@ related: [kondae-gacha-shop, gacha-duplicate-trade, gacha-shop-startup-cost]
 
 ## 플레이션 건대 가챠뽑기샵
 
-플레이션은 건대입구 한아름 건물 1층에 캡슐토이 기기 {{machines}} 규모의 가챠뽑기샵을 준비하고 있어요({{gachaStatus}} 예정). 매장을 네 구역으로 나누고 개봉대, 촬영 자리, 빈 캡슐 반납함을 두어 처음 오는 사람도 편하게 고를 수 있게 만들고 있어요. 자세한 내용은 [건대 가챠샵 소개 글](/magazine/kondae-gacha-shop)과 [방문 안내](/gacha/visit)에 있어요.
+플레이션은 건대입구 한아름 건물 1층에서 캡슐토이 기기 {{machines}} 규모의 가챠뽑기샵을 운영해요. 2026년 10월에 문을 열었어요. 매장을 네 구역으로 나누고 개봉대, 촬영 자리, 빈 캡슐 반납함을 두어 처음 오는 사람도 편하게 고를 수 있게 했어요. 자세한 내용은 [건대 가챠샵 소개 글](/magazine/kondae-gacha-shop)과 [방문 안내](/gacha/visit)에 있어요.
 
 ## 자주 묻는 질문
 
