@@ -338,7 +338,7 @@
      ------------------------------------------------------------------ */
   function calendarPage() {
     if (PLT.page !== 'calendar') return;
-    var gd = $('#gachaDay'); if (gd) gd.textContent = (G.shop || {}).gachaDay ? '매주 ' + G.shop.gachaDay + ' 입고' : '정기 입고 요일은 오픈 후 안내해요';
+    var gd = $('#gachaDay'); if (gd) gd.textContent = (G.shop || {}).gachaDay ? '매주 ' + G.shop.gachaDay + ' 입고' : '정기 입고 요일은 곧 안내해요';
     var now = PLT.parseYmd(PLT.ymd()), y = now.getFullYear(), m = now.getMonth();
     var pm = /^(\d{4})-(\d{2})$/.exec(PLT.param('month') || ''); if (pm) { y = +pm[1]; m = +pm[2] - 1; }
     arrivalsAll().then(function (list) {
@@ -596,7 +596,7 @@
   function visitPage() {
     if (PLT.page !== 'visit') return;
     var sh = G.shop || {}, S = PLT.S;
-    var later = '<span class="t-muted">오픈 전 확정되면 알려 드려요</span>';
+    var later = '<span class="t-muted">곧 이 화면에 올려 드릴게요</span>';
     $('#visitInfo').innerHTML = '<dt>주소</dt><dd>' + esc(SHOP.addr) + '</dd><dt>가는 길</dt><dd>' + esc(SHOP.near) + '</dd><dt>상태</dt><dd><b>' + esc(dday() || sh.statusLabel || '') + '</b></dd><dt>운영 시간</dt><dd>' + (sh.hours ? esc(sh.hours) : later) + '</dd><dt>입고 요일</dt><dd>' + (sh.gachaDay ? '매주 ' + esc(sh.gachaDay) : later) + '</dd><dt>결제</dt><dd>' + esc(sh.payment || '') + '</dd>' + (sh.staffHours ? '<dt>직원 응대</dt><dd>' + esc(sh.staffHours) + '</dd>' : '') + (sh.holiday ? '<dt>휴무</dt><dd>' + esc(sh.holiday) + '</dd>' : '') + (sh.parking ? '<dt>주차</dt><dd>' + esc(sh.parking) + '</dd>' : '') + '<dt>문의</dt><dd><a class="link" href="tel:' + esc(S.company.phone) + '">' + esc(S.company.phone) + '</a></dd>';
     $('#vNaver').href = PLT.naverMap(SHOP); $('#vKakao').href = PLT.kakaoMap(SHOP);
     firstSteps();

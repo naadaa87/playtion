@@ -55,6 +55,35 @@
   }
 
   /* ------------------------------------------------------------------
+     상단 빠른 상담 (이름·연락처만 받는 짧은 양식, 각 페이지 HTML 에 들어 있어요)
+     ------------------------------------------------------------------ */
+  function quickLead() {
+    $$('[data-lead-quick]').forEach(function (f) {
+      var phone = $('[name=phone]', f); if (phone) PLT.bindPhone(phone);
+      f.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var d = PLT.formData(f), nm = $('[name=name]', f), ag = $('[name=agree]', f), sel = $('select', f);
+        var kind = d.kind || f.getAttribute('data-kind') || 'general';
+        if (sel && sel.name === 'kind' && !d.kind) { PLT.fieldError(sel, '어떤 상담인지 골라 주세요.'); sel.focus(); return; }
+        if (sel) PLT.fieldError(sel, '');
+        if (!d.name) { PLT.fieldError(nm, '이름을 적어 주세요.'); nm.focus(); return; }
+        PLT.fieldError(nm, '');
+        if (!PLT.phone.valid(d.phone)) { PLT.fieldError(phone, '연락처를 확인해 주세요.'); phone.focus(); return; }
+        PLT.fieldError(phone, '');
+        if (!ag.checked) { PLT.toast('개인정보 수집·이용에 동의해 주세요.', 'err'); ag.focus(); return; }
+        var note = sel && sel.name === 'pick' && d.pick ? ' ' + sel.getAttribute('data-label') + ': ' + d.pick : '';
+        var lead = { kind: kind, name: d.name, phone: d.phone, region: d.region || '', company: d.company || '', hasSpace: d.hasSpace || '', message: '[상단 빠른 상담]' + note };
+        PLT.busy($('button[type=submit]', f), function () {
+          return PLT.db.lead(lead).then(function () {
+            PLT.track('generate_lead', { kind: kind, form: 'quick' });
+            f.innerHTML = '<div class="lq__done"><span class="lb lb--ok">신청 완료</span><div><b class="lq__title">상담 신청을 받았어요</b><p class="t-small mt-s">영업일 ' + ((PT.contact || {}).responseDays || 2) + '일 안에 ' + esc(PLT.phone.fmt(d.phone)) + '로 연락드릴게요. 더 자세한 내용을 미리 알려 주시려면 <a class="link" href="#apply">아래 신청서</a>에 남겨 주세요.</p></div></div>';
+          });
+        });
+      });
+    });
+  }
+
+  /* ------------------------------------------------------------------
      게이트웨이
      ------------------------------------------------------------------ */
   function programs() {
@@ -208,6 +237,6 @@
   }
 
   PLT.ready.then(function () {
-    leadForm(); if (PLT.page === 'home') programs(); gachaPage(); partyPage(); networkPage(); businessPage(); portal();
+    leadForm(); quickLead(); if (PLT.page === 'home') programs(); gachaPage(); partyPage(); networkPage(); businessPage(); portal();
   });
 })();

@@ -26,14 +26,14 @@
    ===================================================================== */
 window.PLT_STATIONS = [
   {
-    id: "kd-gacha", code: "G01", type: "gacha", status: "soon",
+    id: "kd-gacha", code: "G01", type: "gacha", status: "open",
     name: "플레이션 건대 가챠샵", short: "건대 가챠샵", area: "건대", areaEn: "Konkuk Univ.",
     listed: "플레이션 가챠",
     district: "서울 광진구", addr: "서울특별시 광진구 화양동 10-1, 건대 한아름 건물 1층",
     near: "건대입구역 일대 · 빨간 외벽과 노란 간판",
     machines: "600대 이상",
     gear: ["캡슐토이 600대 이상", "개봉대", "최애 촬영소", "빈 캡슐 반납함"],
-    desc: "서울에서 손꼽히는 규모로 준비 중인 캡슐토이 매장이에요. 매주 새 캡슐이 들어오고, 기기마다 붙은 QR로 재고와 입고 알림을 확인할 수 있어요.",
+    desc: "서울에서 손꼽히는 규모의 캡슐토이 매장이에요. 매주 새 캡슐이 들어오고, 기기마다 붙은 QR로 재고와 입고 알림을 확인할 수 있어요.",
     img: "gacha/front.webp", naverBooking: ""
   },
   {

@@ -289,6 +289,15 @@ public/assets/img/arcade/*.webp          로비 그림(캡슐 타운), 포스터
 - 매거진 창업 글 3편이 새로 생겼어요: `gacha-market-growth`(시장), `akihabara-gacha-connection`(아키하바라), `gacha-host-model`(호스트형). 기존 `gacha-shop-startup-cost` 와 `shop-in-shop-gacha-zone` 은 새 비용 기준으로 고쳤어요. 글 안의 `{{startupCost}}` `{{costArea}}` `{{costExcluded}}` 는 `partner.js` 값으로 채워져요.
 - 페이지를 고친 뒤에는 `node tools/seo/build.mjs && node tools/seo/prerender.mjs && node tools/seo/build.mjs` 를 돌려 미리 그린 본문과 사이트맵을 맞춰 주세요.
 
+**상단 빠른 상담 양식 (2026.10.29 추가)**
+- 창업·제휴 6개 페이지(전체 보기·가챠샵·파티룸·SPOT·입점·기업) 첫 화면 바로 아래에 이름·연락처만 받는 짧은 상담 양식이 있어요. 맨 아래 자세한 신청서와 같은 곳(상담 신청 목록)에 저장되고, 내용 앞에 `[상단 빠른 상담]` 이 붙어서 운영 콘솔에서 구분할 수 있어요.
+- 양식 문구와 선택지는 HTML 에 직접 들어 있어요. 고칠 때는 각 `public/partner/*.html` 의 `<!--lq-->` 부분을 바꾸면 돼요.
+
+**건대 가챠샵 오픈 반영 (2026.10.29)**
+- `data/gacha.js` 의 `statusLabel` 을 "영업 중"으로, `data/stations.js` 의 건대 가챠샵 상태를 `open` 으로 바꿨어요. 알림 띠, 소식, 매거진 글, 챗봇 답변도 영업 중으로 맞췄어요.
+- 영업시간(`hours`)과 매주 입고 요일(`gachaDay`)이 비어 있으면 방문 안내에 "곧 이 화면에 올려 드릴게요"로 보여요. 정해지면 채워 주세요.
+- `supabase/seed.sql` 도 새 상태로 다시 만들었어요.
+
 ---
 
 ## 들어 있는 화면

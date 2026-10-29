@@ -57,9 +57,9 @@ window.PLT_SITE = {
 
   /* 화면 맨 위 알림 띠 (비우면 숨김) */
   topNotice: {
-    text: "건대 한아름 건물 1층, 600대 규모 플레이션 가챠샵이 10월 문을 엽니다.",
-    link: "gacha/",
-    linkText: "가챠샵 보기"
+    text: "건대 한아름 건물 1층, 600대 규모 플레이션 가챠샵이 문을 열었어요.",
+    link: "gacha/visit",
+    linkText: "가는 길 보기"
   },
 
   /* 기능 스위치 — 운영 준비가 된 것만 true */
