@@ -121,7 +121,9 @@ function tokens(text) {
       case 'csHours': return B.hours || '';
       case 'machines': return (D.gacha.shop || {}).machines || '600대 이상';
       case 'gachaStatus': return (D.gacha.shop || {}).statusLabel || '';
-      case 'pyeong': { const g = D.partner.gacha || {}; return g.pricePerPyeong ? num(g.pricePerPyeong[0] / 10000) + '만~' + num(g.pricePerPyeong[1] / 10000) + '만 원' : ''; }
+      case 'startupCost': return ((D.partner.gacha || {}).cost || {}).label || '';
+      case 'costArea': { const r = ((D.partner.gacha || {}).cost || {}).areaRange; return r ? r[0] + '~' + r[1] + '평' : ''; }
+      case 'costExcluded': return (((D.partner.gacha || {}).cost || {}).excluded || []).join('·');
       default: return all;
     }
   });
@@ -574,14 +576,14 @@ const RELATED_ON = {
   'party/stations.html': ['sinchon-party-room-guide', 'mt-club-afterparty', 'team-dinner-second-round'],
   'party/guide.html': ['party-room-checklist', 'birthday-party-room', 'party-games-guide'],
   'party/prices.html': ['party-room-checklist', 'sinchon-party-room-guide', 'kondae-party-room-course'],
-  'gacha/index.html': ['what-is-gacha', 'kondae-gacha-shop', 'gacha-duplicate-trade'],
+  'gacha/index.html': ['what-is-gacha', 'kondae-gacha-shop', 'gacha-market-growth'],
   'gacha/visit.html': ['kondae-gacha-shop', 'kondae-party-room-course', 'what-is-gacha'],
   'gacha/club.html': ['gacha-duplicate-trade', 'what-is-gacha'],
   'community/market.html': ['gacha-duplicate-trade', 'what-is-gacha'],
-  'partner/index.html': ['gacha-shop-startup-cost', 'game-party-room-startup', 'shop-in-shop-gacha-zone'],
-  'partner/gacha.html': ['gacha-shop-startup-cost', 'shop-in-shop-gacha-zone', 'what-is-gacha'],
+  'partner/index.html': ['gacha-shop-startup-cost', 'gacha-host-model', 'game-party-room-startup'],
+  'partner/gacha.html': ['gacha-shop-startup-cost', 'gacha-host-model', 'gacha-market-growth'],
   'partner/party.html': ['game-party-room-startup', 'gacha-shop-startup-cost'],
-  'partner/spot.html': ['shop-in-shop-gacha-zone', 'gacha-shop-startup-cost'],
+  'partner/spot.html': ['shop-in-shop-gacha-zone', 'gacha-host-model', 'gacha-shop-startup-cost'],
   'partner/business.html': ['team-dinner-second-round', 'mt-club-afterparty'],
   'arcade/index.html': ['capsule-web-games'],
   'index.html': ['sinchon-party-room-guide', 'what-is-gacha', 'gacha-shop-startup-cost']

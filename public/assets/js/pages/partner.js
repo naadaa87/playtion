@@ -27,7 +27,7 @@
         (space ? '<div class="fieldrow mt-m"><div class="field"><label class="lbl" for="ldArea">면적 <small>평, 대략</small></label><input class="inp" id="ldArea" name="area" inputmode="numeric" placeholder="예: 12"></div>' +
           '<div class="field"><span class="lbl">공간</span><div class="chips" role="radiogroup" aria-label="공간 여부">' + [['있어요', 'have'], ['찾는 중', 'looking'], ['아직 없어요', 'none']].map(function (o, i) { return '<label class="chip" style="cursor:pointer"><input type="radio" name="hasSpace" value="' + o[1] + '"' + (i === 0 ? ' checked' : '') + ' style="accent-color:var(--ink)"> ' + o[0] + '</label>'; }).join('') + '</div></div></div>' : '') +
         (money ? '<div class="field mt-m"><label class="lbl" for="ldBudget">생각하는 예산</label><select class="sel" id="ldBudget" name="budget"><option value="">아직 모르겠어요</option><option>3천만 원 미만</option><option>3천만~5천만 원</option><option>5천만~1억 원</option><option>1억 원 이상</option></select></div>' : '') +
-        '<div class="field mt-m"><label class="lbl" for="ldMsg">하고 싶은 이야기</label><textarea class="txa" id="ldMsg" name="message" placeholder="' + ({ gacha: '공간 위치와 층, 원하는 방식(구매·렌탈·무상 설치)을 적어 주세요', party: '공간 위치와 면적, 지금 업종이 있다면 함께 적어 주세요', spot: '어떤 공간인지, 영업 시간과 손님 흐름을 적어 주세요', network: '운영 중인 매장과 쓰고 있는 시스템을 적어 주세요', business: '하고 싶은 일, 시기, 규모를 적어 주세요' }[kind] || '궁금한 점이나 가진 공간, 예산을 편하게 적어 주세요') + '"></textarea></div>' +
+        '<div class="field mt-m"><label class="lbl" for="ldMsg">하고 싶은 이야기</label><textarea class="txa" id="ldMsg" name="message" placeholder="' + ({ gacha: '공간 위치와 층, 원하는 방식(오너형·호스트형)을 적어 주세요', party: '공간 위치와 면적, 지금 업종이 있다면 함께 적어 주세요', spot: '어떤 공간인지, 영업 시간과 손님 흐름을 적어 주세요', network: '운영 중인 매장과 쓰고 있는 시스템을 적어 주세요', business: '하고 싶은 일, 시기, 규모를 적어 주세요' }[kind] || '궁금한 점이나 가진 공간, 예산을 편하게 적어 주세요') + '"></textarea></div>' +
         '<div class="mt-m">' + PLT.consentBlock({ noMarketing: true, age: false, termsLabel: '상담을 위한 개인정보 수집·이용에 동의해요', detail: '이름, 연락처, 이메일, 상담 내용 (상담 회신과 자료 전달). 상담이 끝나고 1년 뒤 파기해요.' }) + '</div>' +
         '<button class="btn btn--ink btn--l btn--block mt-m" type="submit">상담 신청하기</button></form>';
       var f = $('#leadForm', host);
@@ -67,22 +67,46 @@
   /* ------------------------------------------------------------------
      가챠샵 창업
      ------------------------------------------------------------------ */
-  function costCalc() {
-    var host = $('#costCalc'); if (!host) return;
-    var area = 15;
-    var draw = function () {
-      var p = GP.pricePerPyeong || [0, 0], m = GP.machinesPerPyeong || [0, 0], over = area > (GP.recommendArea || [0, 30])[1];
-      host.innerHTML = '<div class="field"><label class="lbl" for="ccArea">공간 면적 <b style="font-size:20px;margin-left:6px" class="t-num">' + area + '평</b></label><input class="range" type="range" id="ccArea" min="' + (GP.minArea || 5) + '" max="45" step="1" value="' + area + '"><div class="row row--between t-micro"><span>' + (GP.minArea || 5) + '평</span><span>추천 ' + GP.recommendArea[0] + '~' + GP.recommendArea[1] + '평</span><span>45평</span></div></div>' +
-        '<hr class="hr"><div class="ticket__line"><span>기본 창업 비용</span><b>' + (over ? '따로 상담' : man(area * p[0]) + '~' + man(area * p[1]) + '원') + '</b></div>' +
-        '<div class="ticket__line"><span>놓을 수 있는 기기</span><b>약 ' + PLT.num(area * m[0]) + '~' + PLT.num(area * m[1]) + '대</b></div>' +
-        '<div class="ticket__line"><span>별도 견적</span><b>' + esc((GP.excluded || []).join(', ')) + '</b></div>' +
-        (area < (GP.recommendArea || [10])[0] ? '<p class="note mt-s"><span>' + area + '평이면 동선 확보가 관건이에요. 노출 좋은 1층이어야 하고, 10평부터 매장다운 구성이 나와요.</span></p>' : '') +
-        (over ? '<p class="note mt-s"><span>' + esc(GP.overNote || '') + '</span></p>' : '') +
-        '<button class="btn btn--gacha btn--block mt-m" type="button" id="ccGo">' + area + '평으로 상담 신청</button>';
-      $('#ccArea', host).addEventListener('input', function (e) { area = +e.target.value; draw(); $('#ccArea', host).focus(); });
-      $('#ccGo', host).addEventListener('click', function () { if (PLT.prefillLead) PLT.prefillLead({ kind: 'gacha', area: String(area) }); });
-    };
-    draw();
+  /* 창업 비용 — 규모별 안내와 기기 수 */
+  function costBox() {
+    var host = $('#costBox'); if (!host) return;
+    var c = GP.cost || {}, m = GP.machinesPerPyeong || [15, 20], ar = c.areaRange || [20, 30];
+    host.innerHTML = '<div class="gs-cost__head"><span class="lb lb--gacha lb--s">' + ar[0] + '~' + ar[1] + '평 기준</span><b class="gs-cost__amt">' + esc(c.label || '') + '</b><p class="t-small">' + esc(c.basis || '') + '</p></div>' +
+      '<ul class="gs-tiers">' + (c.tiers || []).map(function (t) { return '<li class="gs-tier' + (t.pick ? ' gs-tier--pick' : '') + '"><span class="gs-tier__area">' + esc(t.area) + '</span><b class="gs-tier__cost">' + esc(t.cost) + '</b><span class="gs-tier__note">' + esc(t.note) + '</span></li>'; }).join('') + '</ul>' +
+      '<dl class="kv kv--s mt-m"><dt>따로 견적</dt><dd>' + esc((c.excluded || []).join(', ')) + ' (공간마다 달라요)</dd><dt>별도</dt><dd>' + esc((c.separate || []).join(', ')) + '</dd><dt>기기 수 가이드</dt><dd>평당 ' + m[0] + '~' + m[1] + '대 · ' + ar[0] + '평이면 약 ' + PLT.num(ar[0] * m[0]) + '~' + PLT.num(ar[0] * m[1]) + '대, ' + ar[1] + '평이면 약 ' + PLT.num(ar[1] * m[0]) + '~' + PLT.num(ar[1] * m[1]) + '대</dd></dl>' +
+      '<p class="note mt-m"><span>기기 수는 2~3단으로 쌓아 벽면을 따라 두는 배치 기준이에요. 실제로는 동선 폭과 보충 공간을 빼고 잡아요. 항목별 견적은 공간 진단 뒤에 드려요.</span></p>' +
+      '<button class="btn btn--gacha btn--block mt-m" type="button" id="ccGo">우리 공간으로 견적 상담</button>';
+    $('#ccGo', host).addEventListener('click', function () { if (PLT.prefillLead) PLT.prefillLead({ kind: 'gacha', message: '공간 진단과 항목별 견적을 받고 싶어요.' }); });
+  }
+  /* 시장 근거 — 숫자 카드와 출처 */
+  function market() {
+    var mk = GP.market || {}, st = mk.stats || [], src = mk.sources || [];
+    fill('#mktStats', st.map(function (s) {
+      var ref = typeof s.src === 'number' && src[s.src] ? '<a class="gs-stat__src" href="#mktSources" aria-label="출처 ' + (s.src + 1) + '">' + (s.src + 1) + '</a>' : '';
+      return '<div class="gs-stat gs-stat--' + esc(s.line || 'ink') + '"><b class="gs-stat__v">' + esc(s.v) + '<small>' + esc(s.unit || '') + '</small></b><span class="gs-stat__l">' + esc(s.label) + ref + '</span>' + (s.sub ? '<span class="gs-stat__s">' + esc(s.sub) + '</span>' : '') + '</div>';
+    }).join(''));
+    var refs = function (a) { return (a || []).filter(function (i) { return src[i]; }).map(function (i) { return '<a class="gs-stat__src" href="#mktSources" aria-label="출처 ' + (i + 1) + '">' + (i + 1) + '</a>'; }).join(''); };
+    fill('#mktNotes', (mk.notes || []).map(function (n) { return '<div class="panel panel--line-' + esc(n.line) + '"><span class="lb lb--' + esc(n.line) + ' lb--s">' + esc(n.lb) + '</span><h3 class="t-h4 mt-s">' + esc(n.title) + '</h3><p class="t-small mt-s">' + esc(n.body) + refs(n.src) + '</p></div>'; }).join(''));
+    fill('#mktSources', src.length ? '<details class="gs-src"><summary>출처 ' + src.length + '건 보기</summary><ol>' + src.map(function (s) { return '<li><a class="link" href="' + esc(s.url) + '" target="_blank" rel="noopener">' + esc(s.name) + '</a>' + (s.date ? ' <span class="t-muted">' + esc(s.date) + '</span>' : '') + '</li>'; }).join('') + '</ol><p class="t-micro mt-s">숫자는 각 기관과 언론이 발표한 자료 기준이에요. 시장 규모 추정은 조사 기관과 기준에 따라 달라질 수 있어요.</p></details>' : '');
+  }
+  function tracks() {
+    var t = GP.tracks || [];
+    fill('#trackCards', t.map(function (x) {
+      return '<article class="gs-track gs-track--' + esc(x.line) + '"><div class="gs-track__head"><span class="lb lb--' + esc(x.line) + ' lb--s">' + esc(x.sub) + '</span><h3 class="gs-track__name">' + esc(x.name) + '</h3><p class="t-small">' + esc(x.summary) + '</p></div>' +
+        '<dl class="kv kv--s"><dt>초기 투자</dt><dd>' + esc(x.invest) + '</dd><dt>매출</dt><dd>' + esc(x.revenue) + '</dd><dt>플레이션이</dt><dd>' + esc(x.hq) + '</dd><dt>점주·호스트가</dt><dd>' + esc(x.owner) + '</dd><dt>위험 부담</dt><dd>' + esc(x.risk) + '</dd><dt>이런 분께</dt><dd>' + esc(x.fit) + '</dd></dl>' +
+        '<button class="btn btn--' + (x.line === 'party' ? 'party' : 'gacha') + ' btn--block" type="button" data-track="' + esc(x.id) + '">' + esc(x.cta) + '</button></article>';
+    }).join(''));
+    $$('[data-track]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var x = t.filter(function (y) { return y.id === b.getAttribute('data-track'); })[0];
+        if (PLT.prefillLead && x) PLT.prefillLead({ kind: 'gacha', message: x.name + '(' + x.sub + ')으로 상담받고 싶어요. ' });
+      });
+    });
+  }
+  function platformCols() {
+    var p = GP.platform || {};
+    fill('#platformCols', (p.cols || []).map(function (c) { return '<div class="gs-col gs-col--' + esc(c.line) + '"><h3 class="t-h4">' + esc(c.who) + '</h3><ul>' + (c.items || []).map(function (i) { return '<li>' + esc(i) + '</li>'; }).join('') + '</ul></div>'; }).join(''));
+    fill('#platformLoop', (p.loop || []).map(function (s, i) { return '<li>' + (i ? '<i aria-hidden="true"></i>' : '') + '<span>' + esc(s) + '</span></li>'; }).join(''));
   }
   function simulator() {
     var host = $('#sim'); if (!host) return;
@@ -103,23 +127,32 @@
         '<div class="ticket__line"><span>매출 총이익</span><b>' + won(gross) + '</b></div>' +
         '<div class="ticket__line"><span>임대료 + 운영비</span><b>−' + won(fixed) + '</b></div></div><div class="ticket__perf"></div>' +
         '<div class="ticket__total"><span class="t-strong">남는 돈 (세전)</span><b style="color:' + (op < 0 ? 'var(--err)' : 'var(--ink)') + '">' + (op < 0 ? '−' : '') + won(Math.abs(op)) + '</b></div>' +
-        '<p class="ticket__note">기기 1대가 하루 <b>' + (Math.ceil(be * 10) / 10) + '회</b> 팔리면 임대료와 운영비를 넘어서요. 인건비, 감가상각, 카드 수수료는 빠져 있어요. 무상 설치형은 매출 배분 방식이라 이 계산과 달라요.</p>';
+        '<p class="ticket__note">기기 1대가 하루 <b>' + (Math.ceil(be * 10) / 10) + '회</b> 팔리면 임대료와 운영비를 넘어서요. 인건비, 감가상각, 카드 수수료는 빠져 있어요. 호스트형은 매출 배분 방식이라 이 계산과 달라요.</p>';
     };
     keys.forEach(function (k) { $('#sim-' + k).addEventListener('input', function (e) { val[k] = +e.target.value; $('#simv-' + k).textContent = fmt(k, val[k]); calc(); }); });
     calc();
   }
   function gachaPage() {
     if (PLT.page !== 'gacha') return;
-    costCalc();
-    var t = GP.types || [];
-    fill('#typeTable', '<thead><tr><th scope="col"></th>' + t.map(function (x) { return '<th scope="col">' + esc(x.name) + '</th>'; }).join('') + '</tr></thead><tbody>' +
-      [['한 줄 요약', 'summary'], ['초기 투자', 'invest'], ['매출', 'revenue'], ['플레이션 역할', 'hq'], ['위험 부담', 'risk'], ['이런 분께', 'fit']].map(function (r) { return '<tr><th scope="row" style="white-space:nowrap">' + r[0] + '</th>' + t.map(function (x) { return '<td class="t-small">' + esc(x[r[1]]) + '</td>'; }).join('') + '</tr>'; }).join('') + '</tbody>');
-    var rowsT = [['초기 투자', 'invest'], ['매출', 'revenue'], ['플레이션 역할', 'hq'], ['위험 부담', 'risk'], ['이런 분께', 'fit']];
-    fill('#typeCards', t.map(function (x) { return '<div class="panel"><h3 class="t-h4">' + esc(x.name) + '</h3><p class="t-small mt-s">' + esc(x.summary) + '</p><dl class="kv kv--s mt-m">' + rowsT.map(function (r) { return '<dt>' + r[0] + '</dt><dd>' + esc(x[r[1]]) + '</dd>'; }).join('') + '</dl></div>'; }).join(''));
+    var c = GP.cost || {};
+    $$('[data-gcost]').forEach(function (el) { el.textContent = c.short || c.label || ''; });
+    market();
+    fill('#whyCards', (GP.why || []).map(function (x, i) { return '<div class="gs-why"><span class="gs-why__n">' + ((i < 9 ? '0' : '') + (i + 1)) + '</span><h3 class="t-h4">' + esc(x.title) + '</h3><p class="t-small mt-s">' + esc(x.body) + '</p></div>'; }).join(''));
+    platformCols();
+    fill('#japanPoints', (GP.japan && GP.japan.points || []).map(function (x) { return '<li class="rw" style="grid-template-columns:150px minmax(0,1fr)"><span class="t-strong">' + esc(x.title) + '</span><span class="t-small">' + esc(x.body) + '</span></li>'; }).join(''));
+    tracks();
+    costBox();
     simulator();
     fill('#supportCards', (GP.support || []).map(function (x) { return '<div class="panel"><h3 class="t-h4">' + esc(x.title) + '</h3><p class="t-small mt-s">' + esc(x.body) + '</p></div>'; }).join(''));
+    fill('#siteChecks', (GP.sites || []).map(function (x) { return '<li class="rw" style="grid-template-columns:170px minmax(0,1fr)"><span class="t-strong">' + esc(x.title) + '</span><span class="t-small">' + esc(x.body) + '</span></li>'; }).join(''));
     fill('#procSteps', (GP.process || []).map(function (x) { return '<li class="st"><h3>' + esc(x.title) + '</h3><p>' + esc(x.body) + '</p></li>'; }).join(''));
     fill('#gFaq', (GP.faq || []).map(function (f) { return '<details><summary>' + esc(f.q) + '</summary><p>' + esc(f.a) + '</p></details>'; }).join(''));
+    $$('[data-apply-track]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var x = (GP.tracks || []).filter(function (y) { return y.id === b.getAttribute('data-apply-track'); })[0];
+        if (PLT.prefillLead && x) PLT.prefillLead({ kind: 'gacha', message: x.name + '(' + x.sub + ')으로 상담받고 싶어요. ' });
+      });
+    });
   }
 
   /* ------------------------------------------------------------------
