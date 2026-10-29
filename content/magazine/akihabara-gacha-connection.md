@@ -45,7 +45,7 @@ related: [gacha-market-growth, gacha-shop-startup-cost, what-is-gacha]
 |---|---|
 | 신상 라인업과 회전 흐름 확인 | 첫 라인업과 교체 시기 결정 |
 | 가격대와 진열 방식 관찰 | 구역 배치와 가격대 구성 |
-| 메이커·유통사 소싱 | 주 1회 가챠데이 입고 |
+| 현지 유통 루트 소싱 | 주 1회 가챠데이 입고 |
 | 협업 기획 | 한정 캡슐·공동 기획전 (확정 시) |
 
 창업자가 직접 일본에 갈 필요는 없어요. 플레이션이 보고 온 것이 직영점 데이터와 함께 상품 공급으로 이어져요. 창업 비용과 방식은 [가챠샵 창업 비용 정리](/magazine/gacha-shop-startup-cost)에, 시장 숫자는 [가챠 시장 성장성](/magazine/gacha-market-growth)에 있어요.
