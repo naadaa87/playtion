@@ -39,7 +39,7 @@ const TARGETS = {
   'gacha/index.html': ['firstSteps', 'shopMap', 'zoneList'],
   'gacha/visit.html': ['visitInfo', 'firstSteps', 'shopMap', 'zoneList', 'gRules', 'gFaq'],
   'partner/index.html': ['programCards'],
-  'partner/gacha.html': ['typeTable', 'typeCards', 'supportCards', 'procSteps', 'gFaq'],
+  'partner/gacha.html': ['mktStats', 'mktNotes', 'mktSources', 'whyCards', 'platformCols', 'platformLoop', 'japanPoints', 'trackCards', 'costBox', 'supportCards', 'siteChecks', 'procSteps', 'gFaq'],
   'partner/party.html': ['modelCards', 'autoTable'],
   'partner/network.html': ['fitChips', 'planCards'],
   'partner/business.html': ['bizCards'],
