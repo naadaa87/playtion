@@ -662,6 +662,16 @@
     $$('[data-x]', host).forEach(function (b) { b.addEventListener('click', function () { PLT.ss.set(b.getAttribute('data-x'), 'off'); b.closest('.topbar').remove(); }); });
   }
 
+  /* PASS 오픈 준비 중 표시 (site.js 의 pass.status) */
+  function passStatus() {
+    var p = S.pass || {};
+    if (p.status !== 'soon') return;
+    document.documentElement.classList.add('pass-soon');
+    if (PLT.section !== 'pass' || PLT.page === 'kiosk') return;
+    var m = $('#main'); if (!m || $('.pass-soon-bar', m)) return;
+    m.insertAdjacentHTML('afterbegin', '<div class="pass-soon-bar" role="note"><div class="wrap pass-soon-bar__in"><span class="lb lb--pass">서비스 오픈 준비 중</span><p>' + esc(p.note || '플레이션 PASS는 서비스 오픈을 준비하고 있어요.') + '</p><a class="pass-soon-bar__go" href="' + PLT.url('news') + '">소식 보기</a></div></div>');
+  }
+
   function header() {
     var btn = $('#hdMenu'), dr = $('#drawer');
     if (btn && dr) {
@@ -768,7 +778,7 @@
       { label: '예약 방법', keys: ['예약', '방법', '어떻게', '네이버'], html: '게임파티룸 예약은 네이버 예약에서 받아요. 지점과 패키지(낮·밤·올데이)를 고르면 그 지점의 네이버 예약 화면으로 넘어가고, 결제와 확정도 거기서 해요. 예약 관리와 문의는 쏘플파티룸 고객센터가 함께 맡고 있어요.' + link('party/booking', '예약하러 가기') + kakao },
       { label: '요금', keys: ['요금', '가격', '얼마', '비용', '올나잇', '올데이', '밤', '낮', '패키지'], html: '지점과 요일(월~목·금·토·일)마다 달라요. 낮·밤·올데이 패키지가 있고 ' + PLT.won(minFrom) + '부터예요. 기준 4명, 추가 1인당 ' + PLT.won(P.extraPerPerson) + '이고 청소 보증금 ' + PLT.won(P.deposit) + '은 이용 후 돌려드려요.' + link('party/prices', '지점별 요금표') },
       { label: '지점 위치', keys: ['위치', '주소', '지점', '어디', '역'], html: '게임파티룸은 ' + names.join(', ') + ' 이렇게 ' + names.length + '곳이고, 건대에 가챠뽑기샵이 있어요.' + link('stations', '전 지점 보기') },
-      { label: 'PASS 혜택', keys: ['PASS', '패스', '멤버십', '포인트', '스탬프', '쿠폰', '등급'], html: '전화번호 하나로 가입하면 온라인 뽑기 1회권을 드려요. 가챠샵 체크인 스탬프, 플레이 코인, 생일 코인, 커뮤니티 활동이 한 장의 PASS에 쌓여요. 파티룸은 네이버 예약으로 받고 있어 PASS 할인은 적용되지 않아요.' + link('pass/', 'PASS 보기') },
+      { label: 'PASS 혜택', keys: ['PASS', '패스', '멤버십', '포인트', '스탬프', '쿠폰', '등급'], html: (S.pass && S.pass.status === 'soon' ? 'PASS는 지금 서비스 오픈을 준비하고 있어요. 문을 열면 ' : '') + '전화번호 하나로 가입하면 온라인 뽑기 1회권을 드려요. 가챠샵 체크인 스탬프, 플레이 코인, 생일 코인, 커뮤니티 활동이 한 장의 PASS에 쌓여요. 파티룸은 네이버 예약으로 받고 있어 PASS 할인은 적용되지 않아요.' + link('pass/', 'PASS 보기') },
       { label: '환불 규정', keys: ['환불', '취소', '변경', '보증금'], html: '이용일 8일 전까지 취소하면 전액 환불되고, 7일 전부터는 환불이 어려워요. 당일 예약은 취소·환불이 안 돼요. 확인·변경·취소는 네이버 앱의 예약 내역에서 해요. 청소 보증금은 이용일 다음 주 수요일 무렵 돌려드려요.' + link('party/guide', '이용안내') },
       { label: '창업 문의', keys: ['창업', '가맹', '입점', '제휴', '투자', '공실'], html: '가챠샵 창업 비용은 20~30평 기준 1,700만 원 내외(간판·사인물, 냉난방기 별도)예요. 직접 여는 오너형과 공간만 내주는 호스트형 중에 고를 수 있어요. 파티룸 창업, SPOT 제휴, 입점도 한곳에서 상담해요.' + link('partner/', '창업·제휴 보기') },
       { label: '주차', keys: ['주차', '차'], html: '게임파티룸은 모두 건물 주차가 안 돼요. 지점 안내에 가까운 공영·민영주차장을 적어 뒀어요.' + link('party/stations', '지점 안내') },
@@ -816,6 +826,7 @@
 
   /* 실행 */
   topbars();
+  passStatus();
   header();
   bindSite();
   helper();
