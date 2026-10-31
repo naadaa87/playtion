@@ -62,6 +62,15 @@ window.PLT_SITE = {
     linkText: "가는 길 보기"
   },
 
+  /* PASS 멤버십 상태
+     "soon" : 서비스 오픈 준비 중. 메뉴와 푸터의 PASS 옆에 '준비 중' 표시가 붙고,
+              PASS 화면 위쪽에 아래 note 안내가 나와요.
+     "open" : 운영 중. 표시가 모두 사라져요. (홈의 PASS 소개 문구는 index.html 에서 함께 바꿔 주세요) */
+  pass: {
+    status: "soon",
+    note: "플레이션 PASS는 서비스 오픈을 준비하고 있어요. 지금 보이는 화면은 미리 보기예요. 문을 열면 소식과 알림 띠로 먼저 알려 드릴게요."
+  },
+
   /* 기능 스위치 — 운영 준비가 된 것만 true */
   features: {
     onlineGacha: true,      // 온라인 뽑기

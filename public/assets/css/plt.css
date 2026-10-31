@@ -2354,3 +2354,23 @@ a.fm-route:hover .fm-route__go { background: var(--pass); }
 .lq__done .lb { flex: none; margin-top: 4px; }
 @media (max-width: 1080px) { .lq__fields { grid-template-columns: repeat(2, minmax(0, 1fr)); } .lq__fields > .lq__foot, .lq__fields > .lq__go { grid-column: 1 / -1; grid-row: auto; } }
 @media (max-width: 560px) { .lq-band { padding-top: 28px; } .lq { padding: 20px 16px 16px; box-shadow: 6px 6px 0 var(--pass); } .lq--gacha { box-shadow: 6px 6px 0 var(--gacha); } .lq--party { box-shadow: 6px 6px 0 var(--party); } .lq--biz { box-shadow: 6px 6px 0 var(--ink); } .lq__fields { grid-template-columns: minmax(0, 1fr); } .lq__alt { margin-left: 0; } .lq__done { flex-direction: column; gap: 8px; } }
+
+/* =====================================================================
+   PASS 서비스 오픈 준비 중 표시 (site.js pass.status = "soon")
+   ===================================================================== */
+.pass-soon .gnb a[href$="pass/"]::after,
+.pass-soon .drawer__group h3:has(.dot--pass)::after,
+.pass-soon .ft__col h4:has(.dot--pass)::after {
+  content: "준비 중"; display: inline-block; margin-left: 6px; padding: 2px 7px 1px; border: 1.5px solid var(--ink); border-radius: 999px;
+  background: var(--pass); color: var(--ink); font-family: var(--font); font-size: 10.5px; font-weight: 800; line-height: 1.3; letter-spacing: 0; vertical-align: 2px; white-space: nowrap;
+}
+.pass-soon .ft__col h4:has(.dot--pass)::after { border-color: var(--pass); }
+/* 상단 메뉴에서는 폭을 늘리지 않도록 스티커처럼 모서리에 붙여요 */
+.pass-soon .gnb a[href$="pass/"]::after { position: absolute; top: -6px; right: -8px; margin: 0; padding: 1px 6px 0; font-size: 9.5px; transform: rotate(-5deg); box-shadow: 1.5px 1.5px 0 var(--ink); pointer-events: none; }
+.pass-soon-bar { background: var(--pass-soft); border-bottom: 2px solid var(--ink); }
+.pass-soon-bar__in { display: flex; align-items: center; gap: 10px 14px; flex-wrap: wrap; padding-block: 14px; }
+.pass-soon-bar__in .lb { flex: none; }
+.pass-soon-bar__in p { flex: 1 1 320px; font-size: 14.5px; font-weight: 600; color: var(--ink); line-height: 1.55; }
+.pass-soon-bar__go { flex: none; font-size: 14px; font-weight: 800; color: var(--ink); border-bottom: 2px solid var(--ink); padding-bottom: 1px; }
+/* 1041~1180px 에서 상단 메뉴가 넘치지 않게 간격을 줄여요 */
+@media (min-width: 1041px) and (max-width: 1180px) { .hd__in { gap: 14px; } .gnb a { padding: 0 9px; gap: 6px; font-size: 14.5px; } }

@@ -33,8 +33,8 @@ window.PLT_NEWS = {
   ],
 
   promos: [
-    { id: "welcome", line: "pass", active: true, title: "PASS 가입하면 온라인 뽑기 1회권", body: "가입하는 순간 온라인 뽑기 1회권이 PASS에 들어와요. 생일 달에는 플레이 코인 3,000C도 넣어 드려요.", period: "상시", link: "pass/login" },
-    { id: "stamp", line: "gacha", active: true, title: "스탬프 10개 모으면 5,000C", body: "가챠샵 체크인, 교환회 참여, 빈 캡슐 반납마다 스탬프가 하나씩 쌓여요. 10개를 채우면 플레이 코인 5,000C를 드려요.", period: "상시", link: "pass" },
+    { id: "welcome", line: "pass", active: true, title: "PASS 오픈하면 가입 선물로 온라인 뽑기 1회권", body: "PASS는 서비스 오픈을 준비하고 있어요. 문을 열면 가입하는 순간 온라인 뽑기 1회권이 들어오고, 생일 달에는 플레이 코인 3,000C도 넣어 드려요.", period: "PASS 오픈 준비 중", link: "pass" },
+    { id: "stamp", line: "gacha", active: true, title: "스탬프 10개 모으면 5,000C", body: "PASS가 열리면 가챠샵 체크인, 교환회 참여, 빈 캡슐 반납마다 스탬프가 하나씩 쌓여요. 10개를 채우면 플레이 코인 5,000C를 드려요.", period: "PASS 오픈 후", link: "pass" },
     { id: "naver", line: "party", active: true, title: "파티룸은 네이버 예약으로 바로", body: "지점과 패키지를 고르면 그 지점 네이버 예약 화면으로 바로 넘어가요. 예약 문의는 쏘플파티룸 카카오톡으로 주세요.", period: "상시", link: "party/booking" }
   ],
 
