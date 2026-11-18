@@ -101,6 +101,14 @@ window.PLT_SITE = {
   },
 
   /* 분석 도구 (비우면 불러오지 않음) */
+  /* 자체 방문 통계 — 운영 콘솔 KPI 메뉴의 방문자·클릭·체류 시간 숫자
+     Cloudflare D1 바인딩 PLT_STATS 와 비밀 값 STATS_KEY 를 넣으면 기록이 쌓이기 시작해요 (README 0-9)
+     hosts 에 적힌 주소에서만 기록해요. 미리보기 주소(*.pages.dev)나 내 컴퓨터에서는 기록하지 않아요. */
+  stats: {
+    enabled: true,
+    hosts: ["playtion.kr", "www.playtion.kr"]
+  },
+
   analytics: {
     ga4: "",                // 예: "G-XXXXXXXXXX"
     metaPixel: ""           // 예: "1234567890"

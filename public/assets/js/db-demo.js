@@ -543,6 +543,7 @@
     /* ---------------- 운영 콘솔 ---------------- */
     adminLogin: function (pin) { if (String(pin) !== String((S.demo || {}).adminPin || '0000')) return no('비밀번호가 맞지 않아요.'); PLT.ss.set('admin', '1'); return ok(true); },
     adminCheck: function () { return ok(PLT.ss.get('admin') === '1'); },
+    accessToken: function () { return ok(null); },
     adminLogout: function () { PLT.ss.set('admin', ''); return ok(true); },
     adminStats: function () {
       var today = PLT.ymd(), days = [];
