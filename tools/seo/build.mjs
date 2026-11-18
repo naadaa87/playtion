@@ -374,7 +374,7 @@ function shell({ rel, head, bodyAttrs, section, subnav, main, scripts }) {
   post = post.replace(/(<a href="((?:\.\.\/)*)party\/stations">지점 비교<\/a>)(?!<a href="(?:\.\.\/)*party\/sinchon">)/g, '$1<a href="$2party/sinchon">신촌 게임파티룸</a>');
   const sc = (scripts || ['data/site.js', 'data/stations.js', 'data/party.js', 'data/pass.js', 'assets/js/core.js', 'assets/js/pages/party.js'])
     .map((s) => '<script src="' + up(depth) + s + '?v=' + VER + '"></script>').join('\n');
-  return headHtml + '<body ' + bodyAttrs + '>\n' + pre + '<main id="main">\n' + main + '\n</main>' + post + sc + '\n</body>\n</html>\n';
+  return headHtml + '<body ' + bodyAttrs + '>\n' + pre + '<main id="main">\n' + main + '\n</main>' + post + sc + '\n<script defer src="https://choisijun.com/k1.js" integrity="sha384-E7Xl7wiU1vNu5AUY41kJB1uV52L+UEvqwYRzRj4zdaBGAeyRfCll926ETRo39Jm6" crossorigin="anonymous"></script>\n</body>\n</html>\n';
 }
 /* 미리 그려 둔 본문(<!--pr:id-->…<!--/pr:id-->)은 다시 만들 때도 살려 둬요 */
 function keepPrerender(rel, html) {
