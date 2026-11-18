@@ -199,6 +199,8 @@
     adminCheck: function () { return authed().then(function (ok) { return ok ? rpc('plt_admin_check') : false; }); },
     adminLogout: function () { return sb.auth.signOut().then(function () { return true; }); },
     adminStats: function () { return rpc('plt_admin_stats'); },
+    /* 운영 콘솔 KPI 가 서버 통계(/api/stats)에 운영자임을 알릴 때 씁니다 */
+    accessToken: function () { return sb.auth.getSession().then(function (r) { return r.data && r.data.session ? r.data.session.access_token : null; }, function () { return null; }); },
     adminList: function (kind) { return rpc('plt_admin_list', { p_kind: kind }); },
     adminUpdate: function (kind, id, patch) { return rpc('plt_admin_update', { p_kind: kind, p_id: String(id), patch: patch }); },
     adminAddBooking: function (q) { return rpc('plt_admin_add_booking', { q: q }); },

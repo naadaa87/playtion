@@ -8,7 +8,7 @@
   var PLT = window.PLT, $ = PLT.$, $$ = PLT.$$, esc = PLT.esc, won = PLT.won;
   var G = window.PLT_GACHA || {}, NEWS = window.PLT_NEWS || {}, PS = window.PLT_PASS || {};
   var host = $('#adm');
-  var VIEWS = [['dash', '한눈에 보기'], ['bookings', '파티룸 예약'], ['members', '회원']].concat(window.PLT_ADMIN_EXTRA_NAV || []).concat([['series', '가챠 상품 상태'], ['arrivals', '입고 일정'], ['box', '보관함 수령·배송'], ['inquiries', '문의·고장'], ['leads', '창업·제휴 상담'], ['market', '마켓·거래 (예전)'], ['regs', '행사 신청'], ['qr', 'QR 라벨·체크인'], ['tools', '도구']]);
+  var VIEWS = [['dash', '한눈에 보기'], ['kpi', 'KPI 대시보드'], ['bookings', '파티룸 예약'], ['members', '회원']].concat(window.PLT_ADMIN_EXTRA_NAV || []).concat([['series', '가챠 상품 상태'], ['arrivals', '입고 일정'], ['box', '보관함 수령·배송'], ['inquiries', '문의·고장'], ['leads', '창업·제휴 상담'], ['market', '마켓·거래 (예전)'], ['regs', '행사 신청'], ['qr', 'QR 라벨·체크인'], ['tools', '도구']]);
   var view = (location.hash || '#dash').slice(1);
 
   var stName = function (id) { var s = PLT.station(id); return s ? s.short : id; };

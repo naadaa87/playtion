@@ -98,7 +98,7 @@
       PLT.busy($('#lgVerify'), function () {
         return PLT.db.verifyOtp(phone, code).then(function (r) {
           clearInterval(timer);
-          if (!r.isNew) { PLT.refreshMe().then(function () { PLT.toast('다시 오셨네요. 로그인했어요.', 'ok'); location.replace(next); }); return; }
+          if (!r.isNew) { PLT.track('login', { method: 'phone' }); PLT.refreshMe().then(function () { PLT.toast('다시 오셨네요. 로그인했어요.', 'ok'); location.replace(next); }); return; }
           signup();
         });
       });
@@ -128,6 +128,7 @@
         PLT.busy($('button[type=submit]', f), function () {
           return PLT.db.signup({ nick: nick, name: $('#suName').value.trim(), birth: bm && bd ? bm + '-' + bd : '', invite: $('#suInvite').value.trim().toUpperCase(), mktSms: data.mktSms, mktKakao: data.mktKakao, mktNight: data.mktNight }).then(function (me) {
             PLT.ls.del('invite');
+            PLT.track('sign_up', { method: 'phone' });
             PLT.refreshMe().then(function () { welcome(me); });
           });
         });

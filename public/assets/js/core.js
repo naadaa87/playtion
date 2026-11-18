@@ -807,9 +807,132 @@
   }
   /* 측정 이벤트 — 개인정보는 보내지 않습니다 */
   PLT.track = function (name, params) {
+    try { if (PLT._statsEv) PLT._statsEv(name, params || {}); } catch (e) { }
     try { if (window.gtag) gtag('event', name, params || {}); } catch (e) { }
     try { if (window.fbq && name === 'complete_booking') fbq('track', 'Purchase', { currency: 'KRW', value: (params || {}).value || 0 }); } catch (e) { }
   };
+
+  /* ------------------------------------------------------------------
+     자체 방문 통계 — 운영 콘솔 KPI 에 쓰여요 (서버: functions/api/pulse.js → Cloudflare D1)
+     이름·전화번호·IP 는 보내지 않아요. 이 브라우저에만 저장된 무작위 번호로 방문을 구분해요.
+     - 브라우저의 '추적 안 함(DNT)'·GPC 를 켜면 기록하지 않아요.
+     - 운영자는 주소 끝에 ?notrack=1 을 붙여 한 번 열면 이 브라우저 방문이 빠져요 (?notrack=0 으로 되돌림).
+     ------------------------------------------------------------------ */
+  function stats() {
+    var cfg = S.stats || {};
+    if (cfg.enabled === false || window.PLT_PRERENDER || navigator.webdriver) return;
+    if (PLT.section === 'admin') return;
+    if ((cfg.hosts || ['playtion.kr', 'www.playtion.kr']).indexOf(location.hostname) < 0) return;
+    if (/[?&]notrack=1\b/.test(location.search)) PLT.ls.set('notrack', 1);
+    if (/[?&]notrack=0\b/.test(location.search)) PLT.ls.del('notrack');
+    if (PLT.ls.get('notrack')) return;
+    if (navigator.doNotTrack === '1' || window.doNotTrack === '1' || navigator.globalPrivacyControl) return;
+
+    var END = cfg.endpoint || '/api/pulse';
+    var rnd = function () { return (Date.now().toString(36) + Math.random().toString(36).slice(2, 12)).slice(-16); };
+    var vid = PLT.ls.get('vid'), nv = 0;
+    if (typeof vid !== 'string' || !/^[a-z0-9]{8,24}$/.test(vid)) { vid = rnd(); PLT.ls.set('vid', vid); nv = 1; }
+    var ses = PLT.ls.get('ses') || {}, ld = 0, t0 = Date.now();
+    if (!ses.id || t0 - (ses.at || 0) > 30 * 60000) { ses = { id: rnd() }; ld = 1; }
+    var touch = function () { ses.at = Date.now(); PLT.ls.set('ses', ses); };
+    touch();
+
+    /* 페이지 주소: .html·index 를 떼고, 상품처럼 ?id= 로 갈리는 화면은 id 까지 */
+    var norm = function (p) { return (p || '/').replace(/\/index(\.html)?$/, '/').replace(/\.html$/, '') || '/'; };
+    var qid = ''; try { qid = new URLSearchParams(location.search).get('id') || ''; } catch (e) { }
+    var path = norm(location.pathname) + (qid ? '?id=' + qid.slice(0, 40) : '');
+
+    /* 어디서 왔는지 (새 방문의 첫 페이지에서만) */
+    var src = '', ref = '';
+    if (ld) {
+      var utm = ''; try { utm = (new URLSearchParams(location.search).get('utm_source') || '').toLowerCase(); } catch (e) { }
+      try { ref = document.referrer ? new URL(document.referrer).hostname.replace(/^(www|m)\./, '') : ''; } catch (e) { }
+      if (ref === location.hostname.replace(/^www\./, '')) ref = '';
+      var w = utm || ref;
+      src = !w ? 'direct' : /naver/.test(w) ? 'naver' : /google/.test(w) ? 'google' : /daum/.test(w) ? 'daum' : /kakao/.test(w) ? 'kakao'
+        : /instagram|^ig$/.test(w) ? 'instagram' : /facebook|fb\.com|^fb$/.test(w) ? 'facebook' : /youtube|youtu\.be/.test(w) ? 'youtube'
+        : /threads/.test(w) ? 'threads' : /(^|\.)x\.com|t\.co$|twitter/.test(w) ? 'x' : /bing/.test(w) ? 'bing'
+        : /ssople|blankspace|socialfactory|orbis/.test(w) ? 'family' : 'etc';
+      if (utm) ref = 'utm:' + utm.slice(0, 40);
+    }
+    var ua = navigator.userAgent || '';
+    var dev = /iPad|Tablet/i.test(ua) || (/Android/i.test(ua) && !/Mobile/i.test(ua)) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1) ? 'tablet' : /Mobi|iPhone|Android/i.test(ua) ? 'mobile' : 'desktop';
+
+    /* 보내기 — 모았다가 한 번에, 페이지를 떠날 때는 sendBeacon 으로 */
+    var q = [], timer = null;
+    var send = function () {
+      clearTimeout(timer); timer = null;
+      while (q.length) {
+        var body = JSON.stringify(q.splice(0, 25)), sent = false;
+        try { sent = !!(navigator.sendBeacon && navigator.sendBeacon(END, new Blob([body], { type: 'text/plain' }))); } catch (e) { }
+        if (!sent) { try { fetch(END, { method: 'POST', body: body, keepalive: true, headers: { 'Content-Type': 'text/plain' } }).catch(function () { }); } catch (e) { } }
+      }
+    };
+    var push = function (e, now) {
+      e.v = e.v || vid; e.s = e.s || ses.id; e.p = e.p || path; e.sec = e.sec || PLT.section; e.e = e.e || rnd();
+      q.push(e); touch();
+      if (now) send(); else if (!timer) timer = setTimeout(send, 2000);
+    };
+
+    /* 지난 페이지를 떠날 때 보낸 기록(머문 시간·마지막 클릭)을 한 번 더 보내요.
+       페이지가 닫히는 순간 보낸 기록은 휴대폰에서 자주 사라지거든요. 서버는 같은 번호(e)를 한 번만 저장해요 */
+    var pend = PLT.ls.get('pend') || [];
+    if (pend.length) { PLT.ls.del('pend'); pend.forEach(function (e) { if (e && e.e && t0 - (e.at || 0) < 30 * 60000) { delete e.at; q.push(e); } }); }
+
+    /* 1) 페이지 열람 */
+    push({ t: 'pv', ti: (document.title || '').replace(/\s*\|\s*플레이션.*$/, '').slice(0, 100), ld: ld, nv: nv, src: src, ref: ref, dev: dev }, true);
+
+    /* 2) 머문 시간 — 화면이 보이고 2분 안에 움직임이 있던 시간만 세요 / 스크롤 깊이 */
+    var acc = 0, last = Date.now(), act = Date.now(), sd = 0;
+    var tick = function () { var n = Date.now(); if (document.visibilityState === 'visible' && n - act < 120000) acc += n - last; last = n; };
+    ['scroll', 'click', 'keydown', 'mousemove', 'touchstart'].forEach(function (ev) { addEventListener(ev, function () { act = Date.now(); }, { passive: true }); });
+    addEventListener('scroll', function () {
+      var h = document.documentElement.scrollHeight - innerHeight;
+      var p = h > 0 ? Math.round((scrollY || pageYOffset) / h * 100) : 100;
+      if (p > sd) sd = Math.min(100, p);
+    }, { passive: true });
+    setInterval(tick, 5000);
+    var flush = function () {
+      tick();
+      if (acc >= 500) { push({ t: 'eng', ms: Math.min(acc, 1800000), sd: sd || (document.documentElement.scrollHeight <= innerHeight + 4 ? 100 : 0) }); acc = 0; }
+      if (q.length) { var at = Date.now(); PLT.ls.set('pend', (PLT.ls.get('pend') || []).concat(q.map(function (x) { var c = { at: at }; for (var k in x) c[k] = x[k]; return c; })).slice(-20)); }
+      send();
+    };
+    document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden') flush(); else { last = Date.now(); act = Date.now(); } });
+    addEventListener('pagehide', flush);
+
+    /* 3) 누른 버튼·링크 */
+    var kindOf = function (host) {
+      return /booking\.naver\.com/.test(host) ? 'naver_booking' : /map\.naver\.com|naver\.me|place\.naver|m\.place/.test(host) ? 'naver_map'
+        : /kakao/.test(host) ? 'kakao' : /instagram/.test(host) ? 'instagram' : /youtube|youtu\.be/.test(host) ? 'youtube' : 'outbound';
+    };
+    document.addEventListener('click', function (ev) {
+      var el = ev.target && ev.target.closest ? ev.target.closest('a[href], button, [data-track]') : null;
+      if (!el || el.closest('[data-no-track]')) return;
+      var href = el.getAttribute('href') || '', k = '', to = '';
+      var label = (el.getAttribute('data-track') || el.getAttribute('aria-label') || el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 60);
+      if (el.tagName === 'A' && href) {
+        if (/^tel:/i.test(href)) { k = 'tel'; to = 'tel'; }
+        else if (/^mailto:/i.test(href)) { k = 'mail'; to = 'mail'; }
+        else if (href.charAt(0) === '#') { if (!el.classList.contains('btn')) return; k = 'cta'; to = path + href.slice(0, 30); }
+        else {
+          var u; try { u = new URL(href, location.href); } catch (e) { return; }
+          if (u.host === location.host) { to = norm(u.pathname); k = el.closest('.gnb, .drawer, .ft, .tabbar, .subnav, .hd, .crumb, .bc') ? 'nav' : el.classList.contains('btn') ? 'cta' : 'link'; }
+          else { to = (u.hostname.replace(/^www\./, '') + u.pathname).slice(0, 120); k = kindOf(u.hostname); }
+        }
+      } else {
+        if (!el.classList.contains('btn') && !el.classList.contains('chip') && !el.hasAttribute('data-track')) return;
+        k = el.type === 'submit' ? 'submit' : 'button'; to = '';
+      }
+      push({ t: 'click', k: k, label: label || to, href: to });
+    }, true);
+
+    /* 4) 목표 행동 (PLT.track 으로 부르는 이벤트들: 상담 신청·네이버 예약 버튼·가입 등) */
+    PLT._statsEv = function (name, p) {
+      var lb = p.kind || p.brand || p.station || p.game || p.form || p.method || '';
+      push({ t: 'ev', k: String(name).slice(0, 40), label: String(lb).slice(0, 60) });
+    };
+  }
 
   /* 패밀리 사이트로 나가는 클릭 — GA4 이벤트 family_click (brand, from) */
   document.addEventListener('click', function (e) {
@@ -831,6 +954,7 @@
   bindSite();
   helper();
   analytics();
+  try { stats(); } catch (e) { }
   serviceWorker();
   PLT.ready.catch(function (e) { console.error(e); });
 })();
