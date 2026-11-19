@@ -11,5 +11,6 @@ Disallow: /pass/wallet
 Disallow: /partner/portal
 Disallow: /admin/
 Disallow: /api/
+Disallow: /cdn-cgi/
 
 Sitemap: https://playtion.kr/sitemap.xml

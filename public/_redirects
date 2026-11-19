@@ -56,3 +56,5 @@
 /contact /help 301
 /stores /party/stations 301
 /store /party/stations 301
+# 서치 콘솔에 404 로 잡힌 옛 주소
+/index.php / 301
