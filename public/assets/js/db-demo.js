@@ -26,6 +26,16 @@
   function now() { return new Date().toISOString(); }
   function ok(v) { return Promise.resolve(v); }
   function no(msg) { return Promise.reject(PLT.fail(msg)); }
+  /* 체험 모드라도 고객이 남긴 창업·제휴 문의, 고객 문의, 행사 신청은 운영자에게 닿아야 한다.
+     브라우저 저장과 함께 최시준 홈페이지 '전체 문의'(choisijun.com/api/lead)로 한 부 보낸다 */
+  var LEAD_URL = 'https://choisijun.com/api/lead';
+  function relay(kind, rec) {
+    try {
+      var body = { kind: kind, page: location.pathname };
+      for (var k in rec) if (rec[k] != null && rec[k] !== '' && !/^(id|at|status|memberId|kind|type)$/.test(k)) body[k] = rec[k];
+      fetch(LEAD_URL, { method: 'POST', mode: 'cors', keepalive: true, headers: { 'Content-Type': 'text/plain;charset=UTF-8' }, body: JSON.stringify(body) }).catch(function () {});
+    } catch (e) { /* 보내지 못해도 화면 흐름은 그대로 */ }
+  }
   function sid() { return PLT.ls.get(SKEY, null); }
   function meRaw() { var id = sid(); return id ? db.members[id] || null : null; }
   function memberByPhone(p) { p = PLT.phone.clean(p); for (var k in db.members) if (db.members[k].phone === p) return db.members[k]; return null; }
@@ -357,7 +367,7 @@
     report: function (r) {
       var m = meRaw();
       var x = { id: PLT.uid('q'), type: 'machine', machine: r.machine || '', kind: r.kind || '', text: (r.text || '').slice(0, 1000), contact: PLT.phone.clean(r.contact || (m && m.phone) || ''), memberId: m ? m.id : null, status: 'open', at: now() };
-      db.inquiries.push(x); save(); return ok(x);
+      db.inquiries.push(x); save(); relay('가챠 기기 문의' + (x.kind ? ' · ' + x.kind : ''), x); return ok(x);
     },
     draw: function (seriesId, count, opt) {
       opt = opt || {};
@@ -511,6 +521,7 @@
       if (db.regs.some(function (r) { return r.eventId === eventId && r.phone === phone && r.status !== 'cancelled'; })) return no('이미 신청한 행사예요.');
       var r = { id: PLT.uid('e'), eventId: eventId, memberId: m ? m.id : null, name: (d.name || (m && m.name) || '').slice(0, 20), phone: phone, people: Math.max(1, d.people | 0 || 1), memo: (d.memo || '').slice(0, 300), status: 'applied', at: now() };
       db.regs.push(r);
+      relay('행사 신청', Object.assign({ event: ((window.PLT_NEWS || {}).events || []).filter(function (e) { return e.id === eventId; }).map(function (e) { return e.title + ' (' + (e.date || '') + ')'; })[0] || eventId }, r, { eventId: null }));
       if (m) note(m.id, '행사 신청을 받았어요', ((window.PLT_NEWS || {}).events || []).filter(function (e) { return e.id === eventId; }).map(function (e) { return e.title; })[0] || '');
       save(); return ok(r);
     },
@@ -520,13 +531,13 @@
     lead: function (d) {
       if (!d.name || !PLT.phone.valid(d.phone)) return no('이름과 연락처를 확인해 주세요.');
       var l = { id: PLT.uid('ld'), kind: d.kind || 'general', name: d.name.slice(0, 30), phone: PLT.phone.clean(d.phone), email: (d.email || '').slice(0, 80), company: (d.company || '').slice(0, 40), region: (d.region || '').slice(0, 40), area: d.area || '', budget: d.budget || '', hasSpace: d.hasSpace || '', message: (d.message || '').slice(0, 1500), status: 'new', at: now() };
-      db.leads.push(l); save(); return ok(l);
+      db.leads.push(l); save(); relay(l.kind === 'general' ? '창업·제휴 문의' : '창업·제휴 문의 · ' + l.kind, l); return ok(l);
     },
     inquiry: function (d) {
       var m = meRaw();
       if (!d.text || d.text.trim().length < 5) return no('문의 내용을 조금 더 적어 주세요.');
       var x = { id: PLT.uid('q'), type: d.type || 'general', kind: d.kind || '', machine: d.machine || '', text: d.text.slice(0, 1500), contact: PLT.phone.clean(d.contact || (m && m.phone) || ''), memberId: m ? m.id : null, status: 'open', at: now() };
-      db.inquiries.push(x); save(); return ok(x);
+      db.inquiries.push(x); save(); relay('고객 문의' + (x.kind ? ' · ' + x.kind : ''), x); return ok(x);
     },
     portalLogin: function (code) {
       if (String(code).trim().toUpperCase() !== String((S.demo || {}).partnerCode || 'PT-DEMO').toUpperCase()) return no('파트너 코드가 맞지 않아요.');
