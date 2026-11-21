@@ -369,9 +369,15 @@
     Promise.all([PLT.db.adminList('members'), PLT.db.adminList('leads'), PLT.db.adminList('inquiries')].map(function (p) { return p.then(null, function () { return []; }); })).then(function (r) {
       var mem = r[0] || [], leads = r[1] || [], inq = r[2] || [];
       var newM = mem.filter(function (m) { return inR(m.createdAt); });
-      var mkt = mem.filter(function (m) { var c = m.consents || {}; return c.mktSms || c.mktKakao; }).length;
-      var plus = mem.filter(function (m) { return m.isPlus; }).length;
-      var lv = {}; mem.forEach(function (m) { var n = (m.level && m.level.name) || '—'; lv[n] = (lv[n] || 0) + 1; });
+      var mkt = mem.filter(function (m) { var c = m.consents || {}; return c.mktEmail || c.mktSms || c.mktKakao; }).length;
+      var PROV = { id: '아이디', kakao: '카카오', google: 'Google' };
+      var social = mem.filter(function (m) { return m.provider === 'kakao' || m.provider === 'google'; }).length;
+      var count = function (fn) { var o = {}; mem.forEach(function (m) { var k = fn(m) || '입력 안 함'; o[k] = (o[k] || 0) + 1; }); return Object.keys(o).map(function (k) { return { l: k, v: o[k] }; }); };
+      var lv = count(function (m) { return m.level && m.level.name; }).sort(function (a, b) { return b.v - a.v; });
+      var prov = count(function (m) { return PROV[m.provider] || (m.phone ? '예전 휴대폰 가입' : ''); }).sort(function (a, b) { return b.v - a.v; });
+      var gen = count(function (m) { return PLT.pass.label('gender', m.gender); }).sort(function (a, b) { return b.v - a.v; });
+      var ageOrder = (((window.PLT_PASS || {}).member || {}).ages || []).map(function (a) { return a[1]; });
+      var age = count(function (m) { return PLT.pass.label('age', m.ageGroup); }).sort(function (a, b) { var ia = ageOrder.indexOf(a.l), ib = ageOrder.indexOf(b.l); return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib); });
       var days = [], x = st.from; while (x <= st.to && days.length < 92) { days.push(x); x = add(x, 1); }
       var perDay = days.map(function (dd) { return newM.filter(function (m) { return ymd(new Date(m.createdAt)) === dd; }).length; });
       var lr = leads.filter(function (l) { return inR(l.at || l.createdAt); }), ir = inq.filter(function (q) { return inR(q.at || q.createdAt); });
@@ -385,13 +391,18 @@
         '<div class="kp-cards kp-cards--4">' +
         '<div class="kp-card"><span>전체 회원</span><b>' + num(mem.length) + '<small>명</small></b><em>지금까지 가입한 PASS 회원</em></div>' +
         '<div class="kp-card"><span>기간 내 신규 가입</span><b>' + num(newM.length) + '<small>명</small></b><em>하루 평균 ' + (newM.length / Math.max(1, days.length)).toFixed(1) + '명</em></div>' +
-        '<div class="kp-card"><span>마케팅 수신 동의</span><b>' + pct(mkt, mem.length) + '<small>%</small></b><em>문자·카톡 중 하나라도 동의 ' + num(mkt) + '명</em></div>' +
-        '<div class="kp-card"><span>PASS+ 회원</span><b>' + num(plus) + '<small>명</small></b><em>유료 멤버십</em></div></div>' +
+        '<div class="kp-card"><span>마케팅 수신 동의</span><b>' + pct(mkt, mem.length) + '<small>%</small></b><em>이메일 소식 받기 동의 ' + num(mkt) + '명</em></div>' +
+        '<div class="kp-card"><span>카카오·구글 가입</span><b>' + pct(social, mem.length) + '<small>%</small></b><em>소셜 계정으로 가입한 ' + num(social) + '명</em></div></div>' +
         '<div class="kp-grid kp-grid--3 mt-m">' +
         panel('일별 신규 가입', '', !newM.length ? '<p class="t-small t-muted">이 기간에 새로 가입한 회원이 없어요.' + (passNote ? ' PASS가 문을 열면 여기서 매일 가입 수를 볼 수 있어요.' : '') + '</p>' : days.length > 1 ? colBars(perDay, days.map(function (dd, i) { return i % Math.max(1, Math.ceil(days.length / 8)) === 0 ? md(dd) : ''; }), 'var(--pass-rail)', '명') : '<p class="t-small">오늘 가입 ' + num(perDay[0] || 0) + '명</p>', 'kp-span2') +
-        panel('등급', '전체 회원 기준', hbars(Object.keys(lv).map(function (k) { return { l: k, v: lv[k] }; }).sort(function (a, b) { return b.v - a.v; }), mem.length, 'var(--pass-rail)')) +
+        panel('가입 방식', '전체 회원 기준', hbars(prov, mem.length, 'var(--pass-rail)')) +
         '</div>' +
-        panel('최근 가입 회원', '전체 목록과 검색·내려받기는 회원 메뉴에서', recent.length ? '<div class="tbl-scroll"><table class="tbl adm-table kp-tbl"><thead><tr><th>회원</th><th>등급</th><th>수신 동의</th><th>가입</th></tr></thead><tbody>' + recent.map(function (m) { var c = m.consents || {}; return '<tr><td>' + esc(m.nick || m.name || '') + '<br><span class="t-micro">' + esc(m.code || '') + '</span></td><td>' + esc((m.level && m.level.name) || '—') + '</td><td>' + ((c.mktSms ? '문자 ' : '') + (c.mktKakao ? '카톡' : '') || '—') + '</td><td>' + esc(PLT.fmtDate(new Date(m.createdAt), false)) + '</td></tr>'; }).join('') + '</tbody></table></div><button class="btn btn--ghost btn--s mt-s" type="button" data-goto="members">회원 메뉴 열기</button>' : '<p class="t-small t-muted">아직 가입한 회원이 없어요.</p>', 'mt-m') +
+        '<div class="kp-grid kp-grid--3 mt-m">' +
+        panel('성별', '전체 회원 기준', hbars(gen, mem.length, 'var(--party)')) +
+        panel('연령대', '전체 회원 기준', hbars(age, mem.length, 'var(--gacha)')) +
+        panel('등급', '최근 1년 받은 포인트 기준', hbars(lv, mem.length, 'var(--pass-rail)')) +
+        '</div>' +
+        panel('최근 가입 회원', '전체 목록과 검색·내려받기는 회원 메뉴에서', recent.length ? '<div class="tbl-scroll"><table class="tbl adm-table kp-tbl"><thead><tr><th>회원</th><th>성별·연령대</th><th>등급</th><th>가입</th></tr></thead><tbody>' + recent.map(function (m) { return '<tr><td>' + esc(m.nick || m.name || '') + '<br><span class="t-micro">' + esc(m.username ? '@' + m.username : (PROV[m.provider] || '') + ' · ' + (m.code || '')) + '</span></td><td>' + esc([PLT.pass.label('gender', m.gender), PLT.pass.label('age', m.ageGroup)].filter(Boolean).join(' · ') || '—') + '</td><td>' + esc((m.level && m.level.name) || '—') + '</td><td>' + esc(PLT.fmtDate(new Date(m.createdAt), false)) + '</td></tr>'; }).join('') + '</tbody></table></div><button class="btn btn--ghost btn--s mt-s" type="button" data-goto="members">회원 메뉴 열기</button>' : '<p class="t-small t-muted">아직 가입한 회원이 없어요.</p>', 'mt-m') +
         '<h2 class="t-h3 kp-h">상담·문의</h2>' +
         '<div class="kp-cards kp-cards--4">' +
         '<div class="kp-card"><span>창업·제휴 상담 신청</span><b>' + num(lr.length) + '<small>건</small></b><em>' + (quick ? '그중 상단 빠른 상담 ' + num(quick) + '건' : '기간 내 접수') + '</em></div>' +

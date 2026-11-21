@@ -15,6 +15,7 @@
 
 create schema if not exists private;
 revoke all on schema private from public;
+create extension if not exists pgcrypto with schema extensions;   -- 운영자 임시 비밀번호(bcrypt)에 씀
 
 -- 이전 버전 함수 정리 (표와 데이터는 그대로 둡니다)
 do $$ declare f record; begin
@@ -39,7 +40,14 @@ create table if not exists private.staff (
 
 create table if not exists private.members (
   id uuid primary key references auth.users (id) on delete cascade,
-  phone text not null unique,
+  provider text not null default 'id',            -- id(아이디·비밀번호) · kakao · google · phone(예전 휴대폰 가입)
+  username text,                                  -- 아이디 (소문자). 소셜 가입은 비어 있어요
+  phone text unique,                              -- 예전 휴대폰 가입 회원만
+  email text not null default '',                 -- 선택: 비밀번호 재설정 메일을 받을 주소
+  gender text not null default '',                -- m · f
+  age_group text not null default '',             -- 10s · 20e · 20l · 30s · 40s · 50p
+  must_change_pw boolean not null default false,  -- 운영자가 임시 비밀번호를 만들면 true
+  recover_sent_at timestamptz,
   nick text not null default '',
   name text not null default '',
   birth text not null default '',
@@ -184,6 +192,31 @@ create table if not exists private.inquiries (
   text text not null default '', contact text not null default '', member_id uuid references private.members (id) on delete set null,
   status text not null default 'open', at timestamptz not null default now()
 );
+-- 포인트 응모·경품 신청
+create table if not exists private.entries (
+  id uuid primary key default gen_random_uuid(),
+  member_id uuid not null references private.members (id) on delete cascade,
+  reward_id text not null, kind text not null, title text not null default '',
+  qty int not null default 1, cost int not null default 0,
+  status text not null default 'applied' check (status in ('applied', 'won', 'lost', 'ready', 'done', 'cancelled')),
+  code text not null default '', at timestamptz not null default now(), updated_at timestamptz not null default now()
+);
+create index if not exists entries_reward on private.entries (reward_id);
+create index if not exists entries_member on private.entries (member_id);
+-- 아이디 찾기·비밀번호 재설정 메일 발송 기록 (너무 자주 보내지 않게)
+create table if not exists private.mail_log (id bigint generated always as identity primary key, kind text not null, email text not null, at timestamptz not null default now());
+
+-- 예전 휴대폰 가입 표에서 바뀐 것 (이미 만든 DB에 다시 실행해도 안전해요)
+alter table private.members add column if not exists provider text not null default 'id';
+alter table private.members add column if not exists username text;
+alter table private.members add column if not exists email text not null default '';
+alter table private.members add column if not exists gender text not null default '';
+alter table private.members add column if not exists age_group text not null default '';
+alter table private.members add column if not exists must_change_pw boolean not null default false;
+alter table private.members add column if not exists recover_sent_at timestamptz;
+alter table private.members alter column phone drop not null;
+update private.members set provider = 'phone' where provider = 'id' and username is null and phone is not null;
+create unique index if not exists members_username on private.members (username) where username is not null;
 
 -- 표는 함수로만 다룹니다
 do $$ declare t record; begin
@@ -231,32 +264,42 @@ create or replace function private.station(sid text) returns jsonb language sql 
 create or replace function private.ptime(tid text) returns jsonb language sql stable as $$ select t from jsonb_array_elements(private.rules() -> 'party' -> 'times') t where t ->> 'id' = tid limit 1 $$;
 create or replace function private.series(sid text) returns jsonb language sql stable as $$ select s from jsonb_array_elements(private.rules() -> 'gacha' -> 'series') s where s ->> 'id' = sid limit 1 $$;
 create or replace function private.jint(j jsonb, k text, d int default 0) returns int language sql immutable as $$ select coalesce(nullif(j ->> k, '')::numeric, d)::int $$;
+-- 운영 콘솔에서 회원 찾기 — 아이디, 회원 코드, 내부 id, 휴대폰 번호 중 무엇이든
+create or replace function private.find_member(k text) returns uuid language sql stable as $$
+  select m.id from private.members m
+  where m.username = lower(trim(coalesce(k, ''))) or m.code = upper(trim(coalesce(k, ''))) or m.id::text = trim(coalesce(k, ''))
+     or (length(private.clean_phone(k)) >= 10 and m.phone = private.clean_phone(k))
+  limit 1
+$$;
+-- 아이디 → 로그인 계정 주소 (data/site.js 의 auth.idDomain 과 같아야 해요)
+create or replace function private.id_domain() returns text language sql stable as $$ select coalesce(nullif(private.rules() -> 'auth' ->> 'idDomain', ''), 'id.playtion.kr') $$;
 
--- 지갑: 포인트·코인·XP·등급·스탬프
+-- 지갑: 포인트·등급·스탬프 (등급은 최근 1년 동안 받은 포인트로)
 create or replace function private.wallet(mid uuid) returns jsonb language plpgsql stable as $$
-declare r jsonb := private.rules(); ps jsonb := r -> 'pass'; m private.members; v_pts int; v_cns int; v_xp int; v_st int; goal int; plus boolean;
-  lv jsonb; nx jsonb; l jsonb; prog numeric; earn int;
+declare r jsonb := private.rules(); ps jsonb := r -> 'pass'; m private.members; v_pts int; v_cns int; v_earn int; v_st int; goal int; plus boolean;
+  lv jsonb; nx jsonb; l jsonb; prog numeric; v_att boolean;
 begin
   select * into m from private.members where id = mid;
   select coalesce(sum(lg.points), 0), coalesce(sum(lg.coins), 0) into v_pts, v_cns from private.ledger lg where lg.member_id = mid;
-  select coalesce(sum(lg.xp), 0) into v_xp from private.ledger lg where lg.member_id = mid and lg.at >= now() - interval '365 days';
+  select coalesce(sum(lg.points), 0) into v_earn from private.ledger lg where lg.member_id = mid and lg.points > 0 and lg.type <> 'refund' and lg.at >= now() - interval '365 days';
+  select exists (select 1 from private.ledger lg where lg.member_id = mid and lg.type = 'attend' and (lg.at at time zone 'Asia/Seoul')::date = private.today()) into v_att;
   select count(*) into v_st from private.stamps sp where sp.member_id = mid;
   goal := coalesce((ps -> 'stamps' ->> 'goal')::int, 10);
   plus := m.plus_until is not null and m.plus_until > now();
-  lv := ps -> 'levels' -> 0; nx := null;
-  for l in select value from jsonb_array_elements(ps -> 'levels') loop
-    if v_xp >= (l ->> 'min')::int then lv := l; nx := null; elsif nx is null then nx := l; end if;
+  lv := coalesce(ps -> 'levels' -> 0, '{"id":"rookie","name":"루키","en":"Rookie","min":0}'::jsonb); nx := null;
+  for l in select value from jsonb_array_elements(coalesce(ps -> 'levels', '[]'::jsonb)) loop
+    if v_earn >= (l ->> 'min')::int then lv := l; nx := null; elsif nx is null then nx := l; end if;
   end loop;
-  prog := case when nx is null then 1 else least(1, (v_xp - (lv ->> 'min')::numeric) / greatest(1, (nx ->> 'min')::numeric - (lv ->> 'min')::numeric)) end;
-  earn := (lv ->> 'earn')::int + case when plus then 1 else 0 end;
-  return jsonb_build_object('points', v_pts, 'coins', v_cns, 'xp', v_xp, 'level', lv, 'nextLevel', nx, 'progress', prog,
-    'toNext', case when nx is null then 0 else (nx ->> 'min')::int - v_xp end,
-    'stampsTotal', v_st, 'stamps', v_st % goal, 'stampGoal', goal, 'isPlus', plus, 'plusUntil', private.ts(m.plus_until),
-    'earnRate', earn, 'noDeposit', plus or lv ->> 'id' in ('pro', 'legend'));
+  prog := case when nx is null then 1 else least(1, (v_earn - coalesce((lv ->> 'min')::numeric, 0)) / greatest(1, (nx ->> 'min')::numeric - coalesce((lv ->> 'min')::numeric, 0))) end;
+  return jsonb_build_object('points', v_pts, 'coins', v_cns, 'earned', v_earn, 'xp', v_earn, 'level', lv, 'nextLevel', nx, 'progress', prog,
+    'toNext', case when nx is null then 0 else (nx ->> 'min')::int - v_earn end,
+    'stampsTotal', v_st, 'stamps', v_st % goal, 'stampGoal', goal, 'attendedToday', v_att, 'isPlus', plus, 'plusUntil', private.ts(m.plus_until),
+    'earnRate', 0, 'noDeposit', false);
 end $$;
 create or replace function private.me_json(mid uuid) returns jsonb language sql stable as $$
-  select case when m.id is null then null else jsonb_build_object('id', m.id, 'phone', m.phone, 'nick', m.nick, 'name', m.name, 'birth', m.birth, 'code', m.code,
-    'invitedBy', m.invited_by, 'plusAuto', m.plus_auto, 'consents', m.consents, 'createdAt', private.ts(m.created_at),
+  select case when m.id is null then null else jsonb_build_object('id', m.id, 'provider', m.provider, 'username', coalesce(m.username, ''), 'phone', coalesce(m.phone, ''),
+    'email', m.email, 'gender', m.gender, 'ageGroup', m.age_group, 'nick', m.nick, 'name', m.name, 'birth', m.birth, 'code', m.code,
+    'invitedBy', m.invited_by, 'plusAuto', m.plus_auto, 'consents', m.consents, 'mustChangePw', m.must_change_pw, 'createdAt', private.ts(m.created_at),
     'unreadNotes', (select count(*) from private.notes n where n.member_id = m.id and not n.read)) || private.wallet(m.id) end
   from private.members m where m.id = mid
 $$;
@@ -266,6 +309,15 @@ $$;
 create or replace function private.note(mid uuid, title text, body text default '', link text default '') returns void language sql as $$
   insert into private.notes (member_id, title, body, link) select mid, title, coalesce(body, ''), coalesce(link, '') where mid is not null
 $$;
+-- 적립 기준(data/pass.js 의 points.earn)대로 포인트 넣기
+create or replace function private.earn(mid uuid, k text, memo text default null, ref text default '') returns int language plpgsql as $$
+declare e jsonb := private.rules() -> 'pass' -> 'points' -> 'earn' -> k; p int := coalesce((e ->> 'points')::int, 0);
+begin
+  if mid is null or p <= 0 then return 0; end if;
+  perform private.ledger_add(mid, k, coalesce(memo, e ->> 'title', '포인트 적립'), p, 0, 0, coalesce(ref, ''));
+  return p;
+end $$;
+create or replace function private.pt(n int) returns text language sql immutable as $$ select to_char(coalesce(n, 0), 'FM999,999,999') || 'P' $$;
 create or replace function private.coupon_json(c private.coupons) returns jsonb language sql stable as $$
   select jsonb_build_object('id', c.id, 'memberId', c.member_id, 'defId', c.def_id, 'title', c.title, 'line', c.line, 'kind', c.kind, 'value', c.value,
     'createdAt', private.ts(c.created_at), 'expiresAt', private.ts(c.expires_at), 'usedAt', private.ts(c.used_at), 'source', c.source,
@@ -286,17 +338,17 @@ begin
   return private.coupon_json(c);
 end $$;
 create or replace function private.add_stamp(mid uuid, kind text, store text, ref text) returns jsonb language plpgsql as $$
-declare ps jsonb := private.rules() -> 'pass'; total int; goal int; rw jsonb := '[]'::jsonb; c jsonb; st jsonb := private.station(store); n int;
+declare ps jsonb := private.rules() -> 'pass'; total int; goal int; rw jsonb := '[]'::jsonb; got int;
 begin
   if mid is null then return jsonb_build_object('rewards', rw); end if;
   insert into private.stamps (member_id, kind, store, ref) values (mid, kind, coalesce(store, ''), coalesce(ref, ''));
   select count(*) into total from private.stamps where member_id = mid;
   goal := coalesce((ps -> 'stamps' ->> 'goal')::int, 10);
-  if total % goal = 0 then c := private.issue(mid, coalesce(ps -> 'stamps' -> 'reward' ->> 'couponId', 'stamp10'), 'stamp'); if c is not null then rw := rw || jsonb_build_array(c); end if; end if;
-  if kind = 'checkin' and st ->> 'type' = 'gacha' and ps -> 'transfer' is not null then
-    select count(*) into n from private.stamps s where s.member_id = mid and s.kind = 'checkin' and (private.station(s.store) ->> 'type') = 'gacha';
-    if n % coalesce((ps -> 'transfer' ->> 'gachaVisitsForParty')::int, 3) = 0 then
-      c := private.issue(mid, ps -> 'transfer' ->> 'gachaToParty', 'transfer'); if c is not null then rw := rw || jsonb_build_array(c); end if;
+  if total % goal = 0 then
+    got := private.earn(mid, 'stamp10', '스탬프 ' || goal || '칸 완성');
+    if got > 0 then
+      rw := rw || jsonb_build_array(jsonb_build_object('title', '스탬프 ' || goal || '칸 완성 · ' || private.pt(got)));
+      perform private.note(mid, '스탬프 카드를 다 채웠어요', private.pt(got) || '를 넣어 드렸어요. 새 카드가 시작돼요.', 'pass/me#points');
     end if;
   end if;
   return jsonb_build_object('rewards', rw, 'total', total);
@@ -439,57 +491,155 @@ end $$;
 --  PASS 회원
 -- ---------------------------------------------------------------------
 create or replace function public.plt_me() returns jsonb language plpgsql security definer set search_path = private, public, pg_temp as $$
-declare u uuid := auth.uid(); m private.members; y text := to_char(now() at time zone 'Asia/Seoul', 'YYYY');
+declare u uuid := auth.uid(); m private.members; y text := to_char(now() at time zone 'Asia/Seoul', 'YYYY'); bal int; last_at timestamptz; days int; got int;
 begin
   if u is null then return null; end if;
   select * into m from private.members where id = u;
   if m.id is null then return null; end if;
   update private.members set last_login_at = now() where id = u and (last_login_at is null or last_login_at < now() - interval '1 hour');
+  -- 1년 동안 포인트가 한 번도 움직이지 않았으면 남은 포인트 정리
+  days := coalesce((private.rules() -> 'pass' -> 'points' ->> 'expireDays')::int, 0);
+  if days > 0 then
+    select coalesce(sum(points), 0), max(at) into bal, last_at from private.ledger where member_id = u and points <> 0;
+    if bal > 0 and last_at < now() - make_interval(days => days) then
+      perform private.ledger_add(u, 'expire', '1년 동안 활동이 없어 포인트가 사라졌어요', -bal);
+      perform private.note(u, '포인트가 사라졌어요', '1년 동안 적립도 사용도 없어 남은 ' || private.pt(bal) || '가 사라졌어요.');
+    end if;
+  end if;
+  -- 생일 달 포인트 — 그해 한 번
   if m.birth ~ '^\d{2}-\d{2}$' and left(m.birth, 2)::int = extract(month from now() at time zone 'Asia/Seoul')::int
-     and not exists (select 1 from private.coupons where member_id = u and def_id = 'birthday' and to_char(created_at at time zone 'Asia/Seoul', 'YYYY') = y) then
-    perform private.issue(u, 'birthday', 'birthday');
+     and not exists (select 1 from private.ledger where member_id = u and type = 'birthday' and to_char(at at time zone 'Asia/Seoul', 'YYYY') = y) then
+    got := private.earn(u, 'birthday', '생일 축하 포인트');
+    if got > 0 then perform private.note(u, '생일 축하해요', '생일 축하 포인트 ' || private.pt(got) || '를 넣어 드렸어요.', 'pass/me#points'); end if;
   end if;
   return private.me_json(u);
 end $$;
 
+-- 아이디를 쓸 수 있는지 (가입 화면)
+create or replace function public.plt_username_free(p_username text) returns boolean language sql security definer set search_path = private, public, pg_temp as $$
+  select coalesce(p_username, '') ~ '^[a-z][a-z0-9_]{3,19}$' and not exists (select 1 from private.members where username = lower(p_username))
+$$;
+
+-- 가입 (아이디 가입은 Supabase 계정을 먼저 만든 뒤, 소셜 가입은 카카오·구글 로그인 뒤 부릅니다)
 create or replace function public.plt_signup(p jsonb) returns jsonb language plpgsql security definer set search_path = private, public, pg_temp as $$
-declare u uuid := auth.uid(); ph text; g private.gifts; v_code text;
+declare u uuid := auth.uid(); au auth.users; prov text; v_user text := null; v_code text; v_nick text := trim(coalesce(p ->> 'nick', ''));
+  v_gender text := coalesce(p ->> 'gender', ''); v_age text := coalesce(p ->> 'ageGroup', ''); v_email text := lower(trim(coalesce(p ->> 'email', '')));
+  a jsonb := private.rules() -> 'auth'; ages jsonb := private.rules() -> 'pass' -> 'member' -> 'ages'; got int;
 begin
-  if u is null then perform private.fail('휴대폰 인증을 먼저 해 주세요.'); end if;
+  if u is null then perform private.fail('로그인을 먼저 해 주세요.'); end if;
   if exists (select 1 from private.members where id = u) then return private.me_json(u); end if;
-  select private.clean_phone(regexp_replace(phone, '^\+?82', '0')) into ph from auth.users where id = u;
-  if ph is null or not private.valid_phone(ph) then perform private.fail('휴대폰 번호를 확인하지 못했어요.'); end if;
-  if exists (select 1 from private.members where phone = ph) then perform private.fail('이미 가입된 번호예요.'); end if;
-  if length(coalesce(trim(p ->> 'nick'), '')) < 2 then perform private.fail('닉네임을 2자 이상 적어 주세요.'); end if;
+  select * into au from auth.users where id = u;
+  prov := coalesce(au.raw_app_meta_data ->> 'provider', 'email');
+  if prov = 'email' then
+    if au.email is null or au.email !~ ('^[a-z][a-z0-9_]{3,19}@' || replace(private.id_domain(), '.', '\.') || '$') then perform private.fail('아이디 가입 정보를 확인하지 못했어요.'); end if;
+    v_user := split_part(au.email, '@', 1); prov := 'id';
+    if exists (select 1 from private.members where username = v_user) then perform private.fail('이미 쓰고 있는 아이디예요.'); end if;
+  elsif prov not in ('kakao', 'google') then perform private.fail('지원하지 않는 가입 방식이에요.');
+  end if;
+  if length(v_nick) < 2 or length(v_nick) > 12 then perform private.fail('닉네임을 2~12자로 적어 주세요.'); end if;
+  if v_gender <> '' and v_gender not in ('m', 'f') then perform private.fail('성별을 다시 골라 주세요.'); end if;
+  if v_gender = '' and coalesce((a ->> 'genderRequired')::boolean, true) then perform private.fail('성별을 골라 주세요.'); end if;
+  if v_age <> '' and ages is not null and not exists (select 1 from jsonb_array_elements(ages) x where x ->> 0 = v_age) then perform private.fail('연령대를 다시 골라 주세요.'); end if;
+  if v_age = '' and coalesce((a ->> 'ageRequired')::boolean, true) then perform private.fail('연령대를 골라 주세요.'); end if;
+  if v_email <> '' and v_email !~ '^[^\s@]+@[^\s@]+\.[^\s@]{2,}$' then perform private.fail('이메일 주소를 확인해 주세요.'); end if;
   loop v_code := private.code('PLT', 6); exit when not exists (select 1 from private.members mm where mm.code = v_code); end loop;
-  insert into private.members (id, phone, nick, name, birth, code, invited_by, consents, first_touch)
-    values (u, ph, left(trim(p ->> 'nick'), 12), left(coalesce(trim(p ->> 'name'), ''), 20),
-      case when coalesce(p ->> 'birth', '') ~ '^\d{2}-\d{2}$' then p ->> 'birth' else '' end, v_code, upper(left(coalesce(p ->> 'invite', ''), 12)),
-      jsonb_build_object('terms', true, 'age', true, 'mktSms', coalesce((p ->> 'mktSms')::boolean, false), 'mktKakao', coalesce((p ->> 'mktKakao')::boolean, false),
-        'mktNight', coalesce((p ->> 'mktNight')::boolean, false), 'at', private.ts(now()), 'ver', '2026-10'), left(coalesce(p ->> 'firstTouch', 'web'), 40));
-  perform private.issue(u, 'welcomeDraw', 'welcome');
-  update private.bookings set member_id = u where member_id is null and phone = ph;
-  update private.regs set member_id = u where member_id is null and phone = ph;
-  for g in select * from private.gifts where to_phone = ph and claimed_at is null loop
-    update private.gifts set claimed_at = now() where id = g.id;
-    perform private.ledger_add(u, 'gift', '선물 받은 코인', 0, g.amount);
-    perform private.note(u, '선물이 도착했어요', to_char(g.amount, 'FM999,999') || 'C' || case when g.message <> '' then ' · ' || g.message else '' end);
-  end loop;
-  perform private.note(u, 'PASS에 오신 걸 환영해요', '가입 선물로 온라인 뽑기 1회권을 넣어 뒀어요.', 'pass/me#coupons');
+  insert into private.members (id, provider, username, email, gender, age_group, nick, birth, code, invited_by, consents, first_touch)
+    values (u, prov, v_user, left(v_email, 80), v_gender, v_age, left(v_nick, 12),
+      case when coalesce(p ->> 'birth', '') ~ '^(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$' then p ->> 'birth' else '' end, v_code, upper(left(coalesce(p ->> 'invite', ''), 12)),
+      jsonb_build_object('terms', true, 'age', true, 'mktEmail', coalesce((p ->> 'mktEmail')::boolean, false), 'at', private.ts(now()), 'ver', '2026-11'), left(coalesce(p ->> 'firstTouch', 'web'), 40));
+  got := private.earn(u, 'welcome', '가입 축하 포인트');
+  perform private.note(u, 'PASS에 오신 걸 환영해요', case when got > 0 then '가입 축하 포인트 ' || private.pt(got) || '를 넣어 드렸어요. ' else '' end || '출석 체크와 가챠샵 체크인으로 포인트를 모아 보세요.', 'pass/me#points');
   return private.me_json(u);
 end $$;
 
 create or replace function public.plt_update_profile(p jsonb) returns jsonb language plpgsql security definer set search_path = private, public, pg_temp as $$
-declare u uuid := private.need();
+declare u uuid := private.need(); m private.members; a jsonb := private.rules() -> 'auth'; ages jsonb := private.rules() -> 'pass' -> 'member' -> 'ages';
+  v_nick text; v_gender text; v_age text; v_email text; v_birth text;
 begin
-  update private.members set
-    nick = case when p ? 'nick' and length(trim(p ->> 'nick')) >= 1 then left(trim(p ->> 'nick'), 12) else nick end,
-    name = case when p ? 'name' then left(coalesce(p ->> 'name', ''), 20) else name end,
-    birth = case when p ? 'birth' and coalesce(p ->> 'birth', '') ~ '^(\d{2}-\d{2})?$' then coalesce(p ->> 'birth', '') else birth end,
-    consents = case when p ? 'consents' then consents || jsonb_build_object('mktSms', coalesce((p -> 'consents' ->> 'mktSms')::boolean, (consents ->> 'mktSms')::boolean),
-      'mktKakao', coalesce((p -> 'consents' ->> 'mktKakao')::boolean, (consents ->> 'mktKakao')::boolean), 'mktNight', coalesce((p -> 'consents' ->> 'mktNight')::boolean, (consents ->> 'mktNight')::boolean), 'at', private.ts(now())) else consents end
+  select * into m from private.members where id = u;
+  v_nick := case when p ? 'nick' then trim(coalesce(p ->> 'nick', '')) else m.nick end;
+  v_gender := case when p ? 'gender' then coalesce(p ->> 'gender', '') else m.gender end;
+  v_age := case when p ? 'ageGroup' then coalesce(p ->> 'ageGroup', '') else m.age_group end;
+  v_email := case when p ? 'email' then lower(trim(coalesce(p ->> 'email', ''))) else m.email end;
+  v_birth := case when p ? 'birth' then coalesce(p ->> 'birth', '') else m.birth end;
+  if length(v_nick) < 2 or length(v_nick) > 12 then perform private.fail('닉네임을 2~12자로 적어 주세요.'); end if;
+  if v_gender <> '' and v_gender not in ('m', 'f') then perform private.fail('성별을 다시 골라 주세요.'); end if;
+  if v_gender = '' and coalesce((a ->> 'genderRequired')::boolean, true) then perform private.fail('성별을 골라 주세요.'); end if;
+  if v_age <> '' and ages is not null and not exists (select 1 from jsonb_array_elements(ages) x where x ->> 0 = v_age) then perform private.fail('연령대를 다시 골라 주세요.'); end if;
+  if v_age = '' and coalesce((a ->> 'ageRequired')::boolean, true) then perform private.fail('연령대를 골라 주세요.'); end if;
+  if v_email <> '' and v_email !~ '^[^\s@]+@[^\s@]+\.[^\s@]{2,}$' then perform private.fail('이메일 주소를 확인해 주세요.'); end if;
+  if v_birth <> '' and v_birth !~ '^(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$' then perform private.fail('생일을 다시 골라 주세요.'); end if;
+  update private.members set nick = left(v_nick, 12), gender = v_gender, age_group = v_age, email = left(v_email, 80), birth = v_birth,
+    consents = case when p ? 'consents' then consents || jsonb_build_object(
+      'mktEmail', coalesce((p -> 'consents' ->> 'mktEmail')::boolean, (consents ->> 'mktEmail')::boolean, false),
+      'mktSms', coalesce((p -> 'consents' ->> 'mktSms')::boolean, (consents ->> 'mktSms')::boolean, false),
+      'mktKakao', coalesce((p -> 'consents' ->> 'mktKakao')::boolean, (consents ->> 'mktKakao')::boolean, false), 'at', private.ts(now())) else consents end
   where id = u;
   return private.me_json(u);
+end $$;
+
+-- 비밀번호를 바꾼 뒤 (임시 비밀번호 표시 지우기)
+create or replace function public.plt_pw_changed() returns jsonb language plpgsql security definer set search_path = private, public, pg_temp as $$
+declare u uuid := private.need();
+begin
+  update private.members set must_change_pw = false where id = u;
+  return private.me_json(u);
+end $$;
+
+-- 출석 체크 — 하루 한 번
+create or replace function public.plt_attend() returns jsonb language plpgsql security definer set search_path = private, public, pg_temp as $$
+declare u uuid := private.need(); got int;
+begin
+  perform pg_advisory_xact_lock(hashtext('attend:' || u::text));
+  if exists (select 1 from private.ledger where member_id = u and type = 'attend' and (at at time zone 'Asia/Seoul')::date = private.today()) then perform private.fail('오늘은 이미 출석했어요. 내일 또 만나요.'); end if;
+  got := private.earn(u, 'attend', '출석 체크');
+  return jsonb_build_object('points', got, 'me', private.me_json(u));
+end $$;
+
+-- 경품별로 나간 수량 (남은 수량 표시)
+create or replace function public.plt_reward_usage() returns jsonb language sql security definer set search_path = private, public, pg_temp as $$
+  select coalesce(jsonb_object_agg(reward_id, n), '{}'::jsonb) from (select reward_id, sum(qty) n from private.entries where status <> 'cancelled' group by reward_id) x
+$$;
+
+-- 포인트로 응모하기·경품 신청하기
+create or replace function public.plt_redeem(p_reward_id text, p_qty int default 1) returns jsonb language plpgsql security definer set search_path = private, public, pg_temp as $$
+declare u uuid := private.need(); r jsonb; q int := greatest(1, least(50, coalesce(p_qty, 1))); w jsonb; cost int; mine int; used int; lvs jsonb; need_i int := 0; my_i int := 0; i int := 0; l jsonb;
+  e private.entries; raffle boolean;
+begin
+  select x into r from jsonb_array_elements(coalesce(private.rules() -> 'pass' -> 'rewards', '[]'::jsonb)) x where x ->> 'id' = p_reward_id limit 1;
+  if r is null or coalesce(r ->> 'kind', '') not in ('raffle', 'prize') then perform private.fail('신청할 수 없는 항목이에요.'); end if;
+  if coalesce((r ->> 'sample')::boolean, false) then perform private.fail('예시로 보여 드리는 경품이에요. 진짜 이벤트가 열리면 알려 드릴게요.'); end if;
+  if coalesce(r ->> 'status', '') <> 'open' then perform private.fail(case when r ->> 'status' = 'soon' then '아직 준비 중이에요.' else '마감됐어요.' end); end if;
+  if coalesce(r ->> 'ends', '') <> '' and private.today() > (r ->> 'ends')::date then perform private.fail('마감됐어요.'); end if;
+  raffle := r ->> 'kind' = 'raffle';
+  if not raffle then q := 1; end if;
+  perform pg_advisory_xact_lock(hashtext('redeem:' || p_reward_id));
+  w := private.wallet(u);
+  if coalesce(r ->> 'minLevel', '') <> '' then
+    lvs := coalesce(private.rules() -> 'pass' -> 'levels', '[]'::jsonb);
+    for l in select value from jsonb_array_elements(lvs) loop
+      if l ->> 'id' = r ->> 'minLevel' then need_i := i; end if;
+      if l ->> 'id' = w -> 'level' ->> 'id' then my_i := i; end if;
+      i := i + 1;
+    end loop;
+    if my_i < need_i then perform private.fail((lvs -> need_i ->> 'name') || ' 등급부터 신청할 수 있어요.'); end if;
+  end if;
+  select coalesce(sum(qty), 0) into mine from private.entries where member_id = u and reward_id = p_reward_id and status <> 'cancelled';
+  if coalesce((r ->> 'perMember')::int, 0) > 0 and mine + q > (r ->> 'perMember')::int then
+    perform private.fail('한 사람이 ' || (r ->> 'perMember') || '번까지 ' || case when raffle then '응모' else '신청' end || '할 수 있어요.' || case when mine > 0 then ' 지금까지 ' || mine || '번 했어요.' else '' end);
+  end if;
+  if not raffle and coalesce((r ->> 'stock')::int, 0) > 0 then
+    select coalesce(sum(qty), 0) into used from private.entries where reward_id = p_reward_id and status <> 'cancelled';
+    if used + q > (r ->> 'stock')::int then perform private.fail('준비한 수량이 다 나갔어요.'); end if;
+  end if;
+  cost := coalesce((r ->> 'cost')::int, 0) * q;
+  if (w ->> 'points')::int < cost then perform private.fail('포인트가 ' || private.pt(cost - (w ->> 'points')::int) || ' 모자라요.'); end if;
+  insert into private.entries (member_id, reward_id, kind, title, qty, cost, status, code)
+    values (u, p_reward_id, r ->> 'kind', left(coalesce(r ->> 'title', ''), 80), q, cost, case when raffle then 'applied' else 'ready' end, case when raffle then '' else private.code('', 6) end)
+    returning * into e;
+  perform private.ledger_add(u, 'use', e.title || case when q > 1 then ' ×' || q else '' end, -cost, 0, 0, e.id::text);
+  perform private.note(u, case when raffle then '응모했어요' else '경품 신청을 받았어요' end, e.title || case when raffle then ' · ' || q || '번' else ' · 수령 코드 ' || e.code end, 'pass/wallet#mine');
+  return jsonb_build_object('entry', jsonb_build_object('id', e.id, 'rewardId', e.reward_id, 'kind', e.kind, 'title', e.title, 'qty', e.qty, 'cost', e.cost, 'status', e.status, 'code', e.code, 'at', private.ts(e.at)), 'me', private.me_json(u));
 end $$;
 
 create or replace function public.plt_delete_account() returns boolean language plpgsql security definer set search_path = private, public, pg_temp as $$
@@ -513,6 +663,7 @@ begin
   elsif p_kind = 'bookings' then return coalesce((select jsonb_agg(private.booking_json(b) order by b.date desc) from private.bookings b where b.member_id = u or b.phone = (select mm.phone from private.members mm where mm.id = u)), '[]');
   elsif p_kind = 'trades' then return coalesce((select jsonb_agg(jsonb_build_object('id', x.id, 'postId', x.post_id, 'title', x.title, 'buyerId', x.buyer_id, 'sellerId', x.seller_id, 'price', x.price, 'fee', x.fee, 'method', x.method, 'status', x.status, 'code', x.code, 'at', private.ts(x.at), 'doneAt', private.ts(x.done_at)) order by x.at desc) from private.trades x where x.buyer_id = u or x.seller_id = u), '[]');
   elsif p_kind = 'regs' then return coalesce((select jsonb_agg(jsonb_build_object('id', x.id, 'eventId', x.event_id, 'people', x.people, 'memo', x.memo, 'status', x.status, 'at', private.ts(x.at))) from private.regs x where x.member_id = u), '[]');
+  elsif p_kind = 'entries' then return coalesce((select jsonb_agg(jsonb_build_object('id', x.id, 'rewardId', x.reward_id, 'kind', x.kind, 'title', x.title, 'qty', x.qty, 'cost', x.cost, 'status', x.status, 'code', case when x.status in ('ready', 'won') then x.code else '' end, 'at', private.ts(x.at)) order by x.at desc) from private.entries x where x.member_id = u), '[]');
   end if;
   return '[]';
 end $$;
@@ -551,16 +702,32 @@ begin
   return jsonb_build_object('token', p_store || '.' || w || '.' || left(private.hmac(sec, p_store || '|' || w), 20), 'ttl', 30 - (floor(extract(epoch from now()))::bigint % 30));
 end $$;
 create or replace function public.plt_checkin(token text) returns jsonb language plpgsql security definer set search_path = private, public, pg_temp as $$
-declare u uuid := private.need(); p text[] := string_to_array(coalesce(token, ''), '.'); sec text := (select value from private.secrets where key = 'kiosk'); age bigint; r jsonb; ps jsonb := private.rules() -> 'pass';
+declare u uuid := private.need(); p text[] := string_to_array(coalesce(token, ''), '.'); sec text := (select value from private.secrets where key = 'kiosk'); age bigint; r jsonb;
+  first_visit boolean; got int; ip int; rw jsonb; m private.members; inv uuid;
 begin
   if array_length(p, 1) <> 3 or p[2] !~ '^\d+$' or left(private.hmac(sec, p[1] || '|' || p[2]), 20) <> p[3] then perform private.fail('QR을 다시 찍어 주세요.'); end if;
   age := floor(extract(epoch from now()) / 30)::bigint - p[2]::bigint;
   if age < 0 or age > 2 then perform private.fail('QR 유효 시간이 지났어요. 화면의 새 QR을 찍어 주세요.'); end if;
+  first_visit := not exists (select 1 from private.checkins c where c.member_id = u);
   insert into private.checkins (member_id, store, day) values (u, p[1], private.today()) on conflict do nothing;
   if not found then return jsonb_build_object('already', true, 'rewards', '[]'::jsonb, 'me', private.me_json(u)); end if;
-  perform private.ledger_add(u, 'visit', coalesce(private.station(p[1]) ->> 'name', p[1]) || ' 체크인', 0, 0, coalesce((ps -> 'xp' ->> 'perVisit')::int, 10));
+  got := private.earn(u, 'checkin', coalesce(private.station(p[1]) ->> 'name', p[1]) || ' 체크인');
   r := private.add_stamp(u, 'checkin', p[1], private.today()::text);
-  return jsonb_build_object('already', false, 'rewards', r -> 'rewards', 'me', private.me_json(u));
+  rw := coalesce(r -> 'rewards', '[]'::jsonb);
+  -- 친구 초대: 초대받은 회원이 처음 체크인하면 두 사람 모두
+  select * into m from private.members where id = u;
+  if first_visit and m.invited_by <> '' then
+    select id into inv from private.members where code = m.invited_by and id <> u;
+    if inv is not null then
+      ip := private.earn(u, 'invite', '친구 초대 · 첫 체크인');
+      perform private.earn(inv, 'invite', coalesce(nullif(m.nick, ''), '친구') || '님 첫 체크인');
+      if ip > 0 then
+        rw := rw || jsonb_build_array(jsonb_build_object('title', '친구 초대 · ' || private.pt(ip)));
+        perform private.note(inv, '초대한 친구가 가챠샵에 왔어요', private.pt(ip) || '를 넣어 드렸어요.', 'pass/me#points');
+      end if;
+    end if;
+  end if;
+  return jsonb_build_object('already', false, 'points', got, 'rewards', rw, 'me', private.me_json(u));
 end $$;
 
 -- ---------------------------------------------------------------------
@@ -945,10 +1112,10 @@ create or replace function public.plt_register(p_event_id text, d jsonb) returns
 declare u uuid := auth.uid(); m private.members; ph text; r private.regs;
 begin
   if u is not null then select * into m from private.members where id = u; end if;
-  ph := coalesce(m.phone, private.clean_phone(d ->> 'phone'));
+  ph := coalesce(nullif(m.phone, ''), private.clean_phone(d ->> 'phone'));
   if not private.valid_phone(ph) then perform private.fail('휴대폰 번호를 확인해 주세요.'); end if;
   if exists (select 1 from private.regs x where x.event_id = p_event_id and x.phone = ph and x.status <> 'cancelled') then perform private.fail('이미 신청한 행사예요.'); end if;
-  insert into private.regs (event_id, member_id, name, phone, people, memo) values (left(p_event_id, 40), m.id, left(coalesce(nullif(d ->> 'name', ''), m.name, m.nick, ''), 20), ph, greatest(1, least(10, private.jint(d, 'people', 1))), left(coalesce(d ->> 'memo', ''), 300)) returning * into r;
+  insert into private.regs (event_id, member_id, name, phone, people, memo) values (left(p_event_id, 40), m.id, left(coalesce(nullif(d ->> 'name', ''), nullif(m.name, ''), m.nick, ''), 20), ph, greatest(1, least(10, private.jint(d, 'people', 1))), left(coalesce(d ->> 'memo', ''), 300)) returning * into r;
   if m.id is not null then perform private.note(m.id, '행사 신청을 받았어요', ''); end if;
   return jsonb_build_object('id', r.id);
 end $$;
@@ -966,7 +1133,10 @@ create or replace function public.plt_inquiry(d jsonb) returns jsonb language pl
 declare u uuid := auth.uid(); ph text; x private.inquiries;
 begin
   if length(trim(coalesce(d ->> 'text', '') || coalesce(d ->> 'kind', ''))) < 5 then perform private.fail('문의 내용을 조금 더 적어 주세요.'); end if;
-  ph := private.clean_phone(coalesce(nullif(d ->> 'contact', ''), (select phone from private.members where id = u)));
+  ph := case when coalesce(d ->> 'contact', '') ~ '^[^\s@]+@[^\s@]+\.[^\s@]{2,}$' then lower(left(trim(d ->> 'contact'), 80))
+             else private.clean_phone(coalesce(nullif(d ->> 'contact', ''), (select phone from private.members where id = u))) end;
+  if coalesce(d ->> 'type', '') = 'account' and ph = '' then perform private.fail('연락받을 휴대폰 번호나 이메일을 적어 주세요.'); end if;
+  if coalesce(d ->> 'type', '') = 'account' and (select count(*) from private.inquiries where type = 'account' and contact = ph and at > now() - interval '1 hour') >= 3 then perform private.fail('이미 요청을 받았어요. 확인하고 연락드릴게요.'); end if;
   insert into private.inquiries (type, kind, machine, text, contact, member_id)
     values (left(coalesce(nullif(d ->> 'type', ''), 'general'), 20), left(coalesce(d ->> 'kind', ''), 60), left(coalesce(d ->> 'machine', ''), 20), left(coalesce(d ->> 'text', ''), 1500), ph, u) returning * into x;
   return jsonb_build_object('id', x.id);
@@ -995,6 +1165,9 @@ begin
     'revenue', (select coalesce(sum((quote ->> 'pay')::int), 0) from private.bookings where status in ('confirmed', 'done')),
     'checkinsToday', (select count(*) from private.checkins where day = private.today()),
     'draws', (select count(*) from private.box), 'coinsOutstanding', (select coalesce(sum(coins), 0) from private.ledger),
+    'pointsOutstanding', (select coalesce(sum(points), 0) from private.ledger),
+    'attendToday', (select count(*) from private.ledger where type = 'attend' and (at at time zone 'Asia/Seoul')::date = private.today()),
+    'entriesOpen', (select count(*) from private.entries where status in ('ready', 'won')),
     'transferRate', case when total > 0 then round(v_both * 100.0 / total) else 0 end,
     'leadsNew', (select count(*) from private.leads where status = 'new'), 'inquiriesOpen', (select count(*) from private.inquiries where status = 'open'),
     'tradesOpen', (select count(*) from private.trades where status in ('paid', 'dropped')), 'days', days);
@@ -1013,11 +1186,14 @@ begin
   elsif p_kind = 'arrivals' then return coalesce((select jsonb_agg(jsonb_build_object('id', x.id, 'date', to_char(x.date, 'YYYY-MM-DD'), 'series', to_jsonb(x.series), 'note', x.note, 'at', private.ts(x.at)) order by x.at desc) from private.arrivals x), '[]');
   elsif p_kind = 'reviews' then return coalesce((select jsonb_agg(jsonb_build_object('id', x.id, 'nick', x.nick, 'stationId', x.station_id, 'rating', x.rating, 'text', x.text, 'status', x.status, 'at', private.ts(x.at)) order by x.at desc) from private.reviews x), '[]');
   elsif p_kind = 'subs' then return coalesce((select jsonb_object_agg(c.series_id, c.n) from (select x.series_id, count(*) n from private.subs x group by x.series_id) c), '{}');
+  elsif p_kind = 'entries' then return coalesce((select jsonb_agg(jsonb_build_object('id', x.id, 'memberId', x.member_id, 'rewardId', x.reward_id, 'kind', x.kind, 'title', x.title, 'qty', x.qty, 'cost', x.cost, 'status', x.status, 'code', x.code,
+      'at', private.ts(x.at), 'updatedAt', private.ts(x.updated_at), 'nick', coalesce(m.nick, '(탈퇴)'), 'username', coalesce(m.username, ''), 'memberCode', coalesce(m.code, '')) order by x.at desc)
+    from private.entries x left join private.members m on m.id = x.member_id), '[]');
   end if;
   return '[]';
 end $$;
 create or replace function public.plt_admin_update(p_kind text, p_id text, patch jsonb) returns jsonb language plpgsql security definer set search_path = private, public, pg_temp as $$
-declare st text := patch ->> 'status'; mid uuid; v_item text;
+declare st text := patch ->> 'status'; mid uuid; v_item text; en private.entries;
 begin
   perform private.need_staff();
   if p_kind = 'bookings' and st in ('requested', 'confirmed', 'done', 'noshow', 'cancelled') then
@@ -1033,6 +1209,16 @@ begin
   elsif p_kind = 'box' and st = 'done' then
     update private.box x set status = 'done', updated_at = now() where x.id = p_id::uuid returning x.member_id, x.item into mid, v_item;
     perform private.note(mid, '보관함 상품을 전달했어요', v_item);
+  elsif p_kind = 'entries' and st in ('applied', 'won', 'lost', 'ready', 'done', 'cancelled') then
+    select * into en from private.entries x where x.id = p_id::uuid;
+    if en.id is null then perform private.fail('신청을 찾지 못했어요.'); end if;
+    if en.status = 'cancelled' and st <> 'cancelled' then perform private.fail('취소한 신청은 되돌릴 수 없어요. 포인트는 이미 돌려드렸어요.'); end if;
+    update private.entries x set status = st, updated_at = now(), code = case when st in ('won', 'ready') and x.code = '' then private.code('', 6) else x.code end where x.id = en.id;
+    if st = 'done' and en.status <> 'done' then perform private.note(en.member_id, '경품을 전달했어요', en.title); end if;
+    if st = 'cancelled' and en.status <> 'cancelled' then
+      perform private.ledger_add(en.member_id, 'refund', en.title || ' 취소 · 포인트 돌려드림', en.cost, 0, 0, en.id::text);
+      perform private.note(en.member_id, '신청이 취소됐어요', en.title || ' · ' || private.pt(en.cost) || '를 돌려드렸어요.');
+    end if;
   else perform private.fail('바꿀 수 없는 항목이에요.'); end if;
   return jsonb_build_object('ok', true);
 end $$;
@@ -1068,22 +1254,79 @@ begin
   end loop;
   return jsonb_build_object('notified', sent);
 end $$;
-create or replace function public.plt_admin_issue_coupon(p_phone text, p_def text) returns jsonb language plpgsql security definer set search_path = private, public, pg_temp as $$
+create or replace function public.plt_admin_issue_coupon(p_key text, p_def text) returns jsonb language plpgsql security definer set search_path = private, public, pg_temp as $$
 declare mid uuid; c jsonb;
 begin
   perform private.need_staff();
-  select id into mid from private.members where members.phone = private.clean_phone(p_phone);
-  if mid is null then perform private.fail('그 번호로 가입한 회원이 없어요.'); end if;
+  mid := private.find_member(p_key);
+  if mid is null then perform private.fail('그 아이디나 회원 코드로 가입한 회원이 없어요.'); end if;
   c := private.issue(mid, p_def, 'admin'); if c is null then perform private.fail('쿠폰 종류를 확인해 주세요.'); end if;
   return c;
 end $$;
-create or replace function public.plt_admin_stamp(p_phone text, p_store text default 'kd-gacha') returns jsonb language plpgsql security definer set search_path = private, public, pg_temp as $$
+create or replace function public.plt_admin_stamp(p_key text, p_store text default 'kd-gacha') returns jsonb language plpgsql security definer set search_path = private, public, pg_temp as $$
 declare mid uuid;
 begin
   perform private.need_staff();
-  select id into mid from private.members where members.phone = private.clean_phone(p_phone);
-  if mid is null then perform private.fail('그 번호로 가입한 회원이 없어요.'); end if;
+  mid := private.find_member(p_key);
+  if mid is null then perform private.fail('그 아이디나 회원 코드로 가입한 회원이 없어요.'); end if;
   return private.add_stamp(mid, 'manual', coalesce(p_store, 'kd-gacha'), 'admin');
+end $$;
+-- 포인트 넣기·빼기 (행사 참여, 돌려드림, 부정 적립 회수)
+create or replace function public.plt_admin_points(p_key text, p_points int, p_memo text default '') returns jsonb language plpgsql security definer set search_path = private, public, pg_temp as $$
+declare mid uuid; v_memo text := left(trim(coalesce(p_memo, '')), 60);
+begin
+  perform private.need_staff();
+  mid := private.find_member(p_key);
+  if mid is null then perform private.fail('그 아이디나 회원 코드로 가입한 회원이 없어요.'); end if;
+  if coalesce(p_points, 0) = 0 or abs(p_points) > 100000 then perform private.fail('넣거나 뺄 포인트를 확인해 주세요.'); end if;
+  if p_points < 0 and (private.wallet(mid) ->> 'points')::int + p_points < 0 then perform private.fail('남은 포인트보다 많이 뺄 수 없어요.'); end if;
+  if v_memo = '' then v_memo := case when p_points > 0 then '운영자 지급' else '운영자 회수' end; end if;
+  perform private.ledger_add(mid, case when p_points > 0 then 'admin' else 'adjust' end, v_memo, p_points);
+  perform private.note(mid, case when p_points > 0 then '포인트가 들어왔어요' else '포인트를 정리했어요' end, v_memo || ' · ' || case when p_points > 0 then '+' else '' end || private.pt(p_points), 'pass/me#points');
+  return private.me_json(mid);
+end $$;
+-- 임시 비밀번호 만들기 — 아이디 가입 회원만. 회원은 이걸로 로그인한 뒤 바로 새 비밀번호로 바꿔요
+create or replace function public.plt_admin_reset_password(p_member text) returns jsonb language plpgsql security definer set search_path = private, public, pg_temp as $$
+declare mid uuid; m private.members; chars text := 'abcdefghjkmnpqrstuvwxyz'; tmp text := ''; i int;
+begin
+  perform private.need_staff();
+  mid := private.find_member(p_member);
+  select * into m from private.members where id = mid;
+  if m.id is null then perform private.fail('회원을 찾지 못했어요.'); end if;
+  if m.provider <> 'id' then perform private.fail('카카오·구글로 가입한 회원은 비밀번호가 없어요. 같은 계정으로 다시 로그인하도록 안내해 주세요.'); end if;
+  for i in 1..4 loop tmp := tmp || substr(chars, 1 + floor(random() * length(chars))::int, 1); end loop;
+  tmp := tmp || (1000 + floor(random() * 9000))::int::text;
+  update auth.users set encrypted_password = extensions.crypt(tmp, extensions.gen_salt('bf', 10)), updated_at = now() where id = m.id;
+  update private.members set must_change_pw = true where id = m.id;
+  perform private.note(m.id, '비밀번호를 다시 설정했어요', '운영자가 안내한 임시 비밀번호로 로그인하면 새 비밀번호를 정하는 화면이 나와요.');
+  return jsonb_build_object('temp', tmp, 'username', m.username);
+end $$;
+-- 응모 추첨 — 넣은 횟수만큼 확률이 올라가고, 한 사람은 한 번만 뽑혀요
+create or replace function public.plt_admin_draw(p_reward_id text) returns jsonb language plpgsql security definer set search_path = private, public, pg_temp as $$
+declare r jsonb; n int; picked uuid[] := '{}'; w record; total int; v_code text; c int := 0; e record; title text;
+begin
+  perform private.need_staff();
+  select x into r from jsonb_array_elements(coalesce(private.rules() -> 'pass' -> 'rewards', '[]'::jsonb)) x where x ->> 'id' = p_reward_id limit 1;
+  select min(en.title) into title from private.entries en where en.reward_id = p_reward_id;
+  if (r is not null and r ->> 'kind' <> 'raffle') or title is null then perform private.fail('추첨할 응모가 없어요.'); end if;
+  n := greatest(1, coalesce((r ->> 'winners')::int, 1));
+  select count(*) into total from private.entries where reward_id = p_reward_id and status = 'applied';
+  if total = 0 then perform private.fail('추첨할 응모가 없어요.'); end if;
+  -- 회원별 응모 횟수로 가중치를 두고 뽑아요 (Efraimidis–Spirakis)
+  for w in select member_id from (select member_id, sum(qty) q from private.entries where reward_id = p_reward_id and status = 'applied' group by member_id) t order by -ln(1 - random()) / q limit n loop
+    picked := picked || w.member_id;
+  end loop;
+  for w in select distinct member_id from private.entries where reward_id = p_reward_id and status = 'applied' loop
+    if w.member_id = any (picked) then
+      v_code := private.code('', 6);
+      update private.entries set status = 'won', code = v_code, updated_at = now() where reward_id = p_reward_id and member_id = w.member_id and status = 'applied';
+      perform private.note(w.member_id, '응모에 당첨됐어요', title || ' · 수령 코드 ' || v_code, 'pass/wallet#mine');
+    else
+      update private.entries set status = 'lost', updated_at = now() where reward_id = p_reward_id and member_id = w.member_id and status = 'applied';
+      perform private.note(w.member_id, '추첨 결과를 알려 드려요', title || ' · 이번에는 당첨되지 않았어요. 다음 응모에서 만나요.', 'pass/wallet#mine');
+    end if;
+  end loop;
+  return jsonb_build_object('winners', coalesce(array_length(picked, 1), 0), 'entries', total);
 end $$;
 create or replace function public.plt_admin_sync_rules(rules jsonb) returns boolean language plpgsql security definer set search_path = private, public, pg_temp as $$
 begin
@@ -1100,9 +1343,32 @@ begin
   return true;
 end $$;
 
+-- 비밀번호 재설정 메일(Cloudflare 함수 /api/auth/recover) — 서버 전용
+-- 아이디와 이메일이 맞으면 로그인 계정 주소를 돌려줘요. 같은 회원에게 2분 안에 다시 보내지 않아요.
+create or replace function public.plt_srv_recover(p_username text, p_email text) returns jsonb language plpgsql security definer set search_path = private, public, pg_temp as $$
+declare m private.members; e text := lower(trim(coalesce(p_email, '')));
+begin
+  select * into m from private.members where username = lower(trim(coalesce(p_username, ''))) and provider = 'id';
+  if m.id is null or m.email = '' or m.email <> e then return null; end if;
+  if m.recover_sent_at is not null and m.recover_sent_at > now() - interval '2 minutes' then return null; end if;
+  update private.members set recover_sent_at = now() where id = m.id;
+  return jsonb_build_object('authEmail', (select email from auth.users where id = m.id), 'nick', m.nick, 'username', m.username);
+end $$;
+-- 아이디 찾기 메일 — 서버 전용. 같은 이메일로 한 시간에 세 번까지
+create or replace function public.plt_srv_find_ids(p_email text) returns jsonb language plpgsql security definer set search_path = private, public, pg_temp as $$
+declare e text := lower(trim(coalesce(p_email, ''))); ids jsonb;
+begin
+  if e = '' then return null; end if;
+  if (select count(*) from private.mail_log where kind = 'id' and email = e and at > now() - interval '1 hour') >= 3 then return null; end if;
+  select jsonb_agg(username order by created_at) into ids from private.members where email = e and provider = 'id' and username is not null;
+  if ids is null then return null; end if;
+  insert into private.mail_log (kind, email) values ('id', e);
+  return jsonb_build_object('ids', ids);
+end $$;
+
 -- 알림 발송(Cloudflare 함수)이 받는 사람 정보를 확인할 때 씁니다 — 서버 전용
 create or replace function public.plt_notify_target(p_member uuid) returns jsonb language sql security definer set search_path = private, public, pg_temp as $$
-  select jsonb_build_object('phone', m.phone, 'nick', m.nick, 'consents', m.consents) from private.members m where m.id = p_member
+  select jsonb_build_object('phone', coalesce(m.phone, ''), 'nick', m.nick, 'consents', m.consents) from private.members m where m.id = p_member
 $$;
 
 -- ---------------------------------------------------------------------
@@ -1111,7 +1377,7 @@ $$;
 do $$ declare f record; begin
   for f in select p.oid::regprocedure as sig, p.proname from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'public' and p.proname like 'plt\_%' loop
     execute format('revoke all on function %s from public, anon, authenticated', f.sig);
-    if f.proname in ('plt_pay_confirm', 'plt_order_peek', 'plt_notify_target') then
+    if f.proname in ('plt_pay_confirm', 'plt_order_peek', 'plt_notify_target', 'plt_srv_recover', 'plt_srv_find_ids') then
       execute format('grant execute on function %s to service_role', f.sig);
     else
       execute format('grant execute on function %s to anon, authenticated, service_role', f.sig);

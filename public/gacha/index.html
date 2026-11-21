@@ -26,7 +26,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700;900&display=swap">
-<link rel="stylesheet" href="../assets/css/plt.css?v=20261118-kpi01">
+<link rel="stylesheet" href="../assets/css/plt.css?v=20261121-pt01">
 <link rel="alternate" type="application/rss+xml" title="플레이션 매거진" href="https://playtion.kr/rss.xml">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Store","name":"플레이션 건대 가챠샵","alternateName":"플레이션 가챠","address":{"@type":"PostalAddress","streetAddress":"서울특별시 광진구 화양동 10-1, 건대 한아름 건물 1층","addressLocality":"서울특별시 광진구","addressCountry":"KR"},"telephone":"1544-3523","url":"https://playtion.kr/gacha/","image":"https://playtion.kr/assets/img/gacha/front.webp","brand":{"@type":"Brand","name":"플레이션"}}</script>
 <script type="application/ld+json" data-seo="breadcrumb">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://playtion.kr/"},{"@type":"ListItem","position":2,"name":"가챠뽑기샵","item":"https://playtion.kr/gacha/"}]}</script>
@@ -50,7 +50,7 @@
     <button class="hd__menu" id="hdMenu" type="button" aria-label="전체 메뉴 열기" aria-expanded="false" aria-controls="drawer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
   </div>
 </div></header>
-<nav class="subnav" aria-label="가챠샵 메뉴"><div class="wrap subnav__in"><span class="subnav__line"><span class="lb lb--gacha lb--s">가챠뽑기샵</span></span><a class="sn" href="../gacha/" aria-current="page">가챠뽑기샵 홈</a><a class="sn" href="../gacha/products">상품 찾기</a><a class="sn" href="../gacha/calendar">입고 캘린더</a><a class="sn" href="../gacha/online">온라인 뽑기</a><a class="sn" href="../community/market">교환 판매</a><a class="sn" href="../gacha/club">컬렉터 클럽</a><a class="sn" href="../gacha/visit">방문 안내</a></div></nav>
+<nav class="subnav" aria-label="가챠샵 메뉴"><div class="wrap subnav__in"><span class="subnav__line"><span class="lb lb--gacha lb--s">가챠뽑기샵</span></span><a class="sn" href="../gacha/" aria-current="page">가챠뽑기샵 홈</a><a class="sn" href="../gacha/products">상품 찾기</a><a class="sn" href="../gacha/calendar">입고 캘린더</a><a class="sn" href="../gacha/online" data-feature="onlineGacha" hidden>온라인 뽑기</a><a class="sn" href="../community/market">교환 판매</a><a class="sn" href="../gacha/club">컬렉터 클럽</a><a class="sn" href="../gacha/visit">방문 안내</a></div></nav>
 <main id="main">
 
 <section class="rp-hero" aria-labelledby="gheroTitle">
@@ -59,7 +59,7 @@
       <div class="phero__row rp-in"><span class="lb lb--gacha">PLAYTION GACHA</span><span id="gStatus" class="t-small t-strong" data-v="gacha.shop.statusLabel">영업 중</span></div>
       <h1 class="t-display rp-in rp-in--2" id="gheroTitle">작은 캡슐,<br><span class="rp-pop rp-pop--red">큰 즐거움.</span></h1>
       <p class="t-lead rp-hero__lead rp-in rp-in--3">건대 한아름 건물 1층, 캡슐토이 <span data-v="gacha.shop.machines">600대 이상</span>이 매주 채워져요. 기기 앞 QR로 남은 수량을 보고, 기다리던 시리즈는 입고 알림으로 받아요. 못 오는 날엔 온라인으로 뽑아 보관함에 담아 두세요.</p>
-      <div class="rp-hero__cta rp-in rp-in--4"><a class="btn btn--primary btn--l" href="../gacha/products">상품 찾기</a><a class="btn btn--ghost btn--l" href="../gacha/online" data-feature="onlineGacha">온라인 뽑기</a></div>
+      <div class="rp-hero__cta rp-in rp-in--4"><a class="btn btn--primary btn--l" href="../gacha/products">상품 찾기</a><a class="btn btn--ghost btn--l" href="../gacha/online" data-feature="onlineGacha" hidden>온라인 뽑기</a></div>
       <div class="rp-hero__facts rp-in rp-in--4"><span class="tag">캡슐토이 <span data-v="gacha.shop.machines">600대 이상</span></span><span class="tag">건대입구역 일대</span><span class="tag">개봉대 · 촬영소 · 반납함</span><span class="tag">PASS 체크인 스탬프</span></div>
     </div>
     <div class="rp-stage rp-in rp-in--2">
@@ -82,7 +82,7 @@
 
 <section class="band band--tight" aria-labelledby="arrTitle" style="padding-top:40px">
   <div class="wrap split">
-    <div><h2 class="t-h2" id="arrTitle">다가오는 입고</h2><p class="t-lead mt-s">기다리는 시리즈가 있다면 입고 알림을 켜 두세요. 들어오는 날 알림톡으로 알려 드려요.</p><a class="btn btn--ghost mt-m" href="../gacha/calendar">입고 캘린더</a></div>
+    <div><h2 class="t-h2" id="arrTitle">다가오는 입고</h2><p class="t-lead mt-s">기다리는 시리즈가 있다면 입고 알림을 켜 두세요. 들어오는 날 내 PASS 알림으로 알려 드려요.</p><a class="btn btn--ghost mt-m" href="../gacha/calendar">입고 캘린더</a></div>
     <div id="arrList" class="rows"></div>
   </div>
 </section>
@@ -125,7 +125,7 @@
   </div>
 </section>
 
-<section class="band" aria-labelledby="onTitle" data-feature="onlineGacha">
+<section class="band" aria-labelledby="onTitle" data-feature="onlineGacha" hidden>
   <div class="wrap gm-wrap">
     <div class="gm" id="gmHero" aria-hidden="true"></div>
     <div>
@@ -133,7 +133,6 @@
       <h2 class="t-h1 mt-s" id="onTitle">못 가는 날엔<br>온라인으로 한 번</h2>
       <p class="t-lead mt-s">매장과 같은 시리즈를 플레이 코인으로 뽑아요. 시리즈마다 남은 수량과 종류별 확률을 그대로 보여 드리고, 뽑은 건 PASS 보관함에 담겨요. 매장에서 무료로 받거나 모아서 배송받으면 돼요.</p>
       <div class="row mt-m"><a class="btn btn--primary btn--l" href="../gacha/online">온라인 뽑기</a><a class="btn btn--quiet" href="../pass/wallet">코인 충전</a></div>
-      <p class="t-small mt-s">PASS에 가입하면 온라인 뽑기 1회권을 드려요.</p>
     </div>
   </div>
 </section>
@@ -194,7 +193,7 @@
 <section class="band" id="hanareum" aria-labelledby="hnTitle">
   <div class="wrap rp-feature">
     <div><p class="rp-eyebrow"><i class="rp-capsule"></i>건대 한아름 건물</p><h2 class="t-h2" id="hnTitle">한 건물에서<br>하루를 다 보내요</h2><p class="t-lead mt-s">가챠뽑기샵이 있는 한아름 건물에는 대형 대관 공간 메가스팟과 세미나·코워킹 공간 소셜팩토리가 함께 있어요. 같은 주소에 24시간 무인 디저트카페 밍글도 있고요.</p><ul class="rp-list mt-m"><li><b>캡슐 한 판</b><span>1층 플레이션 가챠뽑기샵</span></li><li><b>디저트로 쉬어 가기</b><span>밍글</span></li><li><b>행사·세미나·스터디</b><span>2층 메가스팟 · 4층 소셜팩토리</span></li><li><b>2차는 게임</b><span>플레이션 건대 미니 파티룸</span></li></ul><div class="row mt-m"><a class="btn btn--ink" href="../family">패밀리 사이트 보기</a><a class="btn btn--quiet" href="../gacha/visit">오시는 길</a></div></div>
-    <div class="fm-floors"><div class="fm-floors__head"><b>건대 한아름 건물</b><span>서울 광진구 화양동 10-1 · 2·7호선 건대입구역</span></div><ul class="fm-floors__list" aria-label="층별 안내"><li><a class="fm-floor" href="https://socialfactory.co.kr" target="_blank" rel="noopener" data-family="socialfactory"><span class="fm-floor__no">4F</span><span class="fm-floor__body"><b>소셜팩토리 건대</b><small>세미나·강의 룸 5개 · 24시간 코워킹 · 독립사무실</small></span><span class="fm-floor__go">사이트<svg class="fm-ext" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a></li><li><a class="fm-floor" href="https://megaspot.kr/spaces/megaspot-gundae/" target="_blank" rel="noopener" data-family="megaspot"><span class="fm-floor__no">2F</span><span class="fm-floor__body"><b>메가스팟 건대</b><small>한 층 통째로 190평 · 최대 200명 대관</small></span><span class="fm-floor__go">사이트<svg class="fm-ext" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a></li><li><a class="fm-floor is-here" href="../gacha/"><span class="fm-floor__no">1F</span><span class="fm-floor__body"><b>플레이션 가챠뽑기샵</b><small>캡슐토이 600대 이상 · 개봉대 · 촬영소</small></span><span class="fm-floor__here">지금 여기</span></a></li></ul><ul class="fm-floors__list fm-floors__list--sub" aria-label="가까운 곳"><li><a class="fm-floor fm-floor--sub" href="https://hellomingle.kr/store.html" target="_blank" rel="noopener" data-family="mingle"><span class="fm-floor__tag">같은 주소</span><span class="fm-floor__body"><b>밍글</b><small>24시간 무인 디저트카페 · 스터디와 언어교환 모임</small></span></a></li><li><a class="fm-floor fm-floor--sub" href="../party/kondae-mini"><span class="fm-floor__tag">걸어서</span><span class="fm-floor__body"><b>플레이션 건대 미니</b><small>게임파티룸 · 가챠 코인 환승</small></span></a></li></ul></div>
+    <div class="fm-floors"><div class="fm-floors__head"><b>건대 한아름 건물</b><span>서울 광진구 화양동 10-1 · 2·7호선 건대입구역</span></div><ul class="fm-floors__list" aria-label="층별 안내"><li><a class="fm-floor" href="https://socialfactory.co.kr" target="_blank" rel="noopener" data-family="socialfactory"><span class="fm-floor__no">4F</span><span class="fm-floor__body"><b>소셜팩토리 건대</b><small>세미나·강의 룸 5개 · 24시간 코워킹 · 독립사무실</small></span><span class="fm-floor__go">사이트<svg class="fm-ext" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a></li><li><a class="fm-floor" href="https://megaspot.kr/spaces/megaspot-gundae/" target="_blank" rel="noopener" data-family="megaspot"><span class="fm-floor__no">2F</span><span class="fm-floor__body"><b>메가스팟 건대</b><small>한 층 통째로 190평 · 최대 200명 대관</small></span><span class="fm-floor__go">사이트<svg class="fm-ext" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a></li><li><a class="fm-floor is-here" href="../gacha/"><span class="fm-floor__no">1F</span><span class="fm-floor__body"><b>플레이션 가챠뽑기샵</b><small>캡슐토이 600대 이상 · 개봉대 · 촬영소</small></span><span class="fm-floor__here">지금 여기</span></a></li></ul><ul class="fm-floors__list fm-floors__list--sub" aria-label="가까운 곳"><li><a class="fm-floor fm-floor--sub" href="https://hellomingle.kr/store.html" target="_blank" rel="noopener" data-family="mingle"><span class="fm-floor__tag">같은 주소</span><span class="fm-floor__body"><b>밍글</b><small>24시간 무인 디저트카페 · 스터디와 언어교환 모임</small></span></a></li><li><a class="fm-floor fm-floor--sub" href="../party/kondae-mini"><span class="fm-floor__tag">걸어서</span><span class="fm-floor__body"><b>플레이션 건대 미니</b><small>게임파티룸 · 최대 10인 · PC 6대</small></span></a></li></ul></div>
   </div>
 </section>
 
@@ -232,10 +231,10 @@
         <a class="btn btn--ghost btn--s" data-site-href="channels.youtube" href="#" hidden target="_blank" rel="noopener">유튜브</a>
       </div>
     </div>
-    <div class="ft__col"><h4><span class="dot dot--gacha"></span>가챠뽑기샵</h4><a href="../gacha/">가챠뽑기샵 홈</a><a href="../gacha/products">상품 찾기</a><a href="../gacha/online">온라인 뽑기</a><a href="../gacha/club">컬렉터 클럽</a></div>
+    <div class="ft__col"><h4><span class="dot dot--gacha"></span>가챠뽑기샵</h4><a href="../gacha/">가챠뽑기샵 홈</a><a href="../gacha/products">상품 찾기</a><a href="../gacha/online" data-feature="onlineGacha" hidden>온라인 뽑기</a><a href="../gacha/club">컬렉터 클럽</a></div>
     <div class="ft__col"><h4><span class="dot dot--party"></span>게임파티룸</h4><a href="../party/">파티룸 홈</a><a href="../party/stations">지점 비교</a><a href="../party/sinchon">신촌 게임파티룸</a><a href="../party/prices">요금·패키지</a><a href="../party/booking">예약하기</a><a href="../party/guide">이용안내</a></div>
     <div class="ft__col"><h4><span class="dot dot--cm"></span>커뮤니티</h4><a href="../community/">자랑하기</a><a href="../community/market">교환 판매</a><a href="../community/inbox">문의함</a><a href="../community/me">내 활동</a><a href="../community/guide">이용 안내</a></div>
-    <div class="ft__col"><h4><span class="dot dot--pass"></span>PASS</h4><a href="../pass/">PASS 소개</a><a href="../pass/me">내 PASS</a><a href="../pass/wallet">충전·PASS+·선물</a><a href="../pass/login">로그인·가입</a></div>
+    <div class="ft__col"><h4><span class="dot dot--pass"></span>PASS</h4><a href="../pass/">PASS 소개</a><a href="../pass/me">내 PASS</a><a href="../pass/wallet">포인트 쓰기</a><a href="../pass/login">로그인·가입</a></div>
     <div class="ft__col"><h4><span class="dot dot--biz"></span>플레이션</h4><a href="../brand">브랜드 이야기</a><a href="../magazine/">매거진</a><a href="../arcade/">오락실</a><a href="../stations">전 지점</a><a href="../news">소식·혜택</a><a href="../platform">플랫폼 소개</a><a href="../partner/">창업·제휴</a><a href="../help">고객센터</a><a href="../family">패밀리 사이트</a></div>
   </div>
   <nav class="ft__family" aria-label="패밀리 사이트">
@@ -267,22 +266,22 @@
 <div class="drawer" id="drawer"><div class="drawer__bg" data-drawer-x></div><nav class="drawer__panel" aria-label="전체 메뉴">
   <div class="drawer__top"><a class="logo" href="../"><img class="logo__mark" src="../assets/img/brand/symbol.svg" alt="" width="29" height="40"><img class="logo__word" src="../assets/img/brand/wordmark.svg" alt="플레이션" width="90" height="30"></a><button class="modal__x" style="position:static" type="button" data-drawer-x aria-label="메뉴 닫기"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
   <div class="row drawer__cta" style="margin-bottom:12px"><a class="btn btn--primary" href="../gacha/">가챠뽑기샵</a><a class="btn btn--party" href="../party/booking">파티룸 예약</a></div>
-  <div class="drawer__group"><h3><span class="dot dot--gacha"></span>가챠뽑기샵</h3><a href="../gacha/">가챠뽑기샵 홈</a><a href="../gacha/products">상품 찾기</a><a href="../gacha/calendar">입고 캘린더</a><a href="../gacha/online">온라인 뽑기</a><a href="../community/market">교환 판매</a><a href="../gacha/club">컬렉터 클럽</a><a href="../gacha/visit">방문 안내</a></div>
+  <div class="drawer__group"><h3><span class="dot dot--gacha"></span>가챠뽑기샵</h3><a href="../gacha/">가챠뽑기샵 홈</a><a href="../gacha/products">상품 찾기</a><a href="../gacha/calendar">입고 캘린더</a><a href="../gacha/online" data-feature="onlineGacha" hidden>온라인 뽑기</a><a href="../community/market">교환 판매</a><a href="../gacha/club">컬렉터 클럽</a><a href="../gacha/visit">방문 안내</a></div>
   <div class="drawer__group"><h3><span class="dot dot--party"></span>게임파티룸</h3><a href="../party/">파티룸 홈</a><a href="../party/stations">지점 비교</a><a href="../party/sinchon">신촌 게임파티룸</a><a href="../party/prices">요금·패키지</a><a href="../party/booking">예약하기</a><a href="../party/guide">이용안내</a></div>
   <div class="drawer__group"><h3><span class="dot dot--cm"></span>커뮤니티</h3><a href="../community/">자랑하기</a><a href="../community/market">교환 판매</a><a href="../community/write">자랑 올리기</a><a href="../community/inbox">문의함</a><a href="../community/me">내 활동</a><a href="../community/guide">이용 안내</a></div>
   <div class="drawer__group"><h3><span class="dot dot--arc"></span>오락실</h3><a href="../arcade/">오락실 로비</a><a href="../arcade/merge">캡슐 머지</a><a href="../arcade/sort">캡슐 정리</a><a href="../arcade/jump">토토 점프</a><a href="../arcade/rank">랭킹</a><a href="../arcade/dex">도감</a><a href="../arcade/quests">퀘스트·업적</a></div>
-  <div class="drawer__group"><h3><span class="dot dot--pass"></span>PASS 멤버십</h3><a href="../pass/">PASS 소개</a><a href="../pass/me">내 PASS</a><a href="../pass/collection">컬렉션 북</a><a href="../pass/wallet">충전·PASS+·선물</a><a href="../pass/login">로그인·가입</a></div>
+  <div class="drawer__group"><h3><span class="dot dot--pass"></span>PASS 멤버십</h3><a href="../pass/">PASS 소개</a><a href="../pass/me">내 PASS</a><a href="../pass/collection">컬렉션 북</a><a href="../pass/wallet">포인트 쓰기</a><a href="../pass/login">로그인·가입</a></div>
   <div class="drawer__group"><h3><span class="dot dot--biz"></span>플레이션</h3><a href="../brand">브랜드 이야기</a><a href="../magazine/">매거진</a><a href="../stations">전 지점 노선도</a><a href="../news">소식·혜택·행사</a><a href="../platform">플랫폼 소개</a><a href="../partner/">창업·제휴</a><a href="../help">고객센터</a><a href="../family">패밀리 사이트</a></div>
 </nav></div>
-<script src="../data/site.js?v=20261118-kpi01"></script>
-<script src="../data/stations.js?v=20261118-kpi01"></script>
-<script src="../data/gacha.js?v=20261118-kpi01"></script>
-<script src="../data/news.js?v=20261118-kpi01"></script>
-<script src="../data/community.js?v=20261118-kpi01"></script>
-<script src="../data/pass.js?v=20261118-kpi01"></script>
-<script src="../assets/js/core.js?v=20261118-kpi01"></script>
-<script src="../assets/js/pages/gacha.js?v=20261118-kpi01"></script>
-<script src="../assets/js/rp.js?v=20261118-kpi01"></script>
+<script src="../data/site.js?v=20261121-pt01"></script>
+<script src="../data/stations.js?v=20261121-pt01"></script>
+<script src="../data/gacha.js?v=20261121-pt01"></script>
+<script src="../data/news.js?v=20261121-pt01"></script>
+<script src="../data/community.js?v=20261121-pt01"></script>
+<script src="../data/pass.js?v=20261121-pt01"></script>
+<script src="../assets/js/core.js?v=20261121-pt01"></script>
+<script src="../assets/js/pages/gacha.js?v=20261121-pt01"></script>
+<script src="../assets/js/rp.js?v=20261121-pt01"></script>
 <script defer src="https://choisijun.com/k1.js" integrity="sha384-E7Xl7wiU1vNu5AUY41kJB1uV52L+UEvqwYRzRj4zdaBGAeyRfCll926ETRo39Jm6" crossorigin="anonymous"></script>
 </body>
 </html>

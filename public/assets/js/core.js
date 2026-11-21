@@ -330,7 +330,8 @@
       '<label class="check consent__all"><input type="checkbox" data-all> <b>아래 내용을 확인하고 모두 동의해요</b></label>' +
       '<label class="check"><input type="checkbox" name="agreeTerms" required data-req> <span><b>[필수]</b> ' + esc(opt.termsLabel || '이용약관과 개인정보 수집·이용 안내를 확인했어요') + '</span></label>' +
       '<details><summary>수집 항목 보기</summary>' + esc(opt.detail || '전화번호(회원 식별·예약 확인·알림 발송), 이름 또는 닉네임. 탈퇴하거나 목적을 다하면 지체 없이 파기하고, 거래 기록은 관계 법령에 따라 보관해요.') + ' <a class="link" href="' + PLT.url('privacy') + '" target="_blank">개인정보처리방침</a></details>' +
-      (opt.noMarketing ? '' :
+      (opt.noMarketing ? '' : opt.marketing === 'email' ?
+        '<label class="check"><input type="checkbox" name="mktEmail" data-opt> <span>[선택] 이메일로 이벤트·신상 소식 받기</span></label>' :
         '<label class="check"><input type="checkbox" name="mktSms" data-opt> <span>[선택] 문자로 혜택·신상 소식 받기</span></label>' +
         '<label class="check"><input type="checkbox" name="mktKakao" data-opt> <span>[선택] 카카오톡으로 혜택·신상 소식 받기</span></label>' +
         '<label class="check"><input type="checkbox" name="mktNight" data-opt> <span>[선택] 밤 9시~아침 8시에도 입고 알림 받기</span></label>') +
@@ -356,28 +357,34 @@
     var label = e.status === 'open' ? '참가 신청' : e.status === 'full' ? '대기 신청' : '사전 신청';
     var help = e.status === 'planned' ? '일정이 확정되면 신청한 분께 먼저 알려 드려요.' : e.status === 'full' ? '자리가 나면 순서대로 연락드려요.' : '';
     return '<form class="panel panel--mist" id="evForm" novalidate><h3 class="t-h4">' + label + '</h3>' + (help ? '<p class="t-small mt-s">' + help + '</p>' : '') +
-      '<div data-auth-show="out"><div class="fieldrow mt-m"><div class="field"><label class="lbl" for="evName">이름<span class="req">*</span></label><input class="inp" id="evName" name="name" autocomplete="name"></div>' +
+      '<div data-ev-contact><div class="fieldrow mt-m"><div class="field"><label class="lbl" for="evName">이름<span class="req">*</span></label><input class="inp" id="evName" name="name" autocomplete="name"></div>' +
       '<div class="field"><label class="lbl" for="evPhone">휴대폰<span class="req">*</span></label><input class="inp" id="evPhone" name="phone" placeholder="010-0000-0000"></div></div></div>' +
-      '<p class="t-small mt-m" data-auth-show="in" hidden>PASS 정보로 신청하고, 참여하면 스탬프가 쌓여요.</p>' +
+      '<p class="t-small mt-m" data-auth-show="in" hidden>PASS 회원으로 신청하고, 참여하면 스탬프와 포인트가 쌓여요.</p>' +
       '<div class="fieldrow mt-m"><div class="field"><label class="lbl" for="evPeople">인원</label><select class="sel" id="evPeople" name="people">' + [1, 2, 3, 4, 5].map(function (n) { return '<option value="' + n + '">' + n + '명</option>'; }).join('') + '</select></div>' +
       '<div class="field"><label class="lbl" for="evMemo">남길 말 <small>선택</small></label><input class="inp" id="evMemo" name="memo" placeholder="' + (e.type === '교환회' ? '가져올 것 / 구하는 것' : '크루 이름, 궁금한 점') + '"></div></div>' +
-      '<div class="mt-m" data-auth-show="out">' + PLT.consentBlock({ noMarketing: true, detail: '이름, 휴대폰 번호 (행사 안내와 참가 확인). 행사 종료 후 1년 보관 후 파기해요.' }) + '</div>' +
+      '<div class="mt-m" data-ev-contact>' + PLT.consentBlock({ noMarketing: true, detail: '이름, 휴대폰 번호 (행사 안내와 참가 확인). 행사 종료 후 1년 보관 후 파기해요.' }) + '</div>' +
       '<button class="btn btn--primary btn--block mt-m" type="submit">' + label + '하기</button></form>';
   };
   PLT.bindEventForm = function (f, e) {
     PLT.bindConsent(f); PLT.bindPhone($('#evPhone', f));
-    PLT.ready.then(function (me) { $$('[data-auth-show]', f).forEach(function (el) { el.hidden = el.getAttribute('data-auth-show') === 'in' ? !me : !!me; }); });
+    /* 휴대폰 번호가 없는 회원(아이디·소셜 가입)은 연락처를 한 번 더 받아요 */
+    var needContact = function () { return !PLT.me || !PLT.me.phone; };
+    PLT.ready.then(function (me) {
+      $$('[data-auth-show]', f).forEach(function (el) { el.hidden = el.getAttribute('data-auth-show') === 'in' ? !me : !!me; });
+      $$('[data-ev-contact]', f).forEach(function (el) { el.hidden = !needContact(); });
+      if (me && !me.phone && $('#evName', f)) $('#evName', f).value = me.nick || '';
+    });
     f.addEventListener('submit', function (ev) {
       ev.preventDefault();
       var btn = $('button[type=submit]', f), data = PLT.formData(f);
       PLT.busy(btn, function () {
-        if (!PLT.me) {
+        if (needContact()) {
           if (!data.name) { PLT.fieldError($('#evName', f), '이름을 적어 주세요.'); throw PLT.fail('이름을 적어 주세요.'); }
           if (!PLT.phone.valid(data.phone)) { PLT.fieldError($('#evPhone', f), '휴대폰 번호를 확인해 주세요.'); throw PLT.fail('휴대폰 번호를 확인해 주세요.'); }
           if (!PLT.consentOk(f)) return;
         }
         return PLT.db.register(e.id, data).then(function () {
-          f.innerHTML = '<div class="stack center"><span class="lb lb--ok" style="align-self:center">신청 완료</span><h3 class="t-h3">' + esc(e.title) + '</h3><p class="t-small">신청을 받았어요. 일정과 준비물은 알림으로 다시 안내해 드릴게요.</p>' + (PLT.me ? '' : '<a class="btn btn--pass" href="' + PLT.url('pass/login') + '">PASS 만들고 스탬프 받기</a>') + '</div>';
+          f.innerHTML = '<div class="stack center"><span class="lb lb--ok" style="align-self:center">신청 완료</span><h3 class="t-h3">' + esc(e.title) + '</h3><p class="t-small">신청을 받았어요. 일정과 준비물은 알림으로 다시 안내해 드릴게요.</p>' + (PLT.me ? '' : '<a class="btn btn--pass" href="' + PLT.url('pass/login') + '">PASS 만들고 포인트 받기</a>') + '</div>';
         });
       });
     });
@@ -578,21 +585,34 @@
   };
 
   /* ------------------------------------------------------------------
-     PASS 규칙
+     PASS 규칙 (플레이 포인트)
      ------------------------------------------------------------------ */
   var PS = window.PLT_PASS || { levels: [] };
   PLT.pass = {
     data: PS,
-    level: function (xp) {
+    /* 등급 — 최근 1년 동안 받은 포인트로 정해요 */
+    level: function (earned) {
       var lv = PS.levels[0], next = null;
-      for (var i = 0; i < PS.levels.length; i++) { if (xp >= PS.levels[i].min) { lv = PS.levels[i]; next = PS.levels[i + 1] || null; } }
-      var progress = next ? Math.min(1, (xp - lv.min) / (next.min - lv.min)) : 1;
-      return { level: lv, next: next, progress: progress, toNext: next ? next.min - xp : 0 };
+      for (var i = 0; i < PS.levels.length; i++) { if (earned >= PS.levels[i].min) { lv = PS.levels[i]; next = PS.levels[i + 1] || null; } }
+      var progress = next ? Math.min(1, (earned - lv.min) / (next.min - lv.min)) : 1;
+      return { level: lv, next: next, progress: progress, toNext: next ? next.min - earned : 0 };
     },
+    levelIndex: function (id) { for (var i = 0; i < (PS.levels || []).length; i++) if (PS.levels[i].id === id) return i; return 0; },
+    earn: function (key) { return (((PS.points || {}).earn || {})[key] || {}).points || 0; },
+    reward: function (id) { return (PS.rewards || []).filter(function (r) { return r.id === id; })[0] || null; },
+    /* 성별·연령대 이름 */
+    label: function (kind, v) { var list = ((PS.member || {})[kind === 'gender' ? 'genders' : 'ages']) || []; for (var i = 0; i < list.length; i++) if (list[i][0] === v) return list[i][1]; return ''; },
     couponDef: function (id) { return (PS.coupons || {})[id]; },
-    earnRate: function (xp, isPlus) { return PLT.pass.level(xp).level.earn + (isPlus ? 1 : 0); },
-    noDeposit: function (xp, isPlus) { var l = PLT.pass.level(xp).level; return isPlus || l.id === 'pro' || l.id === 'legend'; }
+    /* 예전 파티룸 직접 예약 계산용 — 지금은 쓰지 않아요 */
+    earnRate: function () { return 0; },
+    noDeposit: function () { return false; }
   };
+  /* 아이디 규칙: 영문 소문자로 시작, 영문 소문자·숫자·밑줄 4~20자 */
+  PLT.idOk = function (v) { return /^[a-z][a-z0-9_]{3,19}$/.test(String(v || '')); };
+  /* 비밀번호 규칙: 8자 이상, 영문과 숫자를 함께 */
+  PLT.pwOk = function (v) { v = String(v || ''); return v.length >= 8 && v.length <= 64 && /[A-Za-z]/.test(v) && /\d/.test(v); };
+  PLT.emailOk = function (v) { return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(v || '').trim()); };
+  PLT.maskEmail = function (v) { var m = /^([^@]{0,2})[^@]*(@.*)$/.exec(String(v || '')); return m ? m[1] + '***' + m[2] : ''; };
 
   /* 서버(Supabase)가 금액·적립을 다시 계산할 때 쓰는 규칙 묶음 — 운영 콘솔에서 서버로 보냅니다 */
   PLT.rulesSnapshot = function () {
@@ -602,7 +622,8 @@
       version: VER,
       stations: (window.PLT_STATIONS || []).map(function (s) { return { id: s.id, code: s.code, type: s.type, name: s.name, short: s.short, max: s.max || 0, status: s.status }; }),
       party: pick(P0, ['booking', 'plans', 'basePeople', 'extraPerPerson', 'deposit', 'extraHour']),
-      pass: pick(S0, ['levels', 'xp', 'stamps', 'points', 'coupons', 'transfer', 'plus', 'coins', 'gift']),
+      pass: pick(S0, ['levels', 'points', 'stamps', 'rewards', 'member', 'coupons', 'plus', 'coins', 'gift']),
+      auth: pick(S.auth || {}, ['idDomain', 'genderRequired', 'ageRequired']),
       gacha: { series: (G0.series || []).map(function (s) { return { id: s.id, name: s.name, price: s.price, lineup: s.lineup, online: !!s.online, onlineStock: s.onlineStock || 0 }; }), online: G0.online || {}, market: pick(G0.market || {}, ['feeRate', 'feeMin']) }
     };
   };
@@ -638,7 +659,8 @@
   /* 로그인이 필요한 화면 */
   PLT.requireLogin = function () {
     return PLT.ready.then(function (me) {
-      if (me) return me;
+      if (me && !me.mustChangePw) return me;
+      /* 로그인 전이거나, 임시 비밀번호로 들어와 새 비밀번호를 아직 안 정한 경우 */
       location.href = PLT.url('pass/login?next=' + encodeURIComponent(location.pathname + location.search + location.hash));
       return new Promise(function () { }); /* 로그인 화면으로 이동하는 동안 멈춰 둡니다 */
     });
@@ -652,7 +674,7 @@
     var host = $('#plt-topbar'); if (!host) return;
     var html = '';
     if (PLT.mode === 'demo' && PLT.ss.get('demoBar') !== 'off') {
-      html += '<div class="topbar topbar__demo"><div class="topbar__row"><span><b>체험 모드</b> 지금 하는 예약·가입·결제는 실제로 접수되지 않아요.</span><button class="topbar__x" type="button" data-x="demoBar" aria-label="안내 닫기">' + ICON.close + '</button></div></div>';
+      html += '<div class="topbar topbar__demo"><div class="topbar__row"><span><b>체험 모드</b> PASS 가입과 포인트는 이 브라우저에만 저장돼요.</span><button class="topbar__x" type="button" data-x="demoBar" aria-label="안내 닫기">' + ICON.close + '</button></div></div>';
     }
     var n = S.topNotice || {};
     if (n.text && PLT.ss.get('noticeBar') !== 'off') {
@@ -712,7 +734,8 @@
       var v = PLT.get(S, el.getAttribute('data-site-href'));
       if (v) { el.href = v; el.hidden = false; } else el.hidden = true;
     });
-    $$('[data-feature]').forEach(function (el) { if (PLT.features[el.getAttribute('data-feature')] === false) el.hidden = true; });
+    /* 기능 스위치: 꺼진 기능은 숨기고, 켜진 기능은 원본에 hidden 이 있어도 보여 줘요 */
+    $$('[data-feature]').forEach(function (el) { el.hidden = PLT.features[el.getAttribute('data-feature')] === false; });
     /* 숫자 꽂기: data-count="party" → 운영 중인 파티룸 수 (stations.js 를 고치면 따라 바뀜) */
     var open = PLT.stations.filter(function (s) { return s.type === 'party' && s.status !== 'closed'; });
     var counts = {
@@ -778,17 +801,18 @@
       { label: '예약 방법', keys: ['예약', '방법', '어떻게', '네이버'], html: '게임파티룸 예약은 네이버 예약에서 받아요. 지점과 패키지(낮·밤·올데이)를 고르면 그 지점의 네이버 예약 화면으로 넘어가고, 결제와 확정도 거기서 해요. 예약 관리와 문의는 쏘플파티룸 고객센터가 함께 맡고 있어요.' + link('party/booking', '예약하러 가기') + kakao },
       { label: '요금', keys: ['요금', '가격', '얼마', '비용', '올나잇', '올데이', '밤', '낮', '패키지'], html: '지점과 요일(월~목·금·토·일)마다 달라요. 낮·밤·올데이 패키지가 있고 ' + PLT.won(minFrom) + '부터예요. 기준 4명, 추가 1인당 ' + PLT.won(P.extraPerPerson) + '이고 청소 보증금 ' + PLT.won(P.deposit) + '은 이용 후 돌려드려요.' + link('party/prices', '지점별 요금표') },
       { label: '지점 위치', keys: ['위치', '주소', '지점', '어디', '역'], html: '게임파티룸은 ' + names.join(', ') + ' 이렇게 ' + names.length + '곳이고, 건대에 가챠뽑기샵이 있어요.' + link('stations', '전 지점 보기') },
-      { label: 'PASS 혜택', keys: ['PASS', '패스', '멤버십', '포인트', '스탬프', '쿠폰', '등급'], html: (S.pass && S.pass.status === 'soon' ? 'PASS는 지금 서비스 오픈을 준비하고 있어요. 문을 열면 ' : '') + '전화번호 하나로 가입하면 온라인 뽑기 1회권을 드려요. 가챠샵 체크인 스탬프, 플레이 코인, 생일 코인, 커뮤니티 활동이 한 장의 PASS에 쌓여요. 파티룸은 네이버 예약으로 받고 있어 PASS 할인은 적용되지 않아요.' + link('pass/', 'PASS 보기') },
+      { label: 'PASS 포인트', keys: ['PASS', '패스', '멤버십', '포인트', '스탬프', '등급', '응모', '경품'], html: (S.pass && S.pass.status === 'soon' ? 'PASS는 지금 서비스 오픈을 준비하고 있어요. 문을 열면 ' : '') + '아이디나 카카오·구글 계정으로 가입하고, 출석 체크와 가챠샵 체크인으로 플레이 포인트를 모아요. 포인트는 이벤트 응모와 경품 신청에 쓰고, 돈으로 사거나 현금으로 바꿀 수는 없어요. 파티룸은 네이버 예약으로 받고 있어 포인트가 쌓이지 않아요.' + link('pass/', 'PASS 보기') },
       { label: '환불 규정', keys: ['환불', '취소', '변경', '보증금'], html: '이용일 8일 전까지 취소하면 전액 환불되고, 7일 전부터는 환불이 어려워요. 당일 예약은 취소·환불이 안 돼요. 확인·변경·취소는 네이버 앱의 예약 내역에서 해요. 청소 보증금은 이용일 다음 주 수요일 무렵 돌려드려요.' + link('party/guide', '이용안내') },
       { label: '창업 문의', keys: ['창업', '가맹', '입점', '제휴', '투자', '공실'], html: '가챠샵 창업 비용은 20~30평 기준 1,700만 원 내외(간판·사인물, 냉난방기 별도)예요. 직접 여는 오너형과 공간만 내주는 호스트형 중에 고를 수 있어요. 파티룸 창업, SPOT 제휴, 입점도 한곳에서 상담해요.' + link('partner/', '창업·제휴 보기') },
       { label: '주차', keys: ['주차', '차'], html: '게임파티룸은 모두 건물 주차가 안 돼요. 지점 안내에 가까운 공영·민영주차장을 적어 뒀어요.' + link('party/stations', '지점 안내') },
       { label: '미성년자', keys: ['미성년', '청소년', '학생', '나이'], html: '미성년자끼리는 게임파티룸 낮·올데이 패키지만 이용할 수 있고, 전원 보호자 동의서(손글씨 서명)가 필요해요. 가챠샵은 누구나 이용할 수 있어요.' },
       { label: '음식 반입', keys: ['음식', '배달', '취사', '요리', '술', '주류'], html: '모든 지점에서 배달 음식과 외부 음식 반입이 돼요. 신촌 2·3호점은 인덕션으로 요리도 할 수 있어요.' },
       { label: '분실물', keys: ['분실', '두고', '잃어'], html: '파티룸에 두고 온 물건은 쏘플파티룸 카카오톡이나 1544-3523으로 알려 주세요. 분실물은 30일 동안 보관해요.' + kakao },
+      { label: '비밀번호 찾기', keys: ['비밀번호', '아이디', '로그인', '찾기', '잊어'], html: '로그인 화면의 아이디·비밀번호 찾기에서 가입할 때 적은 이메일로 재설정 링크를 받을 수 있어요. 이메일을 적지 않았거나 메일이 오지 않으면 같은 화면에서 관리자에게 재설정을 요청해 주세요.' + link('pass/find', '아이디·비밀번호 찾기') },
       { label: '파티룸 문의', keys: ['문의', '상담', '카톡', '카카오', '쏘플', '도어락', '비밀번호', '입실', '세금계산서', '영수증'], html: '플레이션 게임파티룸의 예약 관리와 고객 문의는 쏘플파티룸 고객센터가 함께 맡고 있어요. 상담 시간은 ' + esc(B.hours || '') + '이에요.' + kakao + ' <a href="tel:' + esc(B.phone || '') + '">' + esc(B.phone || '') + '</a>' },
       { label: '대관·다른 공간', keys: ['대관', '세미나', '행사', '워크숍', '워크샵', '단체', '스터디', '회의', '강의', '코워킹', '사무실', '디저트', '카페', '200명', '100명', '50명'], html: '게임 없이 파티만 한다면 전국 120여 곳의 쏘플파티룸, 30명이 넘는 행사는 건대 한아름 건물 2층 메가스팟(최대 200명), 세미나·스터디·코워킹은 같은 건물 4층 소셜팩토리가 맞아요. 디저트와 동네 모임은 24시간 무인카페 밍글에서.' + link('family', '패밀리 사이트 보기') },
       { label: '상가·인테리어', keys: ['상가', '점포', '부동산', '임대', '매물', '상권', '인테리어', '브랜딩', '간판', '시공', '빌딩'], html: '가게 자리와 상권분석은 오르비스 부동산 중개법인, 오래 비어 있는 상가를 살리는 일은 공백 공간백서, 브랜딩과 인테리어는 코어무드가 도와요. 가챠뽑기샵·게임파티룸 창업은 플레이션 창업·제휴에서 상담해요.' + link('family#build', '공간을 여는 사람들') },
-      { label: '온라인 뽑기', keys: ['온라인', '보관함', '배송', '수령'], html: '온라인으로 뽑은 상품은 PASS 보관함에 담겨요. 건대 가챠샵에서 무료로 받거나 배송을 신청할 수 있어요.' + link('gacha/online', '온라인 뽑기') }
+      { label: '온라인 뽑기', keys: ['온라인', '보관함', '배송', '수령'], html: PLT.features.onlineGacha === false ? '온라인 뽑기는 아직 열지 않았어요. 지금은 건대 가챠샵에서 직접 뽑을 수 있고, 상품 찾기에서 기기 위치와 재고를 볼 수 있어요.' + link('gacha/products', '상품 찾기') : '온라인으로 뽑은 상품은 PASS 보관함에 담겨요. 건대 가챠샵에서 무료로 받거나 배송을 신청할 수 있어요.' + link('gacha/online', '온라인 뽑기') }
     ];
   };
 

@@ -77,10 +77,11 @@ export const PAGES = {
     desc: '플레이션 건대 가챠샵에 언제 어떤 시리즈가 들어오는지 달력으로 보고, 기다리는 시리즈의 입고 알림을 켜 두세요.',
     crumb: '입고 캘린더', section: 'gacha'
   },
+  /* 온라인 뽑기는 유료 기능이라 지금은 꺼 둠 (site.js features.onlineGacha) — 다시 열면 noindex 를 빼 주세요 */
   'gacha/online.html': {
     title: '온라인 뽑기 | 플레이션 가챠뽑기샵',
-    desc: '매장과 같은 시리즈를 플레이 코인으로 뽑아 PASS 보관함에 담아요. 시리즈마다 남은 수량과 종류별 확률을 공개해요.',
-    crumb: '온라인 뽑기', section: 'gacha'
+    desc: '매장과 같은 시리즈를 온라인으로 뽑아 PASS 보관함에 담는 기능을 준비하고 있어요.',
+    crumb: '온라인 뽑기', section: 'gacha', noindex: true
   },
   'gacha/club.html': {
     title: '가챠 교환회·컬렉터 클럽 | 플레이션',
@@ -123,10 +124,12 @@ export const PAGES = {
 
   /* PASS */
   'pass/index.html': {
-    title: '플레이션 PASS | 가챠샵 스탬프·코인 멤버십',
-    desc: '전화번호 하나로 만드는 플레이션 멤버십. 가챠뽑기샵 체크인 스탬프, 플레이 코인, 컬렉션 북과 커뮤니티 활동이 한 장의 PASS에 쌓여요.',
-    og: '플레이션 PASS — 한 장으로 찍고, 모으고, 자랑해요', crumb: 'PASS', section: 'pass', faq: 'pass'
+    title: '플레이션 PASS | 출석·가챠샵 방문으로 모으는 플레이 포인트',
+    desc: '아이디나 카카오·구글 계정으로 가입하는 플레이션 포인트 멤버십. 출석 체크와 가챠샵 방문 체크인으로 포인트를 모아 이벤트 응모와 경품 신청에 써요. 현금으로 바꾸거나 사는 포인트가 아니에요.',
+    og: '플레이션 PASS — 놀수록 쌓이는 플레이 포인트', crumb: 'PASS', section: 'pass', faq: 'pass'
   },
+  'pass/find.html': { crumb: '아이디·비밀번호 찾기', section: 'pass', noindex: true },
+  'pass/reset.html': { crumb: '새 비밀번호', section: 'pass', noindex: true },
 
   /* 창업·제휴 */
   'partner/index.html': {

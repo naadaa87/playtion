@@ -4,7 +4,7 @@ export async function onRequestGet({ env }) {
     supabase: !!(env.SUPABASE_URL && env.SUPABASE_SERVICE_ROLE_KEY),
     toss: !!env.TOSS_SECRET_KEY,
     sms: !!(env.SOLAPI_API_KEY && env.SOLAPI_API_SECRET && env.SOLAPI_SENDER),
-    smsHook: !!env.SMS_HOOK_SECRET,
+    authMail: !!(env.RESEND_API_KEY && env.MAIL_FROM),
     alimtalk: !!env.SOLAPI_PFID,
     notify: env.NOTIFY_MODE || 'off',
     media: !!env.PLT_MEDIA,

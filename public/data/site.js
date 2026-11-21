@@ -68,19 +68,34 @@ window.PLT_SITE = {
      "open" : 운영 중. 표시가 모두 사라져요. (홈의 PASS 소개 문구는 index.html 에서 함께 바꿔 주세요) */
   pass: {
     status: "soon",
-    note: "플레이션 PASS는 서비스 오픈을 준비하고 있어요. 지금 보이는 화면은 미리 보기예요. 문을 열면 소식과 알림 띠로 먼저 알려 드릴게요."
+    note: "플레이션 PASS는 포인트 멤버십으로 오픈을 준비하고 있어요. 지금 보이는 화면은 미리 보기예요. 문을 열면 소식과 알림 띠로 먼저 알려 드릴게요."
+  },
+
+  /* 회원가입·로그인
+     아이디와 비밀번호로 가입하고, 카카오·구글 계정으로도 시작할 수 있어요. 휴대폰 인증은 쓰지 않아요.
+     - kakao, google : 소셜 로그인 버튼을 보여줄지. 실서비스에서는 Supabase 에 카카오·구글을 먼저 연결해야 해요 (README 6-2).
+                       연결 전에는 false 로 두면 버튼이 숨겨져요. 체험 모드에서는 가상 계정으로 흉내 내요.
+     - genderRequired, ageRequired : 가입할 때 성별·연령대를 꼭 고르게 할지. false 면 '선택 안 함'도 고를 수 있어요.
+     - idDomain : 실서비스 내부에서 아이디를 로그인 계정으로 바꿀 때 붙이는 주소 (예: player01@id.playtion.kr).
+                  이 주소로 메일을 보내지는 않아요. 비밀번호 찾기 메일은 회원이 적은 이메일로 가요. */
+  auth: {
+    kakao: true,
+    google: true,
+    genderRequired: true,
+    ageRequired: true,
+    idDomain: "id.playtion.kr"
   },
 
   /* 기능 스위치 — 운영 준비가 된 것만 true */
   features: {
-    onlineGacha: true,      // 온라인 뽑기
+    onlineGacha: false,     // 온라인 뽑기 (플레이 코인 결제 — 유료 기능이라 지금은 꺼 둠)
     market: true,           // 마켓(교환·판매·구해요)
     safeTrade: false,       // (예전) 마켓 보관함 안전거래 — 결제 기능과 함께 추후 제작
     community: true,        // 커뮤니티: 자랑하기 · 교환 판매 · 문의함
-    store: true,            // 공식 스토어(세트 예약 구매)
-    passPlus: true,         // PASS+ 30일 이용권
-    coins: true,            // 플레이 코인 충전
-    gift: true,             // 선물하기
+    store: false,           // 공식 스토어(세트 예약 구매) — 유료 기능, 지금은 꺼 둠
+    passPlus: false,        // PASS+ 30일 이용권 — 유료 기능, 지금은 꺼 둠
+    coins: false,           // 플레이 코인 충전 — 유료 기능, 지금은 꺼 둠
+    gift: false,            // 코인 선물하기 — 유료 기능, 지금은 꺼 둠
     partnerPortal: true,    // 파트너 포털
     chatHelper: true,       // 화면 오른쪽 아래 도우미
     showSamples: true       // '예시' 표시가 붙은 샘플 상품·글을 보여줄지 (실제 데이터로 바꾸면 false)
@@ -116,7 +131,6 @@ window.PLT_SITE = {
 
   /* 체험 모드 전용 값 */
   demo: {
-    otpHint: true,          // 체험 모드에서 인증번호를 화면에 보여줌
     adminPin: "0000",       // 운영 콘솔 체험용 비밀번호
     kioskKey: "demo",       // 매장 체크인 화면 체험용 키
     partnerCode: "PT-DEMO"  // 파트너 포털 체험용 코드

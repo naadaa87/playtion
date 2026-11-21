@@ -9,16 +9,23 @@
   'use strict';
   var PLT = window.PLT, S = PLT.S, G = window.PLT_GACHA || {};
   var sb = window.supabase.createClient(S.supabase.url, S.supabase.anonKey, {
-    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false, storageKey: 'plt-auth' }
+    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false, storageKey: 'plt-auth', flowType: 'pkce' }
   });
+  var A = S.auth || {};
+  /* 아이디 → 로그인 계정 주소 (메일을 보내지 않는 내부 주소예요) */
+  var idEmail = function (u) { return String(u || '').trim().toLowerCase() + '@' + (A.idDomain || 'id.playtion.kr'); };
   PLT.sb = sb;
 
   var FRIENDLY = [
     [/rate limit|too many|security purposes/i, '요청이 많아요. 잠시 뒤에 다시 시도해 주세요.'],
-    [/token has expired|otp.*expired|expired/i, '인증 시간이 지났어요. 인증번호를 다시 받아 주세요.'],
-    [/invalid.*(otp|token)|token.*invalid/i, '인증번호가 맞지 않아요.'],
-    [/invalid login credentials/i, '이메일이나 비밀번호가 맞지 않아요.'],
-    [/sms|phone provider|send.*otp/i, '문자를 보내지 못했어요. 잠시 뒤에 다시 시도하거나 고객센터로 연락 주세요.'],
+    [/token has expired|otp.*expired|expired|invalid.*(otp|token)|token.*invalid/i, '링크가 만료됐어요. 비밀번호 찾기를 다시 해 주세요.'],
+    [/invalid login credentials/i, '아이디나 비밀번호가 맞지 않아요.'],
+    [/already registered|already been registered|user already exists/i, '이미 쓰고 있는 아이디예요. 다른 아이디를 골라 주세요.'],
+    [/password.*(at least|should be|weak|characters)/i, '비밀번호는 영문과 숫자를 섞어 8자 이상으로 정해 주세요.'],
+    [/same.*password|different from the old/i, '지금과 다른 비밀번호로 정해 주세요.'],
+    [/email address .* is invalid|email_address_invalid/i, '가입 설정을 마치지 못했어요. 고객센터로 알려 주세요. (계정 주소 도메인 확인 필요)'],
+    [/signups not allowed|signup.*disabled/i, '지금은 가입을 받지 않아요. 고객센터로 문의해 주세요.'],
+    [/provider is not enabled|unsupported provider/i, '이 로그인 방식은 아직 연결하지 않았어요. 아이디로 가입해 주세요.'],
     [/permission denied|not allowed|JWT/i, '권한이 없어요. 다시 로그인해 주세요.'],
     [/Failed to fetch|NetworkError|network/i, '연결이 불안정해요. 잠시 뒤에 다시 시도해 주세요.']
   ];
@@ -67,20 +74,104 @@
 
     /* ---------------- 회원 ---------------- */
     me: function () { return authed().then(function (ok) { return ok ? rpc('plt_me') : null; }); },
-    requestOtp: function (phone) {
-      if (!PLT.phone.valid(phone)) return no('휴대폰 번호를 다시 확인해 주세요.');
-      return sb.auth.signInWithOtp({ phone: PLT.phone.e164(phone) }).then(function (r) {
+    usernameFree: function (u) {
+      if (!PLT.idOk(String(u || '').trim().toLowerCase())) return no('아이디는 영문 소문자로 시작해 영문 소문자·숫자·밑줄(_)로 4~20자를 써 주세요.');
+      return rpc('plt_username_free', { p_username: String(u).trim().toLowerCase() });
+    },
+    /* 아이디·비밀번호 가입 — Supabase 이메일 로그인 위에 아이디 주소를 얹어요 (Confirm email 은 꺼 둬야 해요) */
+    signup: function (p) {
+      var u = String(p.username || '').trim().toLowerCase();
+      if (!PLT.idOk(u)) return no('아이디는 영문 소문자로 시작해 영문 소문자·숫자·밑줄(_)로 4~20자를 써 주세요.');
+      if (!PLT.pwOk(p.password)) return no('비밀번호는 영문과 숫자를 섞어 8자 이상으로 정해 주세요.');
+      var body = Object.assign({}, p, { firstTouch: PLT.ls.get('firstTouch', 'web') }); delete body.password;
+      return rpc('plt_username_free', { p_username: u }).then(function (free) {
+        if (!free) throw PLT.fail('이미 쓰고 있는 아이디예요. 다른 아이디를 골라 주세요.');
+        return sb.auth.signUp({ email: idEmail(u), password: p.password, options: { data: { username: u } } });
+      }).then(function (r) {
+        /* 지난번 가입이 중간에 끊긴 같은 사람이면 같은 비밀번호로 이어서 마무리해요 */
+        if (r.error && /already|exists/i.test(r.error.message || '')) {
+          return sb.auth.signInWithPassword({ email: idEmail(u), password: p.password }).then(function (r2) {
+            if (r2.error) throw PLT.fail('이미 쓰고 있는 아이디예요. 다른 아이디를 골라 주세요.');
+            return rpc('plt_me').then(function (me) { if (me) throw PLT.fail('이미 가입한 아이디예요. 로그인해 주세요.'); return r2; });
+          });
+        }
         if (r.error) throw PLT.fail(friendly(r.error.message));
-        return { sent: true, hint: '' };
+        if (!r.data || !r.data.session) throw PLT.fail('가입 설정을 마치지 못했어요. 고객센터로 알려 주세요. (Supabase Confirm email 끄기 필요)');
+        return r;
+      }).then(function () { return rpc('plt_signup', { p: body }); });
+    },
+    login: function (username, password) {
+      var u = String(username || '').trim().toLowerCase();
+      if (!u || !password) return no('아이디와 비밀번호를 넣어 주세요.');
+      return sb.auth.signInWithPassword({ email: idEmail(u), password: password }).then(function (r) {
+        if (r.error) throw PLT.fail(friendly(r.error.message));
+        return rpc('plt_me');
+      }).then(function (me) {
+        if (!me) return { me: null, pending: true };
+        return { me: me, mustChange: !!me.mustChangePw };
       });
     },
-    verifyOtp: function (phone, code) {
-      return sb.auth.verifyOtp({ phone: PLT.phone.e164(phone), token: String(code).trim(), type: 'sms' }).then(function (r) {
+    /* 카카오·구글 — 그 회사 로그인 화면으로 갔다가 /pass/login 으로 돌아와요 */
+    social: function (provider, next) {
+      if (provider !== 'kakao' && provider !== 'google') return no('지원하지 않는 로그인 방식이에요.');
+      var back = location.origin + '/pass/login?oauth=' + provider + (next ? '&next=' + encodeURIComponent(next) : '');
+      return sb.auth.signInWithOAuth({ provider: provider, options: { redirectTo: back } }).then(function (r) {
         if (r.error) throw PLT.fail(friendly(r.error.message));
-        return rpc('plt_me').then(function (me) { return me ? { isNew: false, me: me } : { isNew: true }; });
+        return { redirect: true };
       });
     },
-    signup: function (p) { p = Object.assign({}, p, { firstTouch: PLT.ls.get('firstTouch', 'web') }); return rpc('plt_signup', { p: p }); },
+    /* 돌아온 직후: 주소의 code 로 로그인을 마치고, 회원 정보가 없으면 가입 마무리로 */
+    pendingSocial: function () {
+      var code = PLT.param('code');
+      var step = code ? sb.auth.exchangeCodeForSession(code).then(function (r) { if (r.error) throw PLT.fail(friendly(r.error.message)); }) : Promise.resolve();
+      return step.then(function () { return sb.auth.getUser(); }).then(function (r) {
+        var user = r && r.data && r.data.user; if (!user) return null;
+        var prov = (user.app_metadata || {}).provider || '';
+        if (prov !== 'kakao' && prov !== 'google') return null;
+        return rpc('plt_me').then(function (me) {
+          if (me) return null;
+          var md = user.user_metadata || {};
+          return { provider: prov, nick: String(md.nickname || md.name || md.full_name || '').slice(0, 12), email: user.email || md.email || '' };
+        });
+      });
+    },
+    cancelSocial: function () { return sb.auth.signOut().then(function () { return true; }); },
+    completeSignup: function (p) { return rpc('plt_signup', { p: Object.assign({}, p, { firstTouch: PLT.ls.get('firstTouch', 'web') }) }); },
+    changePassword: function (current, next) {
+      if (!PLT.pwOk(next)) return no('새 비밀번호는 영문과 숫자를 섞어 8자 이상으로 정해 주세요.');
+      var me = PLT.me || {};
+      if (me.provider && me.provider !== 'id') return no('카카오·구글로 가입한 계정은 비밀번호가 없어요.');
+      var check = me.mustChangePw ? Promise.resolve() : sb.auth.signInWithPassword({ email: idEmail(me.username), password: current || '' }).then(function (r) { if (r.error) throw PLT.fail('지금 비밀번호가 맞지 않아요.'); });
+      return check.then(function () { return sb.auth.updateUser({ password: next }); }).then(function (r) {
+        if (r.error) throw PLT.fail(friendly(r.error.message));
+        return rpc('plt_pw_changed');
+      });
+    },
+    /* 아이디 찾기·비밀번호 재설정 메일 (Cloudflare 함수 /api/auth/recover 가 보내요) */
+    recover: function (d) {
+      return fetch('/api/auth/recover', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ kind: d.kind === 'id' ? 'id' : 'password', username: String(d.username || '').trim().toLowerCase(), email: String(d.email || '').trim() }) })
+        .then(function (res) { return res.json().catch(function () { return {}; }).then(function (j) { if (!res.ok || j.error) { var e = PLT.fail(j.error || '메일을 보내지 못했어요. 관리자에게 재설정을 요청해 주세요.'); e.fallback = !!j.fallback || res.status === 503; throw e; } return { sent: true }; }); },
+          function () { throw PLT.fail('연결이 불안정해요. 잠시 뒤에 다시 시도해 주세요.'); });
+    },
+    checkReset: function (token) { return Promise.resolve(!!token); },
+    resetPassword: function (token, next) {
+      if (!PLT.pwOk(next)) return no('새 비밀번호는 영문과 숫자를 섞어 8자 이상으로 정해 주세요.');
+      return sb.auth.verifyOtp({ token_hash: token, type: 'recovery' }).then(function (r) {
+        if (r.error) throw PLT.fail(friendly(r.error.message));
+        return sb.auth.updateUser({ password: next });
+      }).then(function (r) {
+        if (r.error) throw PLT.fail(friendly(r.error.message));
+        return rpc('plt_pw_changed');
+      });
+    },
+    pwRequest: function (d) {
+      var text = ('아이디: ' + (d.username || '-') + ' / 닉네임: ' + (d.nick || '-') + (d.memo ? ' / ' + d.memo : '')).slice(0, 1500);
+      return rpc('plt_inquiry', { d: { type: 'account', kind: '비밀번호 재설정 요청', text: text, contact: d.contact || '' } });
+    },
+    attend: function () { return rpc('plt_attend'); },
+    rewardUsage: function () { return rpc('plt_reward_usage'); },
+    redeem: function (id, qty) { return rpc('plt_redeem', { p_reward_id: id, p_qty: qty || 1 }); },
+    myEntries: function () { return list('entries'); },
     logout: function () { return sb.auth.signOut().then(function () { return true; }); },
     updateProfile: function (patch) { return rpc('plt_update_profile', { p: patch }); },
     deleteAccount: function () { return rpc('plt_delete_account').then(function () { return sb.auth.signOut(); }).then(function () { return true; }); },
@@ -206,8 +297,11 @@
     adminAddBooking: function (q) { return rpc('plt_admin_add_booking', { q: q }); },
     adminSetStatus: function (seriesId, status) { return rpc('plt_admin_set_status', { p_series_id: seriesId, p_status: status }).then(function (r) { return refreshOverlay().then(function () { return r; }); }); },
     adminAddArrival: function (a) { return rpc('plt_admin_add_arrival', { a: a }); },
-    adminIssueCoupon: function (phone, defId) { return rpc('plt_admin_issue_coupon', { p_phone: phone, p_def: defId }); },
-    adminStamp: function (phone, store) { return rpc('plt_admin_stamp', { p_phone: phone, p_store: store || 'kd-gacha' }); },
+    adminIssueCoupon: function (key, defId) { return rpc('plt_admin_issue_coupon', { p_key: key, p_def: defId }); },
+    adminStamp: function (key, store) { return rpc('plt_admin_stamp', { p_key: key, p_store: store || 'kd-gacha' }); },
+    adminPoints: function (key, points, memo) { return rpc('plt_admin_points', { p_key: key, p_points: parseInt(points, 10) || 0, p_memo: memo || '' }); },
+    adminResetPassword: function (memberId) { return rpc('plt_admin_reset_password', { p_member: memberId }); },
+    adminDraw: function (rewardId) { return rpc('plt_admin_draw', { p_reward_id: rewardId }); },
     adminSyncRules: function () { return rpc('plt_admin_sync_rules', { rules: PLT.rulesSnapshot() }); },
     adminSetKioskKey: function (store, key) { return rpc('plt_admin_set_kiosk_key', { p_store: store, p_key: key }); },
     adminReset: function () { return no('실서비스 데이터는 콘솔에서 지울 수 없어요.'); }
