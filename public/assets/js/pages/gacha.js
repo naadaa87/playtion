@@ -45,7 +45,7 @@
         PLT.db.mySubs().then(function (subs) {
           var on = subs.map(function (x) { return x.seriesId; });
           var m = PLT.modal({
-            title: '입고 알림 받을 시리즈', body: '<p class="t-small">켜 둔 시리즈가 들어오는 날 알림톡으로 알려 드려요.</p><div class="stack-s mt-m">' + ids.map(function (id) {
+            title: '입고 알림 받을 시리즈', body: '<p class="t-small">켜 둔 시리즈가 들어오는 날 내 PASS 알림으로 알려 드려요.</p><div class="stack-s mt-m">' + ids.map(function (id) {
               var s = PLT.gacha.get(id); if (!s) return '';
               return '<div class="row row--between" style="flex-wrap:nowrap"><span class="row" style="gap:8px;flex-wrap:nowrap"><span style="width:34px">' + cap(s) + '</span><b>' + esc(s.name) + '</b></span>' + subBtn(id, on.indexOf(id) >= 0, true) + '</div>';
             }).join('') + '</div>'
@@ -66,7 +66,7 @@
           if (!r) return;
           b.className = 'btn ' + (r.on ? 'btn--ink' : 'btn--gacha') + (b.classList.contains('btn--s') ? ' btn--s' : '');
           b.setAttribute('aria-pressed', r.on ? 'true' : 'false'); b.textContent = r.on ? '알림 켜짐' : '입고 알림 받기';
-          PLT.toast(r.on ? '입고되면 알림톡으로 알려 드릴게요.' : '입고 알림을 껐어요.', r.on ? 'ok' : '');
+          PLT.toast(r.on ? '입고되면 내 PASS 알림으로 알려 드릴게요.' : '입고 알림을 껐어요.', r.on ? 'ok' : '');
         });
       });
     });
@@ -153,7 +153,7 @@
         '<p class="help mt-s">기기 번호 ' + esc(machine || '없음') + ' 로 접수돼요.</p><button class="btn btn--ink btn--block mt-m" type="submit">보내기</button></form>'
     });
     PLT.bindPhone($('#rpContact', m.el));
-    if (PLT.me) $('#rpContact', m.el).value = PLT.phone.fmt(PLT.me.phone);
+    if (PLT.me && PLT.me.phone) $('#rpContact', m.el).value = PLT.phone.fmt(PLT.me.phone);
     $('#rpForm', m.el).addEventListener('submit', function (e) {
       e.preventDefault();
       var btn = $('button[type=submit]', m.el);
@@ -279,7 +279,7 @@
           '<div><h2 class="t-h4">구성 ' + (s.lineup || []).length + '종 <span class="t-small t-muted" style="font-weight:500">' + (PLT.me ? '· 가진 종류를 눌러 컬렉션 북에 기록해요' : '· 로그인하면 가진 종류를 기록할 수 있어요') + '</span></h2><div class="mt-s" id="lineupBox">' + lineupHtml(s, have, true) + '</div></div></div>' +
         '<div class="stack">' +
           '<div class="panel"><h2 class="t-h4">어디에 있나요</h2><p class="t-small mt-s">기기 번호 ' + (s.machines || []).map(function (m) { return '<span class="code code--gacha" style="margin-right:4px">' + esc(m) + '</span>'; }).join('') + '</p><div class="mt-s">' + shopMapSvg((PLT.gacha.parseLoc((s.machines || [])[0]) || {}).zone, s.machines) + '</div></div>' +
-          '<div class="panel"><div class="row row--between"><h2 class="t-h4">입고 알림</h2>' + subBtn(s.id, subOn) + '</div><p class="t-small mt-s">품절이거나 다시 채워질 때, 새 시즌이 들어올 때 알림톡으로 알려 드려요.' + (PLT.me && PLT.me.isPlus ? ' PASS+라 하루 먼저 받아요.' : '') + '</p></div>' +
+          '<div class="panel"><div class="row row--between"><h2 class="t-h4">입고 알림</h2>' + subBtn(s.id, subOn) + '</div><p class="t-small mt-s">품절이거나 다시 채워질 때, 새 시즌이 들어올 때 내 PASS 알림으로 알려 드려요.</p></div>' +
           (s.online && PLT.features.onlineGacha ? '<div class="panel panel--line-gacha"><div class="row row--between"><h2 class="t-h4">온라인 뽑기</h2><span class="t-small">남은 수량 <b>' + left + '</b>/' + s.onlineStock + '</span></div><div class="meter mt-s"><i style="width:' + (s.onlineStock ? Math.round(left / s.onlineStock * 100) : 0) + '%;background:linear-gradient(90deg,var(--gacha-rail),var(--gacha))"></i></div>' +
             '<p class="t-small mt-s">구성 ' + (s.lineup || []).length + '종이 모두 같은 확률로 나와요. 종류별 <b>' + odds + '%</b>, 남은 수량 안에서 무작위로 정해져요.</p>' +
             '<a class="btn btn--gacha btn--block mt-m' + (left ? '' : ' is-off') + '" href="' + PLT.url('gacha/online?id=' + s.id) + '">' + (left ? PLT.coin(s.price) + '로 뽑기' : '온라인 수량이 모두 나갔어요') + '</a></div>' : '') +
@@ -373,6 +373,12 @@
      ------------------------------------------------------------------ */
   function onlinePage() {
     if (PLT.page !== 'online') return;
+    /* 온라인 뽑기는 코인 결제가 필요한 기능이라 지금은 꺼 뒀어요 (site.js features.onlineGacha) */
+    if (PLT.features.onlineGacha === false) {
+      var mm = $('#main');
+      if (mm) mm.innerHTML = '<section class="band"><div class="wrap"><div class="empty"><h3>온라인 뽑기는 아직 열지 않았어요</h3><p>지금은 건대 가챠샵에서 직접 뽑을 수 있어요. 상품 찾기에서 기기 위치와 남은 수량을 먼저 확인해 보세요.</p><a class="btn btn--primary" href="' + PLT.url('gacha/products') + '">상품 찾기</a> <a class="btn btn--ghost" href="' + PLT.url('gacha/visit') + '">방문 안내</a></div></div></section>';
+      return;
+    }
     var listHost = $('#olList'), wHost = $('#olWallet');
     var coupons = [];
     var wallet = function () {

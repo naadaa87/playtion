@@ -8,7 +8,7 @@
   var PLT = window.PLT, $ = PLT.$, $$ = PLT.$$, esc = PLT.esc, won = PLT.won;
   var G = window.PLT_GACHA || {}, NEWS = window.PLT_NEWS || {}, PS = window.PLT_PASS || {};
   var host = $('#adm');
-  var VIEWS = [['dash', '한눈에 보기'], ['kpi', 'KPI 대시보드'], ['bookings', '파티룸 예약'], ['members', '회원']].concat(window.PLT_ADMIN_EXTRA_NAV || []).concat([['series', '가챠 상품 상태'], ['arrivals', '입고 일정'], ['box', '보관함 수령·배송'], ['inquiries', '문의·고장'], ['leads', '창업·제휴 상담'], ['market', '마켓·거래 (예전)'], ['regs', '행사 신청'], ['qr', 'QR 라벨·체크인'], ['tools', '도구']]);
+  var VIEWS = [['dash', '한눈에 보기'], ['kpi', 'KPI 대시보드'], ['bookings', '파티룸 예약'], ['members', '회원'], ['entries', '포인트 응모·경품']].concat(window.PLT_ADMIN_EXTRA_NAV || []).concat([['series', '가챠 상품 상태'], ['arrivals', '입고 일정'], ['box', '보관함 수령·배송'], ['inquiries', '문의·고장'], ['leads', '창업·제휴 상담'], ['market', '마켓·거래 (예전)'], ['regs', '행사 신청'], ['qr', 'QR 라벨·체크인'], ['tools', '도구']]);
   var view = (location.hash || '#dash').slice(1);
 
   var stName = function (id) { var s = PLT.station(id); return s ? s.short : id; };
@@ -53,7 +53,7 @@
   }
   function render() {
     var main = $('#admMain'); main.innerHTML = '<p class="t-muted">불러오고 있어요.</p>';
-    var V = { dash: dash, bookings: bookings, members: members, series: series, arrivals: arrivals, box: box, inquiries: inquiries, leads: leads, market: market, regs: regs, qr: qr, tools: tools }, X = window.PLT_ADMIN_EXTRA || {};
+    var V = { dash: dash, bookings: bookings, members: members, entries: entries, series: series, arrivals: arrivals, box: box, inquiries: inquiries, leads: leads, market: market, regs: regs, qr: qr, tools: tools }, X = window.PLT_ADMIN_EXTRA || {};
     for (var k in X) V[k] = X[k];
     (V[view] || V.dash)(main);
   }
@@ -73,9 +73,10 @@
         var max = Math.max.apply(null, s.days.map(function (d) { return d[key]; }).concat([1]));
         return '<div class="bars" style="margin-bottom:26px">' + s.days.map(function (d) { return '<i style="height:' + Math.max(3, Math.round(d[key] / max * 100)) + '%;background:' + color + '" title="' + esc(PLT.fmtMD(d.date) + ' ' + d[key]) + '"><span>' + PLT.parseYmd(d.date).getDate() + '</span></i>'; }).join('') + '</div>';
       };
-      main.innerHTML = head('한눈에 보기', PLT.mode === 'demo' ? '체험 모드 숫자예요. 이 브라우저에서 만든 가입·체크인·뽑기만 집계돼요.' : '') +
+      var todo = (s.leadsNew || 0) + (s.inquiriesOpen || 0) + (s.entriesOpen || 0);
+      main.innerHTML = head('한눈에 보기', PLT.mode === 'demo' ? '체험 모드 숫자예요. 이 브라우저에서 만든 가입·출석·체크인만 집계돼요.' : '') +
         '<div class="kpis"><div class="kpi"><span>PASS 회원</span><b>' + PLT.num(s.members) + '</b></div><div class="kpi"><span>오늘 체크인</span><b>' + PLT.num(s.checkinsToday) + '</b></div>' +
-        '<div class="kpi"><span>온라인 뽑기</span><b>' + PLT.num(s.draws) + '개</b></div><div class="kpi"><span>남은 코인 (부채)</span><b>' + PLT.coin(s.coinsOutstanding) + '</b></div><div class="kpi"><span>처리할 일</span><b>' + (s.leadsNew + s.inquiriesOpen + s.tradesOpen) + '</b><small>상담 ' + s.leadsNew + ' · 문의 ' + s.inquiriesOpen + ' · 거래 ' + s.tradesOpen + '</small></div></div>' +
+        '<div class="kpi"><span>오늘 출석</span><b>' + PLT.num(s.attendToday || 0) + '</b></div><div class="kpi"><span>남은 포인트</span><b>' + PLT.pt(s.pointsOutstanding || 0) + '</b><small>회원이 아직 안 쓴 포인트 합계</small></div><div class="kpi"><span>처리할 일</span><b>' + todo + '</b><small>상담 ' + (s.leadsNew || 0) + ' · 문의 ' + (s.inquiriesOpen || 0) + ' · 경품 전달 ' + (s.entriesOpen || 0) + '</small></div></div>' +
         '<div class="grid g3 mt-m"><div class="panel"><h2 class="t-h4">체크인 (14일)</h2>' + bars('checkins', 'var(--pass-rail)') + '</div><div class="panel"><h2 class="t-h4">새 회원 (14일)</h2>' + bars('members', 'var(--gacha-rail)') + '</div>' +
         '<div class="panel panel--line-party"><h2 class="t-h4">파티룸 예약</h2><p class="t-small mt-s">예약은 네이버 예약으로 받고, 예약 관리와 문의는 쏘플파티룸에서 맡아요.</p>' + partyLinks() + '</div></div>';
     });
@@ -97,27 +98,100 @@
   }
 
   /* 회원 */
+  var PROV = { id: '아이디', kakao: '카카오', google: 'Google' };
+  var whoOf = function (m) { return m.username ? '@' + m.username : (PROV[m.provider] || (m.phone ? '휴대폰' : '')); };
+  var keyOf = function (m) { return m.username || m.code; };
+  function pointsModal(m, done) {
+    var EARN = ((PS.points || {}).earn || {}), ev = EARN.event || {};
+    var md = PLT.modal({
+      title: '포인트 넣기·빼기', body: '<form id="ptForm" novalidate><p class="t-small">' + esc((m.nick || '') + ' (' + whoOf(m) + ')') + ' · 지금 ' + PLT.pt(m.points || 0) + '</p>' +
+        '<div class="chips mt-m"><button class="chip" type="button" data-pre="' + (ev.points || 300) + '" data-memo="' + esc(ev.title || '교환회·행사 참여') + '">' + esc(ev.title || '교환회·행사 참여') + ' +' + PLT.pt(ev.points || 300) + '</button><button class="chip" type="button" data-pre="" data-memo="응모·경품 취소로 돌려드림">돌려드림</button><button class="chip" type="button" data-pre="" data-memo="부정 적립 회수">부정 적립 회수</button></div>' +
+        '<div class="fieldrow mt-m"><div class="field"><label class="lbl" for="ptAmt">포인트 <small>빼려면 앞에 - </small></label><input class="inp" id="ptAmt" inputmode="numeric" placeholder="300 또는 -300"></div><div class="field"><label class="lbl" for="ptMemo">회원에게 보일 내용</label><input class="inp" id="ptMemo" maxlength="60" placeholder="예: 11월 교환회 참여"></div></div>' +
+        '<button class="btn btn--ink btn--block mt-m" type="submit">반영하기</button></form>'
+    });
+    $$('[data-pre]', md.el).forEach(function (b) { b.addEventListener('click', function () { if (b.getAttribute('data-pre')) $('#ptAmt', md.el).value = b.getAttribute('data-pre'); $('#ptMemo', md.el).value = b.getAttribute('data-memo'); }); });
+    $('#ptForm', md.el).addEventListener('submit', function (e) {
+      e.preventDefault();
+      var amt = parseInt(String($('#ptAmt', md.el).value).replace(/[^\d-]/g, ''), 10) || 0;
+      if (!amt) { PLT.toast('넣거나 뺄 포인트를 적어 주세요.', 'err'); return; }
+      PLT.busy($('button[type=submit]', md.el), function () { return PLT.db.adminPoints(keyOf(m), amt, $('#ptMemo', md.el).value.trim()).then(function () { md.close(); PLT.toast('포인트를 반영했어요.', 'ok'); done(); }); });
+    });
+  }
+  function resetModal(m, done) {
+    if (m.provider && m.provider !== 'id') { PLT.toast(PROV[m.provider] + '로 가입한 회원은 비밀번호가 없어요. 같은 계정으로 다시 로그인하도록 안내해 주세요.', 'err'); return; }
+    PLT.confirm('임시 비밀번호를 만들까요?', (m.nick || '') + ' (' + whoOf(m) + ') 회원의 지금 비밀번호는 쓸 수 없게 되고, 임시 비밀번호로 로그인하면 새 비밀번호를 정하는 화면이 나와요. 문의함에 남긴 연락처로 본인인지 먼저 확인해 주세요.', '임시 비밀번호 만들기', 'btn--ink').then(function (yes) {
+      if (!yes) return;
+      PLT.db.adminResetPassword(m.id).then(function (r) {
+        var msg = '[플레이션] ' + (m.nick || '회원') + '님, 요청하신 임시 비밀번호는 ' + r.temp + ' 예요. 아이디 ' + (r.username || m.username || '') + '로 로그인하면 새 비밀번호를 정하는 화면이 나와요. 임시 비밀번호는 다른 사람에게 알려 주지 마세요.';
+        var md = PLT.modal({
+          title: '임시 비밀번호', body: '<p class="t-small">이 창을 닫으면 다시 볼 수 없어요. 회원에게 안내한 뒤 닫아 주세요.</p><div class="ticket__total mt-m"><span class="t-strong">아이디 ' + esc(r.username || m.username || '') + '</span><b style="letter-spacing:.06em">' + esc(r.temp) + '</b></div>' +
+            '<div class="field mt-m"><label class="lbl" for="tpMsg">보낼 안내 문구</label><textarea class="txa" id="tpMsg" style="min-height:96px" readonly>' + esc(msg) + '</textarea></div>',
+          actions: [{ label: '안내 문구 복사', kind: 'btn--ghost', keep: true, onClick: function () { PLT.copy(msg, '안내 문구를 복사했어요'); return false; } }, { label: '닫기', kind: 'btn--ink' }],
+          onClose: done
+        });
+      }, function (e) { PLT.toast(e.message, 'err'); });
+    });
+  }
   function members(main) {
     var q = '';
     var draw = function () {
       PLT.db.adminList('members').then(function (list) {
         var qq = q.toLowerCase(), digits = q.replace(/\D/g, '');
-        var rows = list.filter(function (m) { return !q || ((m.nick || '') + ' ' + (m.name || '') + ' ' + m.code).toLowerCase().indexOf(qq) >= 0 || (digits.length >= 3 && m.phone.indexOf(digits) >= 0); });
-        var defs = Object.keys(PS.coupons || {}).map(function (k) { return [k, PS.coupons[k].title]; });
-        main.innerHTML = head('회원', '마케팅 수신 동의 여부는 발송 전에 꼭 확인해요.', '<button class="btn btn--ghost btn--s" type="button" id="mmCsv">CSV</button>') +
-          '<input class="inp" id="mmQ" placeholder="전화번호 뒷자리, 닉네임, 회원 코드" value="' + esc(q) + '" style="max-width:360px;height:42px">' + '<div class="mt-m">' +
-          table(['회원', '전화', '등급', '포인트', '코인', '스탬프', '수신 동의', '가입', '관리'], rows.map(function (m) {
-            var c = m.consents || {};
-            return [esc(m.nick || '') + (m.name ? ' (' + esc(m.name) + ')' : '') + '<br><span class="t-micro">' + esc(m.code) + (m.isPlus ? ' · PASS+' : '') + '</span>', esc(PLT.phone.fmt(m.phone)), esc(m.level.name), PLT.pt(m.points), PLT.coin(m.coins), m.stamps + '/' + m.stampGoal, (c.mktSms ? '문자 ' : '') + (c.mktKakao ? '카톡 ' : '') + (c.mktNight ? '야간' : '') || '—', esc(PLT.fmtDate(new Date(m.createdAt), false)),
-              sel('def', defs, '', 'data-cp="' + esc(m.phone) + '"') + ' <button class="btn btn--ghost btn--s" type="button" data-give="' + esc(m.phone) + '">쿠폰</button> <button class="btn btn--quiet btn--s" type="button" data-stamp="' + esc(m.phone) + '">스탬프+1</button>'];
+        var rows = list.filter(function (m) { return !q || ((m.nick || '') + ' ' + (m.name || '') + ' ' + (m.username || '') + ' ' + (m.email || '') + ' ' + m.code).toLowerCase().indexOf(qq) >= 0 || (digits.length >= 3 && String(m.phone || '').indexOf(digits) >= 0); });
+        var byId = {}; rows.forEach(function (m) { byId[m.id] = m; });
+        main.innerHTML = head('회원', '비밀번호 재설정 요청은 문의·고장 메뉴에 들어와요. 연락처로 본인인지 확인한 뒤 여기서 임시 비밀번호를 만들어 안내해 주세요.', '<button class="btn btn--ghost btn--s" type="button" id="mmCsv">CSV</button>') +
+          '<input class="inp" id="mmQ" placeholder="아이디, 닉네임, 이메일, 회원 코드" value="' + esc(q) + '" style="max-width:360px;height:42px">' + '<div class="mt-m">' +
+          table(['회원', '성별·연령대', '이메일', '등급', '포인트', '스탬프', '가입', '관리'], rows.map(function (m) {
+            return [esc(m.nick || m.name || '') + '<br><span class="t-micro">' + esc(whoOf(m)) + ' · ' + esc(m.code) + '</span>' + (m.mustChangePw ? '<br><span class="lb lb--warn lb--s">임시 비밀번호 발급됨</span>' : ''),
+              esc([PLT.pass.label('gender', m.gender), PLT.pass.label('age', m.ageGroup)].filter(Boolean).join(' · ') || '—'),
+              esc(m.email || '—') + ((m.consents || {}).mktEmail ? '<br><span class="t-micro">소식 받기 동의</span>' : ''),
+              esc((m.level || {}).name || ''), PLT.pt(m.points || 0), (m.stamps || 0) + '/' + (m.stampGoal || 10), esc(PLT.fmtDate(new Date(m.createdAt), false)),
+              '<div class="row" style="gap:6px;flex-wrap:nowrap"><button class="btn btn--ghost btn--s" type="button" data-pt="' + esc(m.id) + '">포인트</button><button class="btn btn--quiet btn--s" type="button" data-stamp="' + esc(m.id) + '">스탬프+1</button>' + (m.provider === 'id' || (!m.provider && m.username) ? '<button class="btn btn--quiet btn--s" type="button" data-reset="' + esc(m.id) + '">비밀번호 재설정</button>' : '') + '</div>'];
           }), '회원이 없어요') + '</div>';
         $('#mmQ').addEventListener('input', PLT.debounce(function (e) { q = e.target.value.trim(); draw(); }, 250));
-        $$('[data-give]', main).forEach(function (b) { b.addEventListener('click', function () { var s = $('[data-cp="' + b.getAttribute('data-give') + '"]', main); PLT.db.adminIssueCoupon(b.getAttribute('data-give'), s.value).then(function () { PLT.toast('쿠폰을 보냈어요.', 'ok'); }, function (e) { PLT.toast(e.message, 'err'); }); }); });
-        $$('[data-stamp]', main).forEach(function (b) { b.addEventListener('click', function () { PLT.db.adminStamp(b.getAttribute('data-stamp')).then(function () { PLT.toast('스탬프를 찍었어요.', 'ok'); draw(); }, function (e) { PLT.toast(e.message, 'err'); }); }); });
-        $('#mmCsv').addEventListener('click', function () { csv('members', ['닉네임', '이름', '전화', '코드', '등급', '포인트', '코인', '문자수신', '카톡수신', '야간수신', '가입일'], rows.map(function (m) { var c = m.consents || {}; return [m.nick, m.name, PLT.phone.fmt(m.phone), m.code, m.level.name, m.points, m.coins, c.mktSms ? 'Y' : 'N', c.mktKakao ? 'Y' : 'N', c.mktNight ? 'Y' : 'N', PLT.ymd(new Date(m.createdAt))]; })); });
+        $$('[data-pt]', main).forEach(function (b) { b.addEventListener('click', function () { pointsModal(byId[b.getAttribute('data-pt')], draw); }); });
+        $$('[data-stamp]', main).forEach(function (b) { b.addEventListener('click', function () { PLT.db.adminStamp(keyOf(byId[b.getAttribute('data-stamp')])).then(function (r) { PLT.toast('스탬프를 찍었어요.' + (r.rewards && r.rewards.length ? ' 10칸 보상도 나갔어요.' : ''), 'ok'); draw(); }, function (e) { PLT.toast(e.message, 'err'); }); }); });
+        $$('[data-reset]', main).forEach(function (b) { b.addEventListener('click', function () { resetModal(byId[b.getAttribute('data-reset')], draw); }); });
+        $('#mmCsv').addEventListener('click', function () {
+          csv('members', ['닉네임', '아이디', '가입 방식', '회원 코드', '성별', '연령대', '이메일', '이메일 수신', '등급', '포인트', '가입일'], rows.map(function (m) { var c = m.consents || {}; return [m.nick, m.username || '', PROV[m.provider] || (m.phone ? '휴대폰' : ''), m.code, PLT.pass.label('gender', m.gender), PLT.pass.label('age', m.ageGroup), m.email || '', c.mktEmail ? 'Y' : 'N', (m.level || {}).name || '', m.points || 0, PLT.ymd(new Date(m.createdAt))]; }));
+        });
       });
     };
     draw();
+  }
+
+  /* 포인트 응모·경품 */
+  function entries(main) {
+    var ST = [['applied', '응모 완료'], ['won', '당첨 · 수령 대기'], ['lost', '미당첨'], ['ready', '수령 대기'], ['done', '전달 완료'], ['cancelled', '취소 (포인트 돌려줌)']];
+    PLT.db.adminList('entries').then(function (list) {
+      var rewards = PS.rewards || [];
+      var known = {}; rewards.forEach(function (r) { known[r.id] = 1; });
+      var others = {}; list.forEach(function (e) { if (!known[e.rewardId]) others[e.rewardId] = { id: e.rewardId, title: e.title, kind: e.kind }; });
+      var all = rewards.filter(function (r) { return r.kind !== 'item'; }).concat(Object.keys(others).map(function (k) { return others[k]; }));
+      main.innerHTML = head('포인트 응모·경품', '응모는 마감 뒤 추첨하기를 누르면 넣은 횟수만큼 확률이 올라간 채로 뽑혀요. 경품은 매장에서 수령 코드를 확인하고 전달 완료로 바꿔요. 취소로 바꾸면 쓴 포인트를 돌려드려요.', '<button class="btn btn--ghost btn--s" type="button" id="enCsv">CSV</button>') +
+        (all.length ? all.map(function (r) {
+          var rows = list.filter(function (e) { return e.rewardId === r.id; });
+          var qty = rows.filter(function (e) { return e.status !== 'cancelled'; }).reduce(function (a, e) { return a + (e.qty || 0); }, 0);
+          var people = {}; rows.forEach(function (e) { if (e.status !== 'cancelled') people[e.memberId] = 1; });
+          var applied = rows.some(function (e) { return e.status === 'applied'; });
+          return '<div class="panel mt-s"><div class="row row--between"><div><span class="lb ' + (r.kind === 'raffle' ? 'lb--pass' : 'lb--gacha') + ' lb--s">' + (r.kind === 'raffle' ? '응모' : '경품') + '</span> <b class="t-h4">' + esc(r.title) + '</b>' + (r.sample ? ' <span class="lb lb--sample lb--s">예시</span>' : '') +
+            '<p class="t-small mt-s">' + Object.keys(people).length + '명 · ' + qty + (r.kind === 'raffle' ? '번 응모' : '개 신청') + (r.kind === 'raffle' && r.winners ? ' · 당첨 ' + r.winners + '명' : '') + (r.stock ? ' · 준비 수량 ' + r.stock + '개' : '') + (r.ends ? ' · 마감 ' + esc(PLT.fmtMD(r.ends)) : '') + '</p></div>' +
+            (r.kind === 'raffle' && applied ? '<button class="btn btn--ink btn--s" type="button" data-draw="' + esc(r.id) + '">추첨하기</button>' : '') + '</div>' +
+            (rows.length ? '<div class="mt-s">' + table(['회원', '횟수·포인트', '수령 코드', '신청', '상태'], rows.map(function (e) {
+              return [esc(e.nick || '') + '<br><span class="t-micro">' + esc(e.username ? '@' + e.username : e.memberCode || '') + '</span>', (e.kind === 'raffle' ? e.qty + '번 · ' : '') + PLT.pt(e.cost), esc(e.code || '—'), esc(PLT.ago(e.at)), sel('status', ST, e.status, 'data-patch="' + esc(e.id) + '"')];
+            }), '') + '</div>' : '<p class="t-small t-muted mt-s">아직 응모·신청이 없어요.</p>') + '</div>';
+        }).join('') : '<div class="empty"><h3>진행 중인 응모와 경품이 없어요</h3><p>data/pass.js 의 rewards 에 이벤트를 넣으면 여기에 나와요.</p></div>');
+      bindPatch(main, 'entries', function () { entries(main); });
+      $$('[data-draw]', main).forEach(function (b) {
+        b.addEventListener('click', function () {
+          PLT.confirm('지금 추첨할까요?', '응모 완료 상태인 응모만 추첨해요. 한 번 뽑으면 되돌릴 수 없고, 결과는 응모한 회원 모두에게 알림으로 가요.', '추첨하기', 'btn--ink').then(function (yes) {
+            if (!yes) return;
+            PLT.db.adminDraw(b.getAttribute('data-draw')).then(function (r) { PLT.toast(r.entries + '건 중 ' + r.winners + '명이 당첨됐어요.', 'ok'); entries(main); }, function (e) { PLT.toast(e.message, 'err'); });
+          });
+        });
+      });
+      $('#enCsv').addEventListener('click', function () { csv('entries', ['이벤트', '종류', '닉네임', '아이디', '횟수', '포인트', '수령 코드', '상태', '신청일'], list.map(function (e) { return [e.title, e.kind, e.nick, e.username || e.memberCode || '', e.qty, e.cost, e.code || '', e.status, e.at]; })); });
+    });
   }
 
   /* 가챠 상품 상태 */
@@ -168,11 +242,12 @@
   function inquiries(main) {
     PLT.db.adminList('inquiries').then(function (list) {
       var opts = [['open', '접수'], ['doing', '처리 중'], ['done', '완료']];
-      var kindName = { party: '파티룸', gacha: '가챠샵', machine: '기기', market: '마켓', pass: 'PASS', general: '일반' };
-      main.innerHTML = head('문의·고장', '기기 고장은 기기 번호로 들어와요. 환급이 필요한 건은 연락처로 먼저 연락해요.', '<button class="btn btn--ghost btn--s" type="button" id="iqCsv">CSV</button>') +
-        table(['종류', '기기', '내용', '연락처', '접수', '상태'], list.map(function (x) { return [esc(kindName[x.type] || x.type) + (x.kind ? '<br><span class="t-micro">' + esc(x.kind) + '</span>' : ''), esc(x.machine || ''), esc(x.text || ''), esc(PLT.phone.fmt(x.contact || '')), esc(PLT.ago(x.at)), sel('status', opts, x.status, 'data-patch="' + x.id + '"')]; }), '들어온 문의가 없어요');
+      var kindName = { party: '파티룸', gacha: '가챠샵', machine: '기기', market: '마켓', pass: 'PASS', account: '계정·비밀번호', general: '일반' };
+      var contact = function (c) { c = c || ''; return /@/.test(c) ? c : PLT.phone.fmt(c); };
+      main.innerHTML = head('문의·고장', '기기 고장은 기기 번호로 들어와요. 환급이 필요한 건은 연락처로 먼저 연락해요. 계정·비밀번호 요청은 회원 메뉴에서 아이디로 찾아 임시 비밀번호를 만들어 안내해요.', '<button class="btn btn--ghost btn--s" type="button" id="iqCsv">CSV</button>') +
+        table(['종류', '기기', '내용', '연락처', '접수', '상태'], list.map(function (x) { return [esc(kindName[x.type] || x.type) + (x.kind ? '<br><span class="t-micro">' + esc(x.kind) + '</span>' : ''), esc(x.machine || ''), esc(x.text || ''), esc(contact(x.contact)), esc(PLT.ago(x.at)), sel('status', opts, x.status, 'data-patch="' + x.id + '"')]; }), '들어온 문의가 없어요');
       bindPatch(main, 'inquiries');
-      $('#iqCsv').addEventListener('click', function () { csv('inquiries', ['종류', '세부', '기기', '내용', '연락처', '접수', '상태'], list.map(function (x) { return [x.type, x.kind, x.machine, x.text, PLT.phone.fmt(x.contact || ''), x.at, x.status]; })); });
+      $('#iqCsv').addEventListener('click', function () { csv('inquiries', ['종류', '세부', '기기', '내용', '연락처', '접수', '상태'], list.map(function (x) { return [x.type, x.kind, x.machine, x.text, contact(x.contact), x.at, x.status]; })); });
     });
   }
 
@@ -224,16 +299,15 @@
 
   /* 도구 */
   function tools(main) {
-    var defs = Object.keys(PS.coupons || {}).map(function (k) { return '<option value="' + k + '">' + esc(PS.coupons[k].title) + '</option>'; }).join('');
+    var ev = (((PS.points || {}).earn || {}).event || {});
     main.innerHTML = head('도구') +
-      '<div class="grid g2"><form class="panel" id="tlCp" novalidate><h2 class="t-h4">쿠폰 보내기</h2><div class="field mt-m"><label class="lbl" for="tlPhone">회원 전화번호</label><input class="inp" id="tlPhone"></div><div class="field"><label class="lbl" for="tlDef">쿠폰</label><select class="sel" id="tlDef">' + defs + '</select></div><button class="btn btn--ink btn--block mt-m" type="submit">보내기</button></form>' +
-      '<form class="panel" id="tlSt" novalidate><h2 class="t-h4">스탬프 직접 찍기</h2><p class="t-small mt-s">교환회 참여, 빈 캡슐 반납처럼 QR이 없는 활동에 써요.</p><div class="field mt-m"><label class="lbl" for="tlPhone2">회원 전화번호</label><input class="inp" id="tlPhone2"></div><div class="field"><label class="lbl" for="tlStore">매장</label><select class="sel" id="tlStore">' + PLT.stations.map(function (s) { return '<option value="' + s.id + '"' + (s.type === 'gacha' ? ' selected' : '') + '>' + esc(s.short) + '</option>'; }).join('') + '</select></div><button class="btn btn--ink btn--block mt-m" type="submit">스탬프 찍기</button></form></div>' +
-      (PLT.mode === 'live' ? '<div class="grid g2 mt-m"><div class="panel"><h2 class="t-h4">요금·규칙을 서버에 반영</h2><p class="t-small mt-s">data 폴더의 요금, 쿠폰, 등급, 상품 파일을 고쳐 올린 뒤 이 버튼을 누르면 결제 금액 계산과 적립 규칙이 바로 바뀌어요.</p><button class="btn btn--ink btn--s mt-m" type="button" id="tlSync">지금 반영하기</button></div>' +
+      '<div class="grid g2"><form class="panel" id="tlCp" novalidate><h2 class="t-h4">포인트 넣기·빼기</h2><p class="t-small mt-s">교환회·행사 참여(' + PLT.pt(ev.points || 300) + '), 취소한 응모 돌려드리기, 부정 적립 회수에 써요.</p><div class="field mt-m"><label class="lbl" for="tlPhone">회원 아이디 또는 회원 코드</label><input class="inp" id="tlPhone" autocapitalize="none" placeholder="player01 또는 PLT-XXXXXX"></div><div class="fieldrow"><div class="field"><label class="lbl" for="tlPts">포인트 <small>빼려면 -</small></label><input class="inp" id="tlPts" inputmode="numeric" value="' + (ev.points || 300) + '"></div><div class="field"><label class="lbl" for="tlMemo">회원에게 보일 내용</label><input class="inp" id="tlMemo" maxlength="60" value="' + esc(ev.title || '교환회·행사 참여') + '"></div></div><button class="btn btn--ink btn--block mt-m" type="submit">반영하기</button></form>' +
+      '<form class="panel" id="tlSt" novalidate><h2 class="t-h4">스탬프 직접 찍기</h2><p class="t-small mt-s">교환회 참여, 빈 캡슐 반납처럼 QR이 없는 활동에 써요.</p><div class="field mt-m"><label class="lbl" for="tlPhone2">회원 아이디 또는 회원 코드</label><input class="inp" id="tlPhone2" autocapitalize="none" placeholder="player01 또는 PLT-XXXXXX"></div><div class="field"><label class="lbl" for="tlStore">매장</label><select class="sel" id="tlStore">' + PLT.stations.map(function (s) { return '<option value="' + s.id + '"' + (s.type === 'gacha' ? ' selected' : '') + '>' + esc(s.short) + '</option>'; }).join('') + '</select></div><button class="btn btn--ink btn--block mt-m" type="submit">스탬프 찍기</button></form></div>' +
+      (PLT.mode === 'live' ? '<div class="grid g2 mt-m"><div class="panel"><h2 class="t-h4">요금·규칙을 서버에 반영</h2><p class="t-small mt-s">data 폴더의 포인트 적립 기준, 등급, 응모·경품, 상품 파일을 고쳐 올린 뒤 이 버튼을 누르면 서버의 적립·응모 규칙이 바로 바뀌어요.</p><button class="btn btn--ink btn--s mt-m" type="button" id="tlSync">지금 반영하기</button></div>' +
         '<form class="panel" id="tlKey" novalidate><h2 class="t-h4">입구 체크인 키</h2><p class="t-small mt-s">매장 입구 태블릿의 체크인 화면에 넣을 키를 정해요. 바꾸면 태블릿에서도 새 키로 다시 설정해야 해요.</p><div class="fieldrow mt-m"><div class="field"><label class="lbl" for="tlKStore">매장</label><select class="sel" id="tlKStore">' + PLT.stations.map(function (s) { return '<option value="' + s.id + '"' + (s.type === 'gacha' ? ' selected' : '') + '>' + esc(s.short) + '</option>'; }).join('') + '</select></div><div class="field"><label class="lbl" for="tlKKey">키 (6자 이상)</label><input class="inp" id="tlKKey" autocomplete="off"></div></div><button class="btn btn--ink btn--s mt-m" type="submit">키 저장</button></form></div>' : '') +
       (PLT.mode === 'demo' ? '<div class="panel mt-m"><h2 class="t-h4">체험 데이터</h2><p class="t-small mt-s">이 브라우저에 쌓인 체험 데이터를 내려받거나 모두 지울 수 있어요.</p><div class="row mt-m"><button class="btn btn--ghost btn--s" type="button" id="tlExport">JSON 내려받기</button><button class="btn btn--quiet btn--s" type="button" id="tlReset">체험 데이터 모두 지우기</button></div></div>' : '');
-    PLT.bindPhone($('#tlPhone')); PLT.bindPhone($('#tlPhone2'));
-    $('#tlCp').addEventListener('submit', function (e) { e.preventDefault(); PLT.busy($('#tlCp button'), function () { return PLT.db.adminIssueCoupon($('#tlPhone').value, $('#tlDef').value).then(function () { PLT.toast('쿠폰을 보냈어요.', 'ok'); }); }); });
-    $('#tlSt').addEventListener('submit', function (e) { e.preventDefault(); PLT.busy($('#tlSt button'), function () { return PLT.db.adminStamp($('#tlPhone2').value, $('#tlStore').value).then(function (r) { PLT.toast('스탬프를 찍었어요.' + (r.rewards && r.rewards.length ? ' 보상도 나갔어요.' : ''), 'ok'); }); }); });
+    $('#tlCp').addEventListener('submit', function (e) { e.preventDefault(); PLT.busy($('#tlCp button'), function () { return PLT.db.adminPoints($('#tlPhone').value.trim(), parseInt(String($('#tlPts').value).replace(/[^\d-]/g, ''), 10) || 0, $('#tlMemo').value.trim()).then(function () { PLT.toast('포인트를 반영했어요.', 'ok'); }); }); });
+    $('#tlSt').addEventListener('submit', function (e) { e.preventDefault(); PLT.busy($('#tlSt button'), function () { return PLT.db.adminStamp($('#tlPhone2').value.trim(), $('#tlStore').value).then(function (r) { PLT.toast('스탬프를 찍었어요.' + (r.rewards && r.rewards.length ? ' 보상도 나갔어요.' : ''), 'ok'); }); }); });
     var sy = $('#tlSync'); if (sy) sy.addEventListener('click', function () { PLT.busy(sy, function () { return PLT.db.adminSyncRules().then(function () { PLT.toast('서버 규칙을 지금 data 파일 기준으로 바꿨어요.', 'ok'); }); }); });
     var kf = $('#tlKey'); if (kf) kf.addEventListener('submit', function (e) { e.preventDefault(); PLT.busy($('#tlKey button'), function () { return PLT.db.adminSetKioskKey($('#tlKStore').value, $('#tlKKey').value.trim()).then(function () { PLT.toast('체크인 키를 저장했어요.', 'ok'); $('#tlKKey').value = ''; }); }); });
     var ex = $('#tlExport'); if (ex) ex.addEventListener('click', function () { var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(PLT.ls.get('demo-db-v1', {}), null, 2)], { type: 'application/json' })); a.download = 'playtion-demo-' + PLT.ymd() + '.json'; document.body.appendChild(a); a.click(); a.remove(); });

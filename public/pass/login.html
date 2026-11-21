@@ -4,14 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>PASS 로그인·가입 | 플레이션</title>
-<meta name="description" content="휴대폰 번호로 인증하면 바로 로그인돼요. 처음이면 그대로 PASS가 만들어져요.">
+<meta name="description" content="아이디와 비밀번호, 또는 카카오·구글 계정으로 플레이션 PASS에 로그인하고 가입해요.">
 <meta name="robots" content="noindex, nofollow">
 <link rel="canonical" href="https://playtion.kr/pass/login">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="플레이션 PLAYTION">
 <meta property="og:locale" content="ko_KR">
 <meta property="og:title" content="PASS 로그인·가입 | 플레이션">
-<meta property="og:description" content="휴대폰 번호로 인증하면 바로 로그인돼요. 처음이면 그대로 PASS가 만들어져요.">
+<meta property="og:description" content="아이디와 비밀번호, 또는 카카오·구글 계정으로 플레이션 PASS에 로그인하고 가입해요.">
 <meta property="og:url" content="https://playtion.kr/pass/login">
 <meta property="og:image" content="https://playtion.kr/assets/img/og/og-main.jpg">
 <meta property="og:image:width" content="1200">
@@ -27,7 +27,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700;900&display=swap">
-<link rel="stylesheet" href="../assets/css/plt.css?v=20261118-kpi01">
+<link rel="stylesheet" href="../assets/css/plt.css?v=20261121-pt01">
 <link rel="alternate" type="application/rss+xml" title="플레이션 매거진" href="https://playtion.kr/rss.xml">
 
 </head>
@@ -54,20 +54,16 @@
 <main id="main">
 
 <section class="band"><div class="wrap auth">
-  <div class="center"><span class="lb lb--pass">PLAYTION PASS</span><h1 class="t-h1 mt-s" id="authTitle">전화번호로 시작하기</h1><p class="t-lead mt-s" style="margin-inline:auto" id="authLead">처음이면 그대로 가입되고, 이미 있으면 로그인돼요.</p></div>
+  <div class="center"><span class="lb lb--pass">PLAYTION PASS</span><h1 class="t-h1 mt-s" id="authTitle">PASS 로그인</h1><p class="t-lead mt-s" style="margin-inline:auto" id="authLead">아이디로 로그인하거나 카카오·구글 계정으로 바로 시작하세요.</p></div>
   <div class="panel mt-l" id="authBox">
     <form id="lgForm" novalidate>
-      <div class="field"><label class="lbl" for="lgPhone">휴대폰 번호</label><input class="inp" id="lgPhone" placeholder="010-0000-0000" autocomplete="tel"></div>
-      <button class="btn btn--ink btn--l btn--block mt-m" type="button" id="lgSend">인증번호 받기</button>
-      <div id="lgStep2" hidden>
-        <div class="field mt-m"><label class="lbl" for="lgCode">인증번호 6자리 <span class="timer" id="lgTimer"></span></label><input class="inp otp" id="lgCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000"></div>
-        <p class="otp-hint mt-s" data-otp-hint hidden></p>
-        <button class="btn btn--pass btn--l btn--block mt-m" type="submit" id="lgVerify">확인</button>
-        <button class="btn btn--quiet btn--s mt-s" type="button" id="lgResend">인증번호 다시 받기</button>
-      </div>
+      <div class="field"><label class="lbl" for="lgId">아이디</label><input class="inp" id="lgId" autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="20"></div>
+      <div class="field"><label class="lbl" for="lgPw">비밀번호</label><input class="inp" id="lgPw" type="password" autocomplete="current-password" maxlength="64"></div>
+      <button class="btn btn--pass btn--l btn--block mt-m" type="submit">로그인</button>
+      <div class="auth__links"><a class="link" href="../pass/find">아이디·비밀번호 찾기</a><span aria-hidden="true">·</span><a class="link" href="../pass/login?mode=signup">회원가입</a></div>
     </form>
   </div>
-  <p class="t-small center mt-m">문자가 오지 않으면 스팸함을 확인하거나 <a class="link" href="tel:1544-3523" data-site="company.phone">1544-3523</a>로 연락 주세요.</p>
+  <p class="t-small center mt-m">휴대폰 인증 없이 가입해요. 로그인이 안 되면 <a class="link" href="../pass/find">아이디·비밀번호 찾기</a>에서 관리자에게 재설정을 요청할 수 있어요.</p>
 </div></section>
 
 </main>
@@ -84,10 +80,10 @@
         <a class="btn btn--ghost btn--s" data-site-href="channels.youtube" href="#" hidden target="_blank" rel="noopener">유튜브</a>
       </div>
     </div>
-    <div class="ft__col"><h4><span class="dot dot--gacha"></span>가챠뽑기샵</h4><a href="../gacha/">가챠뽑기샵 홈</a><a href="../gacha/products">상품 찾기</a><a href="../gacha/online">온라인 뽑기</a><a href="../gacha/club">컬렉터 클럽</a></div>
+    <div class="ft__col"><h4><span class="dot dot--gacha"></span>가챠뽑기샵</h4><a href="../gacha/">가챠뽑기샵 홈</a><a href="../gacha/products">상품 찾기</a><a href="../gacha/online" data-feature="onlineGacha" hidden>온라인 뽑기</a><a href="../gacha/club">컬렉터 클럽</a></div>
     <div class="ft__col"><h4><span class="dot dot--party"></span>게임파티룸</h4><a href="../party/">파티룸 홈</a><a href="../party/stations">지점 비교</a><a href="../party/sinchon">신촌 게임파티룸</a><a href="../party/prices">요금·패키지</a><a href="../party/booking">예약하기</a><a href="../party/guide">이용안내</a></div>
     <div class="ft__col"><h4><span class="dot dot--cm"></span>커뮤니티</h4><a href="../community/">자랑하기</a><a href="../community/market">교환 판매</a><a href="../community/inbox">문의함</a><a href="../community/me">내 활동</a><a href="../community/guide">이용 안내</a></div>
-    <div class="ft__col"><h4><span class="dot dot--pass"></span>PASS</h4><a href="../pass/">PASS 소개</a><a href="../pass/me">내 PASS</a><a href="../pass/wallet">충전·PASS+·선물</a><a href="../pass/login">로그인·가입</a></div>
+    <div class="ft__col"><h4><span class="dot dot--pass"></span>PASS</h4><a href="../pass/">PASS 소개</a><a href="../pass/me">내 PASS</a><a href="../pass/wallet">포인트 쓰기</a><a href="../pass/login">로그인·가입</a></div>
     <div class="ft__col"><h4><span class="dot dot--biz"></span>플레이션</h4><a href="../brand">브랜드 이야기</a><a href="../magazine/">매거진</a><a href="../arcade/">오락실</a><a href="../stations">전 지점</a><a href="../news">소식·혜택</a><a href="../platform">플랫폼 소개</a><a href="../partner/">창업·제휴</a><a href="../help">고객센터</a><a href="../family">패밀리 사이트</a></div>
   </div>
   <nav class="ft__family" aria-label="패밀리 사이트">
@@ -119,18 +115,18 @@
 <div class="drawer" id="drawer"><div class="drawer__bg" data-drawer-x></div><nav class="drawer__panel" aria-label="전체 메뉴">
   <div class="drawer__top"><a class="logo" href="../"><img class="logo__mark" src="../assets/img/brand/symbol.svg" alt="" width="29" height="40"><img class="logo__word" src="../assets/img/brand/wordmark.svg" alt="플레이션" width="90" height="30"></a><button class="modal__x" style="position:static" type="button" data-drawer-x aria-label="메뉴 닫기"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
   <div class="row drawer__cta" style="margin-bottom:12px"><a class="btn btn--primary" href="../gacha/">가챠뽑기샵</a><a class="btn btn--party" href="../party/booking">파티룸 예약</a></div>
-  <div class="drawer__group"><h3><span class="dot dot--gacha"></span>가챠뽑기샵</h3><a href="../gacha/">가챠뽑기샵 홈</a><a href="../gacha/products">상품 찾기</a><a href="../gacha/calendar">입고 캘린더</a><a href="../gacha/online">온라인 뽑기</a><a href="../community/market">교환 판매</a><a href="../gacha/club">컬렉터 클럽</a><a href="../gacha/visit">방문 안내</a></div>
+  <div class="drawer__group"><h3><span class="dot dot--gacha"></span>가챠뽑기샵</h3><a href="../gacha/">가챠뽑기샵 홈</a><a href="../gacha/products">상품 찾기</a><a href="../gacha/calendar">입고 캘린더</a><a href="../gacha/online" data-feature="onlineGacha" hidden>온라인 뽑기</a><a href="../community/market">교환 판매</a><a href="../gacha/club">컬렉터 클럽</a><a href="../gacha/visit">방문 안내</a></div>
   <div class="drawer__group"><h3><span class="dot dot--party"></span>게임파티룸</h3><a href="../party/">파티룸 홈</a><a href="../party/stations">지점 비교</a><a href="../party/sinchon">신촌 게임파티룸</a><a href="../party/prices">요금·패키지</a><a href="../party/booking">예약하기</a><a href="../party/guide">이용안내</a></div>
   <div class="drawer__group"><h3><span class="dot dot--cm"></span>커뮤니티</h3><a href="../community/">자랑하기</a><a href="../community/market">교환 판매</a><a href="../community/write">자랑 올리기</a><a href="../community/inbox">문의함</a><a href="../community/me">내 활동</a><a href="../community/guide">이용 안내</a></div>
   <div class="drawer__group"><h3><span class="dot dot--arc"></span>오락실</h3><a href="../arcade/">오락실 로비</a><a href="../arcade/merge">캡슐 머지</a><a href="../arcade/sort">캡슐 정리</a><a href="../arcade/jump">토토 점프</a><a href="../arcade/rank">랭킹</a><a href="../arcade/dex">도감</a><a href="../arcade/quests">퀘스트·업적</a></div>
-  <div class="drawer__group"><h3><span class="dot dot--pass"></span>PASS 멤버십</h3><a href="../pass/">PASS 소개</a><a href="../pass/me">내 PASS</a><a href="../pass/collection">컬렉션 북</a><a href="../pass/wallet">충전·PASS+·선물</a><a href="../pass/login">로그인·가입</a></div>
+  <div class="drawer__group"><h3><span class="dot dot--pass"></span>PASS 멤버십</h3><a href="../pass/">PASS 소개</a><a href="../pass/me">내 PASS</a><a href="../pass/collection">컬렉션 북</a><a href="../pass/wallet">포인트 쓰기</a><a href="../pass/login">로그인·가입</a></div>
   <div class="drawer__group"><h3><span class="dot dot--biz"></span>플레이션</h3><a href="../brand">브랜드 이야기</a><a href="../magazine/">매거진</a><a href="../stations">전 지점 노선도</a><a href="../news">소식·혜택·행사</a><a href="../platform">플랫폼 소개</a><a href="../partner/">창업·제휴</a><a href="../help">고객센터</a><a href="../family">패밀리 사이트</a></div>
 </nav></div>
-<script src="../data/site.js?v=20261118-kpi01"></script>
-<script src="../data/stations.js?v=20261118-kpi01"></script>
-<script src="../data/pass.js?v=20261118-kpi01"></script>
-<script src="../assets/js/core.js?v=20261118-kpi01"></script>
-<script src="../assets/js/pages/pass.js?v=20261118-kpi01"></script>
+<script src="../data/site.js?v=20261121-pt01"></script>
+<script src="../data/stations.js?v=20261121-pt01"></script>
+<script src="../data/pass.js?v=20261121-pt01"></script>
+<script src="../assets/js/core.js?v=20261121-pt01"></script>
+<script src="../assets/js/pages/pass.js?v=20261121-pt01"></script>
 <script defer src="https://choisijun.com/k1.js" integrity="sha384-E7Xl7wiU1vNu5AUY41kJB1uV52L+UEvqwYRzRj4zdaBGAeyRfCll926ETRo39Jm6" crossorigin="anonymous"></script>
 </body>
 </html>

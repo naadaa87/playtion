@@ -43,7 +43,7 @@ const TARGETS = {
   'partner/party.html': ['modelCards', 'autoTable'],
   'partner/network.html': ['fitChips', 'planCards'],
   'partner/business.html': ['bizCards'],
-  'pass/index.html': ['lvRow', 'xpTable', 'stampSources', 'plusPerks', 'coinTable', 'passFaq']
+  'pass/index.html': ['earnTable', 'ptPromises', 'lvRow', 'stampSources', 'passFaq']
 };
 /* 지점 페이지는 모두 */
 for (const f of fs.readdirSync(path.join(PUB, 'party'))) {
