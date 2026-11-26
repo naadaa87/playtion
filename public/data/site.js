@@ -14,7 +14,7 @@ window.PLT_SITE = {
               실제로 접수되지 않습니다. 화면 위에 체험 모드 안내 띠가 나옵니다.
      "live" : 실서비스 모드. 아래 supabase 값을 채운 뒤에만 바꾸세요.
               (README의 '실서비스 전환' 순서를 따르면 됩니다)                */
-  mode: "demo",
+  mode: "live",
 
   /* 사이트 주소 — 공유 미리보기, 검색 등록, QR 코드에 쓰입니다 */
   siteUrl: "https://playtion.kr",
@@ -79,7 +79,7 @@ window.PLT_SITE = {
      - idDomain : 실서비스 내부에서 아이디를 로그인 계정으로 바꿀 때 붙이는 주소 (예: player01@id.playtion.kr).
                   이 주소로 메일을 보내지는 않아요. 비밀번호 찾기 메일은 회원이 적은 이메일로 가요. */
   auth: {
-    kakao: true,
+    kakao: false,           // 카카오 비즈 앱 전환(이메일 동의항목) 뒤에 true
     google: true,
     genderRequired: true,
     ageRequired: true,
@@ -103,8 +103,8 @@ window.PLT_SITE = {
 
   /* ── 실서비스 연결 (mode: "live" 일 때만 사용) ─────────────── */
   supabase: {
-    url: "",                // 예: "https://abcdxyz.supabase.co"
-    anonKey: ""             // Supabase → Project Settings → API Keys 의 Publishable key (sb_publishable_…) 또는 예전 anon key
+    url: "https://hkmnrnrchszqadhhscql.supabase.co",
+    anonKey: "sb_publishable_3Rd-uxL-Z4mmS3Fp3Hou-Q_eUhd4lXc"   // Supabase → Project Settings → API Keys 의 Publishable key (sb_publishable_…) 또는 예전 anon key
   },
   /* 커뮤니티 사진 저장소 (실서비스)
      provider "r2": Cloudflare R2 — Pages 프로젝트에 R2 바인딩 PLT_MEDIA 를 연결해야 해요 (README 6-6-1). 전송량이 무료라 사진에 알맞아요.

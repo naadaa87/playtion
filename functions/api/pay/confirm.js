@@ -1,12 +1,13 @@
 // POST /api/pay/confirm — 토스페이먼츠 결제 승인 → Supabase 주문 반영
-// 필요한 환경 변수: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, TOSS_SECRET_KEY
+// 필요한 환경 변수: SUPABASE_SERVICE_ROLE_KEY, TOSS_SECRET_KEY (Supabase 주소는 ../_supabase.js)
+import { sbUrl } from '../_supabase.js';
 const json = (o, status = 200) => new Response(JSON.stringify(o), { status, headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' } });
 
 async function rpc(env, fn, args) {
   const key = env.SUPABASE_SERVICE_ROLE_KEY;
   const headers = { apikey: key, 'Content-Type': 'application/json' };
   if (/^eyJ/.test(key)) headers.Authorization = 'Bearer ' + key; // 예전 형식(JWT) 키일 때만
-  const r = await fetch(`${env.SUPABASE_URL.replace(/\/$/, '')}/rest/v1/rpc/${fn}`, { method: 'POST', headers, body: JSON.stringify(args) });
+  const r = await fetch(`${sbUrl(env)}/rest/v1/rpc/${fn}`, { method: 'POST', headers, body: JSON.stringify(args) });
   const text = await r.text();
   let data; try { data = JSON.parse(text); } catch { data = text; }
   if (!r.ok) throw new Error((data && data.message) || 'Supabase 요청 실패');
@@ -22,7 +23,7 @@ async function cancelPayment(env, paymentKey, reason) {
 }
 
 export async function onRequestPost({ request, env }) {
-  if (!env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY || !env.TOSS_SECRET_KEY) return json({ error: '결제 서버 설정이 아직 끝나지 않았어요.' }, 503);
+  if (!env.SUPABASE_SERVICE_ROLE_KEY || !env.TOSS_SECRET_KEY) return json({ error: '결제 서버 설정이 아직 끝나지 않았어요.' }, 503);
   let body;
   try { body = await request.json(); } catch { return json({ error: '잘못된 요청이에요.' }, 400); }
   const paymentKey = String(body.paymentKey || ''), orderId = String(body.orderId || ''), amount = Number(body.amount);

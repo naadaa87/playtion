@@ -47,7 +47,6 @@ export async function onRequestGet({ request, env }) {
   const db = env.PLT_STATS;
   const need = [];
   if (!db) need.push('PLT_STATS');
-  if (!env.STATS_KEY && !env.SUPABASE_URL) need.push('STATS_KEY');
   if (need.length) return json({ error: 'not_configured', need }, 503);
   if (!(await authorize(request, env))) return json({ error: 'unauthorized' }, 401);
 

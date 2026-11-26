@@ -1,5 +1,6 @@
 // 커뮤니티 사진 저장소(Cloudflare R2) 공통 도구
-// 필요한 설정: R2 바인딩 PLT_MEDIA, 환경 변수 SUPABASE_URL 과 SUPABASE_ANON_KEY(또는 SUPABASE_SERVICE_ROLE_KEY)
+// 필요한 설정: R2 바인딩 PLT_MEDIA, Supabase 주소·공개 키(../_supabase.js)
+import { sbUrl, sbPublicKey } from '../_supabase.js';
 export const json = (o, status = 200) => new Response(JSON.stringify(o), { status, headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' } });
 
 export const TYPES = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' };
@@ -9,11 +10,10 @@ export const MAX_BYTES = 10 * 1024 * 1024;
 export async function memberId(request, env) {
   const auth = request.headers.get('Authorization') || '';
   const token = auth.replace(/^Bearer\s+/i, '').trim();
-  if (!token || !env.SUPABASE_URL) return null;
-  const apikey = env.SUPABASE_ANON_KEY || env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!apikey) return null;
+  if (!token) return null;
+  const apikey = sbPublicKey(env);
   try {
-    const r = await fetch(`${env.SUPABASE_URL.replace(/\/$/, '')}/auth/v1/user`, { headers: { apikey, Authorization: 'Bearer ' + token } });
+    const r = await fetch(`${sbUrl(env)}/auth/v1/user`, { headers: { apikey, Authorization: 'Bearer ' + token } });
     if (!r.ok) return null;
     const u = await r.json();
     return u && typeof u.id === 'string' && /^[0-9a-f-]{36}$/i.test(u.id) ? u.id : null;

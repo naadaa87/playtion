@@ -1,6 +1,7 @@
 // 자체 방문 통계 공통 도구 (Cloudflare D1)
 // 필요한 설정: D1 바인딩 PLT_STATS, 비밀 값 STATS_KEY (운영 콘솔에서 통계를 열 때 쓰는 열쇠)
 // 표는 처음 기록이 들어올 때 저절로 만들어져요.
+import { sbUrl, sbPublicKey } from '../_supabase.js';
 
 export const json = (o, status = 200, extra = {}) => new Response(JSON.stringify(o), {
   status, headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', ...extra }
@@ -81,10 +82,10 @@ export async function authorize(request, env) {
   const key = request.headers.get('x-stats-key') || '';
   if (env.STATS_KEY && key && same(key, env.STATS_KEY)) return true;
   const token = (request.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '').trim();
-  const apikey = env.SUPABASE_ANON_KEY || env.SUPABASE_SERVICE_ROLE_KEY;
-  if (token && env.SUPABASE_URL && apikey) {
+  const apikey = sbPublicKey(env);
+  if (token) {
     try {
-      const r = await fetch(`${env.SUPABASE_URL.replace(/\/$/, '')}/rest/v1/rpc/plt_admin_check`, {
+      const r = await fetch(`${sbUrl(env)}/rest/v1/rpc/plt_admin_check`, {
         method: 'POST', headers: { apikey, Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' }, body: '{}'
       });
       if (r.ok && (await r.json()) === true) return true;

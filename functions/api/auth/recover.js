@@ -1,9 +1,10 @@
 // POST /api/auth/recover — 아이디 찾기 · 비밀번호 재설정 메일
 // 회원이 가입할 때 적은 이메일로만 보내요. 맞는 회원이 없어도 같은 답을 돌려줘서 가입 여부를 알 수 없게 해요.
 // 필요한 환경 변수 (Cloudflare Pages → Settings → Variables and Secrets)
-//   SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY  — 회원 확인과 재설정 링크 만들기 (Secret 키는 여기에만 넣어요)
+//   SUPABASE_SERVICE_ROLE_KEY              — 회원 확인과 재설정 링크 만들기 (Secret 키는 여기에만 넣어요)
 //   RESEND_API_KEY, MAIL_FROM                — 메일 보내기 (예: MAIL_FROM = 플레이션 <no-reply@playtion.kr>)
 //   SITE_URL (선택)                          — 메일 속 링크 주소, 비우면 https://playtion.kr
+import { sbUrl } from '../_supabase.js';
 const json = (o, status = 200) => new Response(JSON.stringify(o), { status, headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' } });
 const OK = { ok: true };
 const emailOk = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
@@ -15,13 +16,13 @@ function keyHeaders(env) {
   return h;
 }
 async function rpc(env, fn, args) {
-  const r = await fetch(`${env.SUPABASE_URL.replace(/\/$/, '')}/rest/v1/rpc/${fn}`, { method: 'POST', headers: keyHeaders(env), body: JSON.stringify(args) });
+  const r = await fetch(`${sbUrl(env)}/rest/v1/rpc/${fn}`, { method: 'POST', headers: keyHeaders(env), body: JSON.stringify(args) });
   if (!r.ok) throw new Error('supabase ' + r.status);
   return r.json();
 }
 /* Supabase 가 만든 재설정 토큰(해시) — 링크는 우리 주소(/pass/reset)로 직접 만들어요 */
 async function recoveryToken(env, authEmail) {
-  const r = await fetch(`${env.SUPABASE_URL.replace(/\/$/, '')}/auth/v1/admin/generate_link`, { method: 'POST', headers: keyHeaders(env), body: JSON.stringify({ type: 'recovery', email: authEmail }) });
+  const r = await fetch(`${sbUrl(env)}/auth/v1/admin/generate_link`, { method: 'POST', headers: keyHeaders(env), body: JSON.stringify({ type: 'recovery', email: authEmail }) });
   const j = await r.json().catch(() => ({}));
   if (!r.ok) throw new Error('generate_link ' + r.status);
   return j.hashed_token || (j.properties && j.properties.hashed_token) || '';
@@ -38,7 +39,7 @@ async function sendMail(env, to, subject, text) {
 }
 
 export async function onRequestPost({ request, env }) {
-  if (!env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY || !env.RESEND_API_KEY || !env.MAIL_FROM) {
+  if (!env.SUPABASE_SERVICE_ROLE_KEY || !env.RESEND_API_KEY || !env.MAIL_FROM) {
     return json({ error: '이메일 재설정을 아직 준비하고 있어요. 아래에서 관리자에게 재설정을 요청해 주세요.', fallback: true }, 503);
   }
   const site = (env.SITE_URL || 'https://playtion.kr').replace(/\/$/, '');
