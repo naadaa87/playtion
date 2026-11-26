@@ -537,9 +537,11 @@ GitHub에서 파일을 열고 연필 아이콘(**Edit**) → 고치기 → **Com
    select id, 'admin' from auth.users where email = '운영자@이메일';
    ```
 
+   운영 콘솔 비밀번호는 나중에 운영 콘솔 위쪽 **내 비밀번호** 에서 바꿀 수 있어요. 잊어버렸다면 로그인 화면의 **비밀번호를 잊었어요** 를 누르면 Supabase 가 운영자 이메일로 재설정 링크를 보내요. 링크를 누르면 운영 콘솔에서 새 비밀번호를 정하는 창이 바로 열려요. (Supabase 기본 메일은 프로젝트 팀원 이메일로만 가요. 운영자 계정은 팀원 이메일로 만들어 주세요.)
+
 4. **Project Settings → API Keys** 에서 세 가지를 확인합니다.
    - Project URL (`https://xxxx.supabase.co`)
-   - Publishable key (`sb_publishable_…`, 예전 프로젝트는 anon key) — 브라우저용이라 `site.js` 에 넣어도 됩니다.
+   - Publishable key (`sb_publishable_…`, 예전 프로젝트는 anon key) — 브라우저용이라 `site.js` 와 `functions/api/_supabase.js` 에 넣어도 됩니다.
    - Secret key (`sb_secret_…`, 예전 프로젝트는 service_role key) — **절대 `site.js`나 GitHub에 넣지 마세요.** Cloudflare 환경 변수에만 넣습니다.
 
 ### 6-2. 로그인 설정 — 아이디 · 카카오 · 구글 · 비밀번호 찾기 메일
@@ -554,12 +556,13 @@ GitHub에서 파일을 열고 연필 아이콘(**Edit**) → 고치기 → **Com
 1. [Kakao Developers](https://developers.kakao.com) → 내 애플리케이션 → 앱 만들기(앱 이름 플레이션).
 2. **앱 설정 → 플랫폼 → Web** 에 `https://playtion.kr` 등록.
 3. **카카오 로그인 → 활성화 ON**, Redirect URI 에 `https://<프로젝트>.supabase.co/auth/v1/callback`.
-4. **동의항목**: 닉네임(profile_nickname)·프로필 사진(profile_image). 이메일(account_email)은 비즈 앱 전환 후에만 받을 수 있어요.
+4. **동의항목**: 닉네임(profile_nickname) 필수, 프로필 사진(profile_image) 선택, **카카오계정(이메일)(account_email)**. Supabase 는 카카오 로그인 때 이메일을 항상 함께 요청해서, 이메일 동의항목이 없으면 카카오 화면에서 `KOE205` 오류가 나요. 이메일 항목은 **앱 → 일반 → 비즈니스 정보**에서 앱 아이콘을 올리고 사업자 정보를 등록해 **비즈 앱**으로 전환해야 켤 수 있어요.
 5. **앱 키**의 REST API 키, **보안 → Client Secret** 생성·사용함.
-6. Supabase **Authentication → Providers → Kakao** → Enabled, Client ID = REST API 키, Client Secret = 위 값. 이메일 동의항목이 없다면 **Allow users without an email** 을 켜요.
+6. Supabase **Authentication → Providers → Kakao** → Enabled, Client ID = REST API 키, Client Secret = 위 값. 이메일을 선택 동의로 두면 **Allow users without an email** 도 켜 주세요(회원이 이메일 제공을 거절해도 가입돼요).
+7. 연결이 끝나면 `site.js` 의 `auth.kakao` 를 `true` 로 바꿔요.
 
 **구글 로그인**
-1. [Google Cloud Console](https://console.cloud.google.com) → API 및 서비스 → **OAuth 동의 화면**(앱 이름 플레이션, 지원 이메일) 설정.
+1. [Google Cloud Console](https://console.cloud.google.com) → **Google 인증 플랫폼 → 브랜딩**(앱 이름 플레이션, 지원 이메일, 홈페이지·개인정보처리방침·약관 주소) 설정 → **대상 → 앱 게시**로 프로덕션 전환. 테스트 상태로 두면 등록한 테스트 사용자만 로그인돼요.
 2. **사용자 인증 정보 → OAuth 클라이언트 ID → 웹 애플리케이션**, 승인된 리디렉션 URI 에 `https://<프로젝트>.supabase.co/auth/v1/callback`.
 3. 받은 Client ID·Client Secret 을 Supabase **Providers → Google** 에 넣고 Enabled.
 
@@ -586,10 +589,11 @@ GitHub에서 파일을 열고 연필 아이콘(**Edit**) → 고치기 → **Com
 
 Pages 프로젝트 → **Settings → Variables and Secrets** → Production에 아래 값을 넣습니다. 비밀 값은 **Secret(암호화)** 으로 넣으세요.
 
+Supabase 주소와 Publishable 키는 공개 값이라 `functions/api/_supabase.js` 에 들어 있어요. 회원 확인(사진 올리기, 통계 보기)은 이 값만으로 동작해서 따로 넣지 않아도 돼요. Supabase 프로젝트를 바꾸면 `site.js` 의 `supabase` 와 이 파일을 함께 고쳐 주세요.
+
 | 이름 | 값 |
 |---|---|
-| `SUPABASE_URL` | Supabase Project URL |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase Secret key (`sb_secret_…`) |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase Secret key (`sb_secret_…`). 비밀번호 찾기 메일·결제·알림 문자를 켤 때만 필요해요 |
 | `TOSS_SECRET_KEY` | 토스 시크릿 키 (유료 기능을 열 때만) |
 | `SOLAPI_API_KEY` / `SOLAPI_API_SECRET` | 솔라피 API Key / Secret |
 | `SOLAPI_SENDER` | 등록한 발신번호, 숫자만 (예: `15443523`) |
@@ -628,7 +632,7 @@ toss: { clientKey: "test_ck_..." },
 
 1. Cloudflare 대시보드 → 왼쪽 **R2 Object Storage** → **Create bucket** → 이름 `playtion-media`, Location 은 **Asia-Pacific (APAC)** → Create. (R2 를 처음 쓰면 결제 수단 등록 화면이 한 번 나오지만, 무료 한도(저장 10GB, 전송량 무제한) 안에서는 요금이 나가지 않아요.)
 2. **Workers & Pages → playtion(Pages 프로젝트) → Settings → Bindings → Add → R2 bucket** → Variable name 에 `PLT_MEDIA`, Bucket 에 `playtion-media` → Save.
-3. 6-4의 환경 변수 중 `SUPABASE_URL` 과 `SUPABASE_SERVICE_ROLE_KEY` 가 들어 있는지 확인해요. 사진을 올릴 때 "진짜 로그인한 회원인지"를 이 값으로 Supabase 에 물어봐요.
+3. 사진을 올릴 때 "진짜 로그인한 회원인지"는 `functions/api/_supabase.js` 의 공개 설정으로 Supabase 에 물어봐요. 따로 넣을 값은 없어요.
 4. **Deployments → 최신 배포 → Retry deployment** 를 한 번 눌러요. 그다음 `https://playtion.kr/api/health` 를 열어 `"media": true` 가 보이면 연결된 거예요.
 5. (선택, 나중에) 사진을 더 빠르게 내보내려면 R2 버킷 → **Settings → Custom Domains → Connect Domain** 에 `media.playtion.kr` 을 붙이고, `site.js` 의 `media.base` 를 `"https://media.playtion.kr"` 로 바꿔요. 붙이기 전에는 홈페이지 서버 기능(`/media/…`)이 대신 내보내 주니 그대로 둬도 동작해요.
 
@@ -636,7 +640,7 @@ toss: { clientKey: "test_ck_..." },
 
 ### 6-7. 확인하기
 
-1. `https://playtion.kr/api/health` 를 열어 `configured` 안의 `supabase`, `authMail`, `media` 가 `true` 인지 봅니다.
+1. `https://playtion.kr/api/health` 를 열어 `configured` 안의 `supabase`, `media`, `stats` 가 `true` 인지 봅니다. (`authMail` 은 Resend 를 연결한 뒤에 `true`)
 2. 아이디로 PASS 가입 → 로그아웃 → 다시 로그인, 카카오·구글로도 가입해 봅니다. 이메일을 적은 계정으로 비밀번호 찾기 메일이 오는지 확인합니다.
 2-1. 커뮤니티에서 사진 한 장으로 자랑 글을 올려 보고, 다른 휴대폰(또는 시크릿 창)에서도 그 글이 보이는지 확인합니다. 보이면 글은 Supabase, 사진은 R2 에 제대로 저장된 거예요.
 3. 내 PASS 에서 출석 체크 → 포인트가 들어오는지, 운영 콘솔 회원 메뉴에서 비밀번호 재설정 → 임시 비밀번호로 로그인하면 새 비밀번호 화면이 나오는지 봅니다.
