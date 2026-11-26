@@ -35,18 +35,51 @@
 
   /* ------------------------------------------------------------------ */
   function login() {
-    $('#admOut').hidden = true;
-    host.innerHTML = '<section class="band"><div class="wrap auth"><form class="panel" id="admLogin" novalidate><h1 class="t-h3">운영 콘솔 로그인</h1><p class="t-small mt-s">' + (PLT.mode === 'demo' ? '체험 모드 비밀번호는 data/site.js 의 demo.adminPin 값이에요. 기본값은 ' + esc((PLT.S.demo || {}).adminPin || '0000') + '이에요.' : '운영자로 등록된 계정으로 로그인해 주세요.') + '</p>' +
-      (PLT.mode === 'live' ? '<div class="field mt-m"><label class="lbl" for="admEmail">이메일</label><input class="inp" id="admEmail" type="email" autocomplete="username"></div>' : '') +
-      '<div class="field mt-m"><label class="lbl" for="admPin">' + (PLT.mode === 'live' ? '비밀번호' : '콘솔 비밀번호') + '</label><input class="inp" id="admPin" type="password" autocomplete="current-password"></div><button class="btn btn--ink btn--block mt-m" type="submit">들어가기</button></form></div></section>';
-    $('#admPin').focus();
+    $('#admOut').hidden = true; if ($('#admPw')) $('#admPw').hidden = true;
+    var live = PLT.mode === 'live';
+    host.innerHTML = '<section class="band"><div class="wrap auth"><form class="panel" id="admLogin" novalidate><h1 class="t-h3">운영 콘솔 로그인</h1><p class="t-small mt-s">' + (live ? '운영자로 등록된 이메일과 비밀번호로 들어와요.' : '체험 모드 비밀번호는 data/site.js 의 demo.adminPin 값이에요. 기본값은 ' + esc((PLT.S.demo || {}).adminPin || '0000') + '이에요.') + '</p>' +
+      (live ? '<div class="field mt-m"><label class="lbl" for="admEmail">이메일</label><input class="inp" id="admEmail" type="email" autocomplete="username"></div>' : '') +
+      '<div class="field mt-m"><label class="lbl" for="admPin">' + (live ? '비밀번호' : '콘솔 비밀번호') + '</label><input class="inp" id="admPin" type="password" autocomplete="current-password"></div><button class="btn btn--ink btn--block mt-m" type="submit">들어가기</button>' +
+      (live ? '<div class="auth__links"><button type="button" class="link" id="admForgot">비밀번호를 잊었어요</button></div>' : '') + '</form></div></section>';
+    $(live ? '#admEmail' : '#admPin').focus();
     $('#admLogin').addEventListener('submit', function (e) {
       e.preventDefault();
-      PLT.busy($('#admLogin button'), function () { return PLT.db.adminLogin($('#admPin').value, ($('#admEmail') || {}).value).then(shell); });
+      PLT.busy($('#admLogin button[type=submit]'), function () { return PLT.db.adminLogin($('#admPin').value, ($('#admEmail') || {}).value).then(shell); });
+    });
+    var fg = $('#admForgot');
+    if (fg) fg.addEventListener('click', function () {
+      var m = PLT.modal({
+        title: '운영자 비밀번호 재설정', body: '<form id="afForm" novalidate><p class="t-small">운영자 이메일로 재설정 링크를 보내요. 이 컴퓨터, 이 브라우저에서 링크를 열어 주세요.</p><div class="field mt-m"><label class="lbl" for="afEmail">운영자 이메일</label><input class="inp" id="afEmail" type="email" value="' + esc(($('#admEmail') || {}).value || '') + '"></div><button class="btn btn--ink btn--block mt-m" type="submit">재설정 메일 받기</button></form>'
+      });
+      $('#afForm', m.el).addEventListener('submit', function (e) {
+        e.preventDefault();
+        var em = $('#afEmail', m.el).value.trim();
+        if (!PLT.emailOk(em)) { PLT.fieldError($('#afEmail', m.el), '이메일을 확인해 주세요.'); return; }
+        PLT.busy($('#afForm button', m.el), function () { return PLT.db.adminForgot(em).then(function () { m.close(); PLT.toast('운영자 계정이 맞으면 몇 분 안에 메일이 가요. 받은편지함과 스팸함을 확인해 주세요.', 'ok'); }); });
+      });
+    });
+  }
+  /* 운영자 비밀번호 정하기 — 재설정 메일 링크로 들어왔을 때(force)와 콘솔 안에서 바꿀 때 */
+  function pwForm(force) {
+    var m = PLT.modal({
+      title: force ? '새 비밀번호 정하기' : '내 비밀번호 바꾸기',
+      body: '<form id="apForm" novalidate>' + (force ? '<p class="t-small">재설정 링크를 확인했어요. 앞으로 쓸 운영자 비밀번호를 정해 주세요.</p>' : '<div class="field"><label class="lbl" for="apNow">지금 비밀번호</label><input class="inp" id="apNow" type="password" autocomplete="current-password"></div>') +
+        '<div class="field' + (force ? ' mt-m' : '') + '"><label class="lbl" for="apNew">새 비밀번호</label><input class="inp" id="apNew" type="password" autocomplete="new-password" placeholder="영문과 숫자를 섞어 8자 이상"></div>' +
+        '<div class="field"><label class="lbl" for="apNew2">새 비밀번호 확인</label><input class="inp" id="apNew2" type="password" autocomplete="new-password"></div>' +
+        '<p class="t-micro">회원 비밀번호와 따로 관리돼요. 다른 사이트와 같은 비밀번호는 피해 주세요.</p><button class="btn btn--ink btn--block mt-m" type="submit">저장</button></form>'
+    });
+    $('#apForm', m.el).addEventListener('submit', function (e) {
+      e.preventDefault();
+      var now = force ? null : $('#apNow', m.el).value, nw = $('#apNew', m.el).value, nw2 = $('#apNew2', m.el).value;
+      if (!force && !now) { PLT.fieldError($('#apNow', m.el), '지금 비밀번호를 넣어 주세요.'); return; }
+      if (!PLT.pwOk(nw)) { PLT.fieldError($('#apNew', m.el), '영문과 숫자를 섞어 8자 이상으로 정해 주세요.'); return; }
+      PLT.fieldError($('#apNew', m.el), '');
+      if (nw !== nw2) { PLT.fieldError($('#apNew2', m.el), '비밀번호가 서로 달라요.'); return; }
+      PLT.busy($('#apForm button[type=submit]', m.el), function () { return PLT.db.adminChangePassword(now, nw).then(function () { m.close(); PLT.toast('운영자 비밀번호를 바꿨어요.', 'ok'); }); });
     });
   }
   function shell() {
-    $('#admOut').hidden = false;
+    $('#admOut').hidden = false; if ($('#admPw')) $('#admPw').hidden = PLT.mode !== 'live';
     host.innerHTML = '<div class="adm"><nav class="adm__nav" aria-label="콘솔 메뉴">' + VIEWS.map(function (v) { return '<button type="button" data-v="' + v[0] + '" aria-current="' + (view === v[0]) + '">' + esc(v[1]) + '</button>'; }).join('') + '</nav><main class="adm__main" id="admMain"></main></div>';
     $$('.adm__nav button').forEach(function (b) { b.addEventListener('click', function () { view = b.getAttribute('data-v'); history.replaceState(null, '', '#' + view); $$('.adm__nav button').forEach(function (x) { x.setAttribute('aria-current', x === b ? 'true' : 'false'); }); render(); }); });
     render();
@@ -317,5 +350,9 @@
   /* 시작 */
   $('#admMode').textContent = PLT.mode === 'demo' ? '체험 모드' : '실서비스';
   $('#admOut').addEventListener('click', function () { PLT.db.adminLogout().then(login); });
-  PLT.ready.then(function () { return PLT.db.adminCheck(); }).then(function (ok) { if (ok) shell(); else login(); });
+  if ($('#admPw')) $('#admPw').addEventListener('click', function () { pwForm(false); });
+  /* 운영자 비밀번호 재설정 메일의 링크로 돌아온 경우: 로그인을 마치고 새 비밀번호를 받아요 */
+  var recover = PLT.mode === 'live' && PLT.param('reset') && PLT.db.adminRecover ? PLT.db.adminRecover() : Promise.resolve(false);
+  recover.then(function (r) { if (r) history.replaceState(null, '', location.pathname); return r; }, function (e) { PLT.toast(e.message, 'err'); history.replaceState(null, '', location.pathname); return false; })
+    .then(function (r) { return PLT.ready.then(function () { return PLT.db.adminCheck(); }).then(function (ok) { if (ok) { shell(); if (r) pwForm(true); } else login(); }); });
 })();

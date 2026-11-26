@@ -67,7 +67,7 @@ window.PLT_SITE = {
               PASS 화면 위쪽에 아래 note 안내가 나와요.
      "open" : 운영 중. 표시가 모두 사라져요. (홈의 PASS 소개 문구는 index.html 에서 함께 바꿔 주세요) */
   pass: {
-    status: "soon",
+    status: "open",
     note: "플레이션 PASS는 포인트 멤버십으로 오픈을 준비하고 있어요. 지금 보이는 화면은 미리 보기예요. 문을 열면 소식과 알림 띠로 먼저 알려 드릴게요."
   },
 
