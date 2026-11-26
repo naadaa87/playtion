@@ -288,6 +288,29 @@
       });
     },
     adminCheck: function () { return authed().then(function (ok) { return ok ? rpc('plt_admin_check') : false; }); },
+    /* 운영자 비밀번호 — 콘솔에서 바꾸기(current 가 null 이면 재설정 링크로 들어온 경우), 잊었을 때 메일 받기 */
+    adminChangePassword: function (current, next) {
+      return sb.auth.getUser().then(function (r) {
+        var em = r && r.data && r.data.user && r.data.user.email;
+        if (!em) throw PLT.fail('다시 로그인해 주세요.');
+        if (current === null) return null;
+        return sb.auth.signInWithPassword({ email: em, password: current }).then(function (r2) { if (r2.error) throw PLT.fail('지금 비밀번호가 맞지 않아요.'); });
+      }).then(function () { return sb.auth.updateUser({ password: next }); }).then(function (r) {
+        if (r.error) throw PLT.fail(friendly(r.error.message));
+        return true;
+      });
+    },
+    adminForgot: function (email) {
+      return sb.auth.resetPasswordForEmail(String(email || '').trim(), { redirectTo: location.origin + '/admin/?reset=1' }).then(function (r) {
+        if (r.error) throw PLT.fail(friendly(r.error.message));
+        return true;
+      });
+    },
+    adminRecover: function () {
+      var code = PLT.param('code');
+      if (!code) return Promise.resolve(false);
+      return sb.auth.exchangeCodeForSession(code).then(function (r) { if (r.error) throw PLT.fail('재설정 링크가 만료됐어요. 비밀번호를 잊었어요에서 다시 받아 주세요.'); return true; });
+    },
     adminLogout: function () { return sb.auth.signOut().then(function () { return true; }); },
     adminStats: function () { return rpc('plt_admin_stats'); },
     /* 운영 콘솔 KPI 가 서버 통계(/api/stats)에 운영자임을 알릴 때 씁니다 */

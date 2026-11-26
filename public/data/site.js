@@ -14,7 +14,7 @@ window.PLT_SITE = {
               실제로 접수되지 않습니다. 화면 위에 체험 모드 안내 띠가 나옵니다.
      "live" : 실서비스 모드. 아래 supabase 값을 채운 뒤에만 바꾸세요.
               (README의 '실서비스 전환' 순서를 따르면 됩니다)                */
-  mode: "demo",
+  mode: "live",
 
   /* 사이트 주소 — 공유 미리보기, 검색 등록, QR 코드에 쓰입니다 */
   siteUrl: "https://playtion.kr",
@@ -67,7 +67,7 @@ window.PLT_SITE = {
               PASS 화면 위쪽에 아래 note 안내가 나와요.
      "open" : 운영 중. 표시가 모두 사라져요. (홈의 PASS 소개 문구는 index.html 에서 함께 바꿔 주세요) */
   pass: {
-    status: "soon",
+    status: "open",
     note: "플레이션 PASS는 포인트 멤버십으로 오픈을 준비하고 있어요. 지금 보이는 화면은 미리 보기예요. 문을 열면 소식과 알림 띠로 먼저 알려 드릴게요."
   },
 
@@ -103,8 +103,8 @@ window.PLT_SITE = {
 
   /* ── 실서비스 연결 (mode: "live" 일 때만 사용) ─────────────── */
   supabase: {
-    url: "",                // 예: "https://abcdxyz.supabase.co"
-    anonKey: ""             // Supabase → Project Settings → API Keys 의 Publishable key (sb_publishable_…) 또는 예전 anon key
+    url: "https://hkmnrnrchszqadhhscql.supabase.co",
+    anonKey: "sb_publishable_3Rd-uxL-Z4mmS3Fp3Hou-Q_eUhd4lXc"   // Supabase → Project Settings → API Keys 의 Publishable key (sb_publishable_…) 또는 예전 anon key
   },
   /* 커뮤니티 사진 저장소 (실서비스)
      provider "r2": Cloudflare R2 — Pages 프로젝트에 R2 바인딩 PLT_MEDIA 를 연결해야 해요 (README 6-6-1). 전송량이 무료라 사진에 알맞아요.

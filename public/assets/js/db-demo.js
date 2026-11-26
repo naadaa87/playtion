@@ -718,6 +718,8 @@
     /* ---------------- 운영 콘솔 ---------------- */
     adminLogin: function (pin) { if (String(pin) !== String((S.demo || {}).adminPin || '0000')) return no('비밀번호가 맞지 않아요.'); PLT.ss.set('admin', '1'); return ok(true); },
     adminCheck: function () { return ok(PLT.ss.get('admin') === '1'); },
+    adminChangePassword: function () { return no('체험 모드 비밀번호는 data/site.js 의 demo.adminPin 값이에요. 실서비스에서는 여기서 바꿀 수 있어요.'); },
+    adminForgot: function () { return no('체험 모드 비밀번호는 data/site.js 의 demo.adminPin 값이에요.'); },
     accessToken: function () { return ok(null); },
     adminLogout: function () { PLT.ss.set('admin', ''); return ok(true); },
     adminStats: function () {

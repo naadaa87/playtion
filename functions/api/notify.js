@@ -1,7 +1,8 @@
 // POST /api/notify — supabase/notify.sql 트리거(private.notes 에 알림이 추가될 때) → 알림톡/문자
 // 필요한 환경 변수: NOTIFY_SECRET(웹훅 헤더 x-hook-secret 값), NOTIFY_MODE("sms" | "alimtalk" | "off"),
-//   SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, SOLAPI_API_KEY, SOLAPI_API_SECRET, SOLAPI_SENDER
+//   SUPABASE_SERVICE_ROLE_KEY, SOLAPI_API_KEY, SOLAPI_API_SECRET, SOLAPI_SENDER
 //   알림톡을 쓸 때: SOLAPI_PFID, ALIMTALK_TEMPLATES (알림 제목 → 템플릿 ID JSON)
+import { sbUrl } from './_supabase.js';
 const json = (o, status = 200) => new Response(JSON.stringify(o), { status, headers: { 'Content-Type': 'application/json' } });
 const enc = new TextEncoder();
 const hex = (buf) => [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, '0')).join('');
@@ -17,7 +18,7 @@ async function rpc(env, fn, args) {
   const key = env.SUPABASE_SERVICE_ROLE_KEY;
   const headers = { apikey: key, 'Content-Type': 'application/json' };
   if (/^eyJ/.test(key)) headers.Authorization = 'Bearer ' + key;
-  const r = await fetch(`${env.SUPABASE_URL.replace(/\/$/, '')}/rest/v1/rpc/${fn}`, { method: 'POST', headers, body: JSON.stringify(args) });
+  const r = await fetch(`${sbUrl(env)}/rest/v1/rpc/${fn}`, { method: 'POST', headers, body: JSON.stringify(args) });
   if (!r.ok) throw new Error('supabase ' + r.status);
   return r.json();
 }
