@@ -79,7 +79,7 @@ window.PLT_SITE = {
      - idDomain : 실서비스 내부에서 아이디를 로그인 계정으로 바꿀 때 붙이는 주소 (예: player01@id.playtion.kr).
                   이 주소로 메일을 보내지는 않아요. 비밀번호 찾기 메일은 회원이 적은 이메일로 가요. */
   auth: {
-    kakao: false,           // 카카오 비즈 앱 전환(이메일 동의항목) 뒤에 true
+    kakao: true,
     google: true,
     genderRequired: true,
     ageRequired: true,
