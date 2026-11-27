@@ -6,7 +6,87 @@
   <atom:link href="https://playtion.kr/rss.xml" rel="self" type="application/rss+xml"/>
   <description>신촌·건대 게임파티룸, 가챠, 무인 매장 창업 이야기 — 플레이션</description>
   <language>ko</language>
-  <lastBuildDate>Thu, 26 Nov 2026 00:00:00 GMT</lastBuildDate>
+  <lastBuildDate>Fri, 27 Nov 2026 00:00:00 GMT</lastBuildDate>
+  <item>
+    <title>가챠 기계 가격, 한 대에 얼마이고 몇 대부터 매장이 될까</title>
+    <link>https://playtion.kr/magazine/gacha-machine-price</link>
+    <guid isPermaLink="true">https://playtion.kr/magazine/gacha-machine-price</guid>
+    <description>상업용 가챠 기계는 한 대에 50만~100만 원 선이라는 보도가 있어요. 기계값 말고 무엇이 더 드는지, 평수별로 몇 대가 들어가는지, 기계를 다 사지 않고 시작하는 호스트형·렌탈 방식까지 가챠샵을 운영하며 정리했어요.</description>
+    <category>창업</category>
+    <pubDate>Fri, 27 Nov 2026 00:00:00 GMT</pubDate>
+  </item>
+  <item>
+    <title>모은 캡슐토이, 이렇게 진열하고 보관해요</title>
+    <link>https://playtion.kr/magazine/gacha-display-storage</link>
+    <guid isPermaLink="true">https://playtion.kr/magazine/gacha-display-storage</guid>
+    <description>가챠를 모으다 보면 책상이 금방 꽉 차요. 작은 피규어를 보기 좋게 진열하는 법, 먼지와 햇빛에 따른 변색을 줄이는 보관법, 작은 부품을 잃어버리지 않는 요령, 사진 찍기 좋은 배치까지 정리했어요.</description>
+    <category>가챠</category>
+    <pubDate>Fri, 27 Nov 2026 00:00:00 GMT</pubDate>
+  </item>
+  <item>
+    <title>가챠로 원하는 걸 뽑으려면 몇 번 돌려야 할까 — 종류 수로 계산해 봤어요</title>
+    <link>https://playtion.kr/magazine/gacha-odds-secret</link>
+    <guid isPermaLink="true">https://playtion.kr/magazine/gacha-odds-secret</guid>
+    <description>5종 시리즈에서 원하는 하나가 나올 확률은 한 번에 20%예요. 원하는 종류 하나를 뽑을 때까지, 전 종류를 다 모을 때까지 평균 몇 번 돌려야 하는지 종류 수별로 계산하고, 시크릿이 섞이면 무엇이 달라지는지 정리했어요.</description>
+    <category>가챠</category>
+    <pubDate>Fri, 27 Nov 2026 00:00:00 GMT</pubDate>
+  </item>
+  <item>
+    <title>가챠 한 번 얼마? 가격대별로 뭐가 다른지 정리했어요</title>
+    <link>https://playtion.kr/magazine/gacha-price-guide</link>
+    <guid isPermaLink="true">https://playtion.kr/magazine/gacha-price-guide</guid>
+    <description>요즘 가챠는 한 번에 1,000원짜리부터 8,000원이 넘는 것까지 다양해요. 가격대마다 캡슐 크기와 들어 있는 상품이 어떻게 다른지, 한 시리즈를 다 모으려면 얼마쯤 드는지, 예산을 짜는 방법을 정리했어요.</description>
+    <category>가챠</category>
+    <pubDate>Fri, 27 Nov 2026 00:00:00 GMT</pubDate>
+  </item>
+  <item>
+    <title>가챠 용어 사전 — 캡슐토이부터 시크릿, 컴플, 다부리, 소프비까지</title>
+    <link>https://playtion.kr/magazine/gacha-glossary</link>
+    <guid isPermaLink="true">https://playtion.kr/magazine/gacha-glossary</guid>
+    <description>가챠샵에서 자주 듣는 말을 한곳에 모았어요. 캡슐토이, 가샤폰, 라인업, 시크릿, 레어, 컴플, 다부리(중복), 재판, 소프비, 미니어처, 블라인드 박스까지 처음 수집하는 사람도 바로 알아듣게 풀었어요.</description>
+    <category>가챠</category>
+    <pubDate>Fri, 27 Nov 2026 00:00:00 GMT</pubDate>
+  </item>
+  <item>
+    <title>파티룸에서 밤새 놀 수 있을까? 밤 패키지와 숙박의 차이</title>
+    <link>https://playtion.kr/magazine/party-room-overnight</link>
+    <guid isPermaLink="true">https://playtion.kr/magazine/party-room-overnight</guid>
+    <description>플레이션 게임파티룸 밤 패키지는 저녁 7시부터 다음 날 아침 9시(건대 미니는 10시)까지예요. 밤새 노는 건 되지만 숙박 용도는 아니에요. 시간과 요금, 미성년자 규칙, 밤에 지킬 것, 올데이 패키지와 고르는 법을 정리했어요.</description>
+    <category>게임파티룸</category>
+    <pubDate>Fri, 27 Nov 2026 00:00:00 GMT</pubDate>
+  </item>
+  <item>
+    <title>노래방 있는 파티룸, 신촌에서 고르는 법</title>
+    <link>https://playtion.kr/magazine/karaoke-party-room</link>
+    <guid isPermaLink="true">https://playtion.kr/magazine/karaoke-party-room</guid>
+    <description>플레이션 신촌 1·2·3호점에는 모두 노래방이 있어요. TJ와 금영 반주기, 화면, 최대 인원, 같이 즐길 거리로 세 지점을 비교하고, 노래방 파티를 재밌게 하는 진행법과 밤에 지킬 점까지 정리했어요.</description>
+    <category>게임파티룸</category>
+    <pubDate>Fri, 27 Nov 2026 00:00:00 GMT</pubDate>
+  </item>
+  <item>
+    <title>파티룸 가격, 1인당 얼마일까? 인원별로 계산해 봤어요</title>
+    <link>https://playtion.kr/magazine/party-room-price-per-person</link>
+    <guid isPermaLink="true">https://playtion.kr/magazine/party-room-price-per-person</guid>
+    <description>파티룸 요금은 방 하나 가격이라 인원이 늘수록 1인당 금액이 내려가요. 플레이션 신촌·건대 네 지점의 낮·밤·올데이 요금으로 4명, 6명, 8명, 10명일 때 1인당 얼마인지 표로 계산하고, 요금을 아끼는 방법까지 정리했어요.</description>
+    <category>게임파티룸</category>
+    <pubDate>Fri, 27 Nov 2026 00:00:00 GMT</pubDate>
+  </item>
+  <item>
+    <title>크리스마스 파티룸, 이렇게 준비하면 편해요 — 예약부터 꾸미기·음식·선물 교환까지</title>
+    <link>https://playtion.kr/magazine/christmas-party-room</link>
+    <guid isPermaLink="true">https://playtion.kr/magazine/christmas-party-room</guid>
+    <description>크리스마스 이브와 당일은 파티룸이 가장 빨리 차는 날이에요. 올해 날짜와 요일 요금, 언제 예약하면 좋은지, 꾸밈 소품과 음식, 인원별로 하기 좋은 게임, 가챠로 하는 랜덤 선물 교환까지 정리했어요.</description>
+    <category>게임파티룸</category>
+    <pubDate>Fri, 27 Nov 2026 00:00:00 GMT</pubDate>
+  </item>
+  <item>
+    <title>연말 송년회 장소, 파티룸으로 정했다면 — 인원·예산·진행 순서</title>
+    <link>https://playtion.kr/magazine/year-end-party-room</link>
+    <guid isPermaLink="true">https://playtion.kr/magazine/year-end-party-room</guid>
+    <description>연말 송년회를 식당 대신 파티룸에서 하면 시간 눈치를 덜 보고 우리끼리 길게 놀 수 있어요. 인원별 지점 고르기, 요일별 1인 예산, 예약 시기와 취소 기준, 진행 순서와 준비물까지 정리했어요.</description>
+    <category>게임파티룸</category>
+    <pubDate>Fri, 27 Nov 2026 00:00:00 GMT</pubDate>
+  </item>
   <item>
     <title>공간만 있으면 되는 가챠샵, 호스트형(본사 설치·수익 배분) 정리</title>
     <link>https://playtion.kr/magazine/gacha-host-model</link>
