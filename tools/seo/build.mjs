@@ -8,7 +8,10 @@
    3. 지점 페이지(/party/sinchon-1 …)와 신촌 모아보기(/party/sinchon)를 만들어요
    4. content/magazine/*.md 로 매거진 글(/magazine/…)과 목록을 만들어요
    5. 관련 글 묶음, 푸터·전체 메뉴의 매거진 링크를 넣어요
-   6. sitemap.xml, rss.xml 을 다시 만들어요
+   6. sitemap.xml(이미지·언어 대체 주소 포함), rss.xml 을 다시 만들어요
+   7. AI 검색용 llms.txt · llms-full.txt 를 만들어요 (사이트 요약과 글 전문)
+   8. 회사·매장 엔티티(Organization·WebSite·Store)와 브랜드 기본 정보 표를 넣어요
+   9. content/intl/*.md 로 외국어 가챠샵 안내(/en/, /ja/)를 만들어요
 
    쓰는 법 (저장소 맨 위 폴더에서)
      node tools/seo/build.mjs            # 페이지·글·사이트맵·RSS 만들기
@@ -70,7 +73,8 @@ const maxPrice = (s) => Math.max(...(s.pkgs || []).flatMap((k) => k.p.filter(Boo
 const pkg = (s, id) => (s.pkgs || []).find((k) => k.id === id);
 const naverUrl = (s, id) => (id && pkg(s, id) && pkg(s, id).url) || (s.naver && s.naver.booking) || (s.naver && s.naver.place) || '';
 const ldScript = (kind, obj) => '<script type="application/ld+json" data-seo="' + kind + '">' + JSON.stringify(obj).replace(/</g, '\\u003c') + '</script>';
-const ORG = { '@type': 'Organization', name: '플레이션 PLAYTION', url: SITE + '/', logo: SITE + '/apple-touch-icon.png' };
+const ORG_ID = SITE + '/#org', SITE_ID = SITE + '/#website', STORE_ID = SITE + '/gacha/#store';
+const ORG = { '@type': 'Organization', '@id': ORG_ID, name: '플레이션', alternateName: 'PLAYTION', url: SITE + '/', logo: SITE + '/icon-512.png' };
 const VER = (read('index.html').match(/plt\.css\?v=([\w-]+)/) || [])[1] || '1';
 const OUT = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 5h5v5M19 5l-8 8M18 14v5H5V6h5"/></svg>';
 
@@ -223,7 +227,7 @@ function markdown(src, depth, shift) {
     if ((m = L.match(/^### (.+)/))) {
       flush(); endQ();
       const t = m[1].trim();
-      if (/자주 묻는 질문/.test(sec)) q = { q: t, a: [] };
+      if (/자주 묻는 질문|^FAQ|よくある質問/.test(sec)) q = { q: t, a: [] };
       out.push('<' + H3 + '>' + inline(t, depth) + '</' + H3 + '>'); i++; continue;
     }
     if (/^- /.test(L)) {
@@ -317,6 +321,8 @@ function applyHead(html, m) {
   if (m.robots) html = html.replace(/(<meta name="description" content="[^"]*">)/, '$1\n<meta name="robots" content="' + m.robots + '">');
   html = html.replace(/<meta property="article:[^>]*>\n?/g, '');
   if (m.article) html = html.replace(/(<meta name="twitter:card" content="[^"]*">)/, '<meta property="article:published_time" content="' + m.article.published + 'T09:00:00+09:00">\n<meta property="article:modified_time" content="' + m.article.modified + 'T09:00:00+09:00">\n$1');
+  html = html.replace(/<link rel="alternate" hreflang="[^"]*" href="[^"]*">\n?/g, '');
+  if (m.alternates && m.alternates.length) html = html.replace(/(<link rel="canonical" href="[^"]*">)/, '$1\n' + m.alternates.map((x) => '<link rel="alternate" hreflang="' + x[0] + '" href="' + x[1] + '">').join('\n'));
   if (!html.includes('application/rss+xml')) html = html.replace(/(<link rel="stylesheet" href="[^"]*plt\.css[^"]*">)/, '$1\n' + RSS_LINK);
   html = html.replace(/<script type="application\/ld\+json" data-seo="[^"]*">[\s\S]*?<\/script>\n?/g, '');
   if (m.jsonld && m.jsonld.length) html = html.replace('</head>', m.jsonld.join('\n') + '\n</head>');
@@ -349,6 +355,47 @@ function stationLd(s) {
     makesOffer: (s.pkgs || []).map((k) => ({ '@type': 'Offer', name: planName(k.id) + ' 패키지 (' + k.hours + ')', priceCurrency: 'KRW', price: Math.min(...k.p.filter(Boolean)), url: k.url })),
     parentOrganization: ORG
   };
+}
+/* 회사·사이트 엔티티 — 홈과 브랜드 페이지에 넣어요. AI 검색이 '플레이션이 누구인지' 한 번에 알아보게 해요 */
+function entityLd() {
+  const c = D.site.company || {}, ch = D.site.channels || {};
+  const sameAs = [ch.instagram, ch.youtube, ch.blog, ch.kakao].filter(Boolean);
+  const hq = splitAddr(String(c.address || ''));
+  return ldScript('entity', {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Organization', '@id': ORG_ID, name: '플레이션', alternateName: ['PLAYTION', 'Playtion', '플레이션 PLAYTION'],
+        url: SITE + '/', logo: { '@type': 'ImageObject', url: SITE + '/icon-512.png', width: 512, height: 512 }, image: SITE + '/assets/img/og/og-main.jpg',
+        description: '서울 신촌·건대에서 게임파티룸 ' + parties().length + '곳과 캡슐토이 ' + ((D.gacha.shop || {}).machines || '600대 이상') + ' 규모의 건대 가챠뽑기샵을 운영하는 놀이 브랜드. 포인트 멤버십 PASS, 가챠 커뮤니티, 웹게임 오락실, 가챠샵·파티룸 창업 제휴를 함께 운영해요.',
+        slogan: '작은 캡슐, 큰 즐거움', email: c.email, telephone: c.phone,
+        address: hq,
+        contactPoint: [{ '@type': 'ContactPoint', telephone: (B.phone || c.phone), contactType: 'customer service', areaServed: 'KR', availableLanguage: ['Korean'] }],
+        areaServed: [{ '@type': 'City', name: '서울' }],
+        knowsAbout: ['캡슐토이', '가챠', '가챠샵', '게임파티룸', '파티룸', '보드게임', '무인 매장 창업'],
+        parentOrganization: { '@type': 'Organization', name: c.name, taxID: c.regNo, address: hq, email: c.email },
+        subOrganization: [{ '@id': STORE_ID }].concat(parties().filter((s) => s.slug).map((s) => ({ '@id': SITE + '/party/' + s.slug + '#place' }))),
+        sameAs: sameAs.length ? sameAs : undefined
+      },
+      { '@type': 'WebSite', '@id': SITE_ID, url: SITE + '/', name: '플레이션', alternateName: 'PLAYTION', inLanguage: 'ko-KR', publisher: { '@id': ORG_ID } }
+    ]
+  });
+}
+/* 건대 가챠뽑기샵 매장 정보 */
+function gachaStore() { return D.stations.find((x) => x.type === 'gacha') || {}; }
+function storeLd() {
+  const g = gachaStore(), shop = D.gacha.shop || {};
+  const a = splitAddr(g.addr || '');
+  return ldScript('store', {
+    '@context': 'https://schema.org', '@type': 'Store', '@id': STORE_ID,
+    name: g.name || '플레이션 건대 가챠샵', alternateName: ['플레이션 가챠', '플레이션 가챠뽑기샵', '건대 가챠샵 플레이션', 'Playtion Gacha Shop Konkuk'],
+    description: '건대입구 한아름 건물 1층, 캡슐토이 기기 ' + (shop.machines || '600대 이상') + '를 갖춘 가챠뽑기샵. 개봉대, 촬영 자리, 빈 캡슐 반납함이 있고 기기 QR로 재고와 입고 알림을 확인할 수 있어요.',
+    url: SITE + '/gacha/', image: [SITE + '/assets/img/' + (g.img || 'gacha/front.webp')], telephone: B.phone || D.site.company.phone,
+    address: a, paymentAccepted: '신용카드, 간편결제', currenciesAccepted: 'KRW', publicAccess: true,
+    amenityFeature: (g.gear || []).map((x) => ({ '@type': 'LocationFeatureSpecification', name: x, value: true })),
+    keywords: '건대 가챠샵, 건대입구 가챠, 캡슐토이, 가챠, 가샤폰, 서울 가챠샵',
+    brand: { '@type': 'Brand', name: '플레이션' }, parentOrganization: ORG
+  });
 }
 
 /* ------------------------------------------------------------------ 페이지 틀 (지점·매거진) */
@@ -423,6 +470,8 @@ function buildArticles(arts) {
     const rel = 'magazine/' + a.slug + '.html', depth = 1, c = CATS[a.category] || CATS.party;
     const md = markdown(a.body, depth);
     a.faq = md.faq; a.chars = md.chars;
+    a.tl = a.tldr ? String(Array.isArray(a.tldr) ? a.tldr.join(', ') : a.tldr).split(';;').map((x) => tokens(x.trim())).filter(Boolean) : [];
+    const sum = a.tl.length ? '<aside class="mg-sum" aria-label="핵심 요약"><b class="mg-sum__t">한눈에 보기</b><ul>' + a.tl.map((x) => '<li>' + inline(x, depth) + '</li>').join('') + '</ul></aside>' : '';
     const minutes = Math.max(2, Math.round(md.chars / 500));
     const canonical = SITE + '/magazine/' + a.slug;
     const [iw, ih] = imgSize(a.image);
@@ -440,7 +489,7 @@ function buildArticles(arts) {
       '</div></header>' +
       '<div class="wrap wrap--narrow mg-wrap">' +
         '<figure class="mg-cover"><img src="../assets/img/' + esc(a.image) + '" alt="' + esc(a.imageAlt || a.title) + '" width="' + iw + '" height="' + ih + '"></figure>' +
-        toc +
+        sum + toc +
         '<div class="mg-body">' + md.html + '</div>' +
         ctaHtml(a.cta || c.cta, depth) +
         (a.keywords ? '<p class="mg-kw"><span>태그</span>' + (Array.isArray(a.keywords) ? a.keywords : String(a.keywords).split(',')).map((k) => '<span class="tag">' + esc(String(k).trim()) + '</span>').join('') + '</p>' : '') +
@@ -451,7 +500,8 @@ function buildArticles(arts) {
         '@context': 'https://schema.org', '@type': 'BlogPosting', headline: a.title, description: a.description,
         image: [SITE + '/assets/img/' + a.image], datePublished: a.date + 'T09:00:00+09:00', dateModified: a.updated + 'T09:00:00+09:00',
         author: { '@type': 'Organization', name: '플레이션 운영팀', url: SITE + '/brand' }, publisher: ORG,
-        mainEntityOfPage: canonical, articleSection: c.name, inLanguage: 'ko-KR',
+        mainEntityOfPage: canonical, isPartOf: { '@id': SITE_ID }, articleSection: c.name, inLanguage: 'ko-KR',
+        abstract: a.tl.length ? a.tl.join(' ').replace(/\*\*/g, '').replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') : undefined, wordCount: md.chars,
         keywords: Array.isArray(a.keywords) ? a.keywords.join(', ') : a.keywords || ''
       }),
       breadcrumb([['홈', ''], ['매거진', 'magazine/'], [a.title, 'magazine/' + a.slug]]),
@@ -572,26 +622,28 @@ function faqFor(kind) {
 }
 /* 페이지마다 붙일 관련 글 (카테고리 또는 글 주소) */
 const RELATED_ON = {
-  'party/index.html': ['sinchon-party-room-guide', 'birthday-party-room', 'lol-custom-game-venue'],
+  'party/index.html': ['party-room-price-per-person', 'year-end-party-room', 'birthday-party-room'],
   'party/stations.html': ['sinchon-party-room-guide', 'mt-club-afterparty', 'team-dinner-second-round'],
   'party/guide.html': ['party-room-checklist', 'birthday-party-room', 'party-games-guide'],
-  'party/prices.html': ['party-room-checklist', 'sinchon-party-room-guide', 'kondae-party-room-course'],
-  'gacha/index.html': ['what-is-gacha', 'kondae-gacha-shop', 'gacha-market-growth'],
-  'gacha/visit.html': ['kondae-gacha-shop', 'kondae-party-room-course', 'what-is-gacha'],
-  'gacha/club.html': ['gacha-duplicate-trade', 'what-is-gacha'],
+  'party/prices.html': ['party-room-price-per-person', 'party-room-checklist', 'party-room-overnight'],
+  'gacha/index.html': ['what-is-gacha', 'gacha-glossary', 'gacha-price-guide'],
+  'gacha/visit.html': ['kondae-gacha-shop', 'gacha-odds-secret', 'kondae-party-room-course'],
+  'gacha/club.html': ['gacha-duplicate-trade', 'gacha-display-storage', 'gacha-glossary'],
+  'gacha/products.html': ['gacha-price-guide', 'gacha-odds-secret', 'gacha-glossary'],
+  'community/index.html': ['gacha-display-storage', 'gacha-glossary'],
   'community/market.html': ['gacha-duplicate-trade', 'what-is-gacha'],
   'partner/index.html': ['gacha-shop-startup-cost', 'gacha-host-model', 'game-party-room-startup'],
-  'partner/gacha.html': ['gacha-shop-startup-cost', 'gacha-host-model', 'gacha-market-growth'],
+  'partner/gacha.html': ['gacha-shop-startup-cost', 'gacha-machine-price', 'gacha-host-model'],
   'partner/party.html': ['game-party-room-startup', 'gacha-shop-startup-cost'],
-  'partner/spot.html': ['shop-in-shop-gacha-zone', 'gacha-host-model', 'gacha-shop-startup-cost'],
+  'partner/spot.html': ['shop-in-shop-gacha-zone', 'gacha-host-model', 'gacha-machine-price'],
   'partner/business.html': ['team-dinner-second-round', 'mt-club-afterparty'],
   'arcade/index.html': ['capsule-web-games'],
-  'index.html': ['sinchon-party-room-guide', 'what-is-gacha', 'gacha-shop-startup-cost']
+  'index.html': ['year-end-party-room', 'what-is-gacha', 'gacha-shop-startup-cost']
 };
 function updateExisting(arts) {
   const files = execSync('find . -name "*.html"', { cwd: PUB }).toString().trim().split('\n').map((f) => f.replace(/^\.\//, '')).sort();
   for (const rel of files) {
-    if (/^magazine\//.test(rel) || /^party\/(sinchon|sinchon-\d|kondae-mini)\.html$/.test(rel) || rel === 'admin/index.html') continue;
+    if (/^magazine\//.test(rel) || /^(en|ja)\//.test(rel) || /^party\/(sinchon|sinchon-\d|kondae-mini)\.html$/.test(rel) || rel === 'admin/index.html') continue;
     let html = read(rel), orig = html;
     const depth = depthOf(rel), m = PAGES[rel] || {};
     const isNoindex = m.noindex || /<meta name="robots" content="noindex/.test(orig);
@@ -607,6 +659,11 @@ function updateExisting(arts) {
       ld.push(breadcrumb(items));
     }
     if (m.faq && !isNoindex) { const f = faqLd(faqFor(m.faq)); if (f) ld.push(f); }
+    /* 예전에 손으로 넣은 회사·사이트·매장 정보는 빼고 새 엔티티로 바꿔요 */
+    if (/^(index|brand|gacha\/index|gacha\/visit)\.html$/.test(rel)) html = html.replace(/<script type="application\/ld\+json">\{"@context":"https:\/\/schema\.org","@type":"(Organization|WebSite|Store)"[\s\S]*?<\/script>\n?/g, '');
+    if (rel === 'index.html' || rel === 'brand.html') ld.push(entityLd());
+    if (rel === 'gacha/index.html' || rel === 'gacha/visit.html') ld.push(storeLd());
+    if (rel === 'gacha/visit.html') head.alternates = INTL_ALT;
     head.jsonld = ld;
     html = applyHead(html, head);
     /* 푸터·전체 메뉴에 매거진 */
@@ -619,8 +676,109 @@ function updateExisting(arts) {
       const list = want.map((s) => arts.find((a) => a.slug === s)).filter(Boolean);
       if (list.length) html = html.replace('</main>', relatedSection(list, depth, rel.startsWith('partner/') ? '창업 전에 읽어 보세요' : '함께 읽어 보세요') + '\n</main>');
     }
+    /* 가챠샵 페이지에 외국어 안내 링크 */
+    html = html.replace(/<!--seo:intl-->[\s\S]*?<!--\/seo:intl-->\n?/g, '');
+    if (rel === 'gacha/index.html' || rel === 'gacha/visit.html') {
+      html = html.replace('</main>', '<!--seo:intl--><section class="band--tight intl-strip" aria-label="Visitor guide in English and Japanese"><div class="wrap"><p class="t-small"><b>Visiting from abroad?</b> <a class="link" href="' + up(depth) + 'en/" hreflang="en" lang="en">English guide</a> · <a class="link" href="' + up(depth) + 'ja/" hreflang="ja" lang="ja">日本語ガイド</a></p></div></section><!--/seo:intl-->\n</main>');
+    }
+    /* 브랜드 페이지에 기본 정보 표 */
+    if (rel === 'brand.html') {
+      html = html.replace(/<!--seo:facts-->[\s\S]*?<!--\/seo:facts-->\n?/g, '');
+      html = html.replace('</main>', factsSection(depth) + '\n</main>');
+    }
     if (html !== orig) write(rel, html);
   }
+}
+/* 브랜드 기본 정보 — 사람과 AI 검색이 똑같이 읽는 사실 표 */
+function factsSection(depth) {
+  const c = D.site.company || {}, g = gachaStore(), shop = D.gacha.shop || {};
+  const rows = [
+    ['브랜드', '플레이션 (PLAYTION)'],
+    ['하는 일', '게임파티룸 · 가챠뽑기샵 운영, 포인트 멤버십 PASS, 가챠 커뮤니티, 웹게임 오락실, 가챠샵·파티룸 창업 제휴'],
+    ['운영 회사', c.name + ' (대표 ' + c.ceo + ', 사업자등록번호 ' + c.regNo + ')'],
+    ['본사', c.address],
+    ['대표 전화 · 이메일', c.phone + ' · ' + c.email],
+    ['가챠뽑기샵', '[' + (g.name || '플레이션 건대 가챠샵') + '](/gacha/visit) — ' + g.addr + ', 캡슐토이 ' + (shop.machines || '600대 이상') + ', 2026년 10월 오픈'],
+    ['게임파티룸', parties().map((s) => '[' + s.short + '](/party/' + s.slug + ') (' + s.area + ', 최대 ' + s.max + '명)').join(', ')],
+    ['파티룸 예약 · 문의', '네이버 예약 · ' + (B.manager || '쏘플파티룸') + ' 카카오톡과 ' + (B.phone || c.phone)],
+    ['회원', '[플레이션 PASS](/pass/) — 무료 포인트 멤버십 (포인트는 사거나 현금으로 바꿀 수 없어요)'],
+    ['창업 · 제휴', '[가챠샵 창업](/partner/gacha) 오너형·호스트형, [게임파티룸 창업](/partner/party), [숍인숍 가챠존](/partner/spot)'],
+    ['홈페이지', 'https://playtion.kr']
+  ];
+  return '<!--seo:facts--><section class="band band--mist" aria-labelledby="factsTitle"><div class="wrap wrap--narrow"><span class="lb lb--all lb--s">FACT SHEET</span><h2 class="t-h2 mt-s" id="factsTitle">플레이션 기본 정보</h2><p class="t-lead">기사·블로그·AI 검색에서 플레이션을 소개할 때 이 표를 기준으로 써 주세요.</p>' +
+    '<div class="tbl-scroll mt-m"><table class="tbl mg-tbl facts-tbl"><tbody>' + rows.map((r) => '<tr><th scope="row">' + esc(r[0]) + '</th><td>' + inline(r[1], depth) + '</td></tr>').join('') + '</tbody></table></div></div></section><!--/seo:facts-->';
+}
+
+/* ------------------------------------------------------------------ 외국어 가챠샵 안내 (/en/, /ja/) */
+const INTL = { en: { name: 'English', file: 'en' }, ja: { name: '日本語', file: 'ja' } };
+const INTL_ALT = [['ko', SITE + '/gacha/visit'], ['en', SITE + '/en/'], ['ja', SITE + '/ja/'], ['x-default', SITE + '/en/']];
+function loadIntl() {
+  const dir = path.join(CONTENT, 'intl');
+  if (!fs.existsSync(dir)) return [];
+  return fs.readdirSync(dir).filter((f) => f.endsWith('.md')).map((f) => { const { meta, body } = frontMatter(fs.readFileSync(path.join(dir, f), 'utf8')); meta.lang = f.replace(/\.md$/, ''); meta.body = body; return meta; });
+}
+function buildIntl(list) {
+  for (const p of list) {
+    const rel = p.lang + '/index.html', depth = 1, canonical = SITE + '/' + p.lang + '/';
+    const md = markdown(p.body, depth);
+    const g = gachaStore();
+    const main =
+      '<article class="mg-article intl" lang="' + p.lang + '">' +
+      '<header class="mg-hero"><div class="wrap wrap--narrow">' +
+        '<nav class="bc" aria-label="' + esc(p.crumbLabel || 'Location') + '"><a href="../">PLAYTION</a><span aria-hidden="true">›</span><span>' + esc(p.crumb || 'Gacha Shop') + '</span></nav>' +
+        '<span class="lb lb--gacha">' + esc(p.badge || 'GACHA SHOP · SEOUL') + '</span>' +
+        '<h1 class="mg-title">' + esc(p.title) + '</h1>' +
+        '<p class="mg-lead">' + esc(p.description) + '</p>' +
+        '<div class="mg-meta"><span>' + esc(p.langNote || '') + '</span><a class="link" href="../gacha/visit" hreflang="ko" lang="ko">한국어</a>' + Object.keys(INTL).filter((k) => k !== p.lang).map((k) => '<a class="link" href="../' + k + '/" hreflang="' + k + '" lang="' + k + '">' + INTL[k].name + '</a>').join('') + '</div>' +
+      '</div></header>' +
+      '<div class="wrap wrap--narrow mg-wrap">' +
+        '<figure class="mg-cover"><img src="../assets/img/' + esc(g.img || 'gacha/front.webp') + '" alt="' + esc(p.imageAlt || '') + '" width="' + imgSize(g.img || 'gacha/front.webp')[0] + '" height="' + imgSize(g.img || 'gacha/front.webp')[1] + '"></figure>' +
+        '<div class="mg-body">' + md.html + '</div>' +
+      '</div></article>';
+    const ld = [storeLd(), breadcrumb([['PLAYTION', ''], [p.crumb || 'Gacha Shop', p.lang + '/']]), faqLd(md.faq)].filter(Boolean);
+    let html = shell({
+      rel, section: 'gacha', subnav: false,
+      head: { title: p.seoTitle || p.title, desc: p.description, canonical, ogType: 'website', ogImage: SITE + '/assets/img/og/og-gacha.jpg', ogImageSize: [1200, 630], alternates: INTL_ALT, jsonld: ld },
+      bodyAttrs: 'class="sec-gacha page-intl" data-root="../" data-section="gacha" data-page="intl"', main
+    });
+    html = html.replace('<html lang="ko">', '<html lang="' + p.lang + '">').replace(/<meta property="og:locale" content="[^"]*">/, '<meta property="og:locale" content="' + (p.lang === 'ja' ? 'ja_JP' : 'en_US') + '">');
+    write(rel, html);
+  }
+}
+
+/* ------------------------------------------------------------------ AI 검색용 llms.txt */
+function plain(s) { return tokens(String(s || '')).replace(/\*\*/g, '').replace(/\[([^\]]+)\]\((\/[^)]*)\)/g, '$1 (' + SITE + '$2)').replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$1 ($2)'); }
+function mdText(body) {
+  return tokens(body).split('\n').filter((l) => !/^:::/.test(l) && !/^!\[/.test(l)).join('\n')
+    .replace(/\[([^\]]+)\]\((\/[^)]*)\)/g, '[$1](' + SITE + '$2)').replace(/\n{3,}/g, '\n\n').trim();
+}
+function buildLlms(arts, intl) {
+  const c = D.site.company || {}, g = gachaStore(), shop = D.gacha.shop || {};
+  const cat = (k) => arts.filter((a) => a.category === k).map((a) => '- [' + a.title + '](' + SITE + '/magazine/' + a.slug + '): ' + a.description).join('\n');
+  const facts = [
+    '- 브랜드: 플레이션 (PLAYTION). 운영 회사 ' + c.name + ', 대표 ' + c.ceo + ', 사업자등록번호 ' + c.regNo,
+    '- 대표 전화 ' + c.phone + ', 이메일 ' + c.email + ', 홈페이지 ' + SITE,
+    '- 플레이션 건대 가챠샵: ' + g.addr + '. 캡슐토이 기기 ' + (shop.machines || '600대 이상') + ', 개봉대·촬영 자리·빈 캡슐 반납함. 2026년 10월 오픈. 결제 ' + (shop.payment || '카드·간편결제'),
+    ...parties().map((s) => '- ' + s.name + ': ' + s.addr + '. 최대 ' + s.max + '명, 기준 ' + (s.base || P.basePeople || 4) + '명 ' + won(minPrice(s)) + '~' + won(maxPrice(s)) + ' (패키지·요일별). 시설: ' + (s.gear || []).join(', ') + '. 예약은 네이버 예약.'),
+    '- 파티룸 공통: 한 번에 한 팀만 쓰는 무인 공간, 청소 보증금 ' + won(P.deposit) + ', 기준 인원을 넘으면 1인당 ' + won(P.extraPerPerson) + '. 숙박 용도는 아니에요. 문의는 ' + (B.manager || '쏘플파티룸') + ' 카카오톡과 ' + (B.phone || c.phone) + '.',
+    '- 플레이션 PASS: 무료 포인트 멤버십. 가입 500P, 출석 10P, 가챠샵 체크인 100P. 포인트는 사거나 현금으로 바꿀 수 없고 응모·경품 신청에 써요.',
+    '- 창업·제휴: 가챠샵 창업 ' + (((D.partner.gacha || {}).cost || {}).label || '') + ' (20~30평, 간판·냉난방기 별도), 본사가 기기를 설치하고 매출을 나누는 호스트형도 있어요.'
+  ].join('\n');
+  const pages = [
+    ['홈', '', '플레이션 전체 안내'], ['가챠뽑기샵', 'gacha/', '건대 가챠샵 소개, 구역 지도, 입고 소식'], ['가챠샵 방문 안내', 'gacha/visit', '위치, 결제, 이용 순서, 자주 묻는 질문'],
+    ['게임파티룸', 'party/', '신촌·건대 게임파티룸 4곳'], ['지점 비교', 'party/stations', '인원·시설·요금 비교표'], ['요금표', 'party/prices', '낮·밤·올데이 패키지 요금'], ['이용안내', 'party/guide', '예약·보증금·환불·규칙'],
+    ['신촌 게임파티룸', 'party/sinchon', '신촌 3곳 비교'], ...parties().map((s) => [s.name, 'party/' + s.slug, s.desc]),
+    ['PASS', 'pass/', '포인트 멤버십 안내'], ['창업·제휴', 'partner/', '가챠샵·파티룸 창업과 제휴'], ['가챠샵 창업', 'partner/gacha', '비용, 방식, 시장 자료'],
+    ['브랜드 기본 정보', 'brand', '회사·매장 사실 표'], ['고객센터', 'help', '자주 묻는 질문'], ['매거진', 'magazine/', '파티룸·가챠·창업 글 모음']
+  ].map((x) => '- [' + x[0] + '](' + SITE + '/' + x[1] + '): ' + x[2]).join('\n');
+  const intlLines = intl.map((p) => '- [' + p.title + '](' + SITE + '/' + p.lang + '/): ' + p.description).join('\n');
+  const txt = '# 플레이션 PLAYTION\n\n> 서울 신촌·건대에서 게임파티룸 ' + parties().length + '곳과 캡슐토이 ' + (shop.machines || '600대 이상') + ' 규모의 건대 가챠뽑기샵을 직접 운영하는 놀이 브랜드예요. 파티룸 예약은 네이버 예약으로, 가챠샵은 예약 없이 방문해요. 이 파일은 AI 검색이 플레이션을 정확히 소개하도록 핵심 사실과 주요 페이지를 정리한 안내예요.\n\n' +
+    '## 핵심 사실\n\n' + facts + '\n\n## 주요 페이지\n\n' + pages + '\n\n## 매거진 — 게임파티룸\n\n' + cat('party') + '\n\n## 매거진 — 가챠\n\n' + cat('gacha') + '\n\n## 매거진 — 창업\n\n' + cat('startup') + '\n\n## 매거진 — 오락실\n\n' + cat('play') +
+    (intlLines ? '\n\n## Other languages\n\n' + intlLines : '') + '\n\n## Optional\n\n- [전체 글 본문](' + SITE + '/llms-full.txt): 매거진 글 전문과 매장 정보\n- [사이트맵](' + SITE + '/sitemap.xml)\n- [RSS](' + SITE + '/rss.xml)\n';
+  write('llms.txt', txt);
+  const full = '# 플레이션 PLAYTION — 전체 글\n\n> 기준일 ' + TODAY + '. 요금과 시설은 매장 사정에 따라 바뀔 수 있어요. 최신 정보는 각 페이지에서 확인해 주세요.\n\n## 핵심 사실\n\n' + facts + '\n\n' +
+    arts.map((a) => '---\n\n# ' + a.title + '\n\n주소: ' + SITE + '/magazine/' + a.slug + '\n작성: 플레이션 운영팀 · ' + a.date + (a.updated !== a.date ? ' (고침 ' + a.updated + ')' : '') + '\n\n' + (a.tl && a.tl.length ? '핵심 요약:\n' + a.tl.map((x) => '- ' + plain(x)).join('\n') + '\n\n' : '') + mdText(a.body)).join('\n\n') + '\n';
+  write('llms-full.txt', full);
 }
 
 /* ------------------------------------------------------------------ 사이트맵 */
@@ -645,11 +803,16 @@ function buildSitemap(arts) {
     if (rel === '404.html') continue;
     const art = arts.find((a) => 'magazine/' + a.slug + '.html' === rel);
     const lastmod = art ? art.updated : gitDate(rel);
-    const pr = loc === '/' ? '1.0' : /^\/(party|gacha|partner|magazine)\/$/.test(loc) ? '0.9' : /^\/party\/(sinchon|kondae)/.test(loc) ? '0.9' : /^\/magazine\//.test(loc) ? '0.7' : /^\/(privacy|terms)$/.test(loc) ? '0.3' : '0.6';
+    const pr = loc === '/' ? '1.0' : /^\/(party|gacha|partner|magazine)\/$|^\/gacha\/visit$/.test(loc) ? '0.9' : /^\/party\/(sinchon|kondae)/.test(loc) ? '0.9' : /^\/magazine\//.test(loc) ? '0.7' : /^\/(privacy|terms)$/.test(loc) ? '0.3' : '0.6';
     const cf = /^\/magazine\/$|^\/$|^\/news$/.test(loc) ? 'weekly' : 'monthly';
-    urls.push('  <url><loc>' + SITE + loc + '</loc><lastmod>' + lastmod + '</lastmod><changefreq>' + cf + '</changefreq><priority>' + pr + '</priority></url>');
+    /* 대표 이미지(이미지 검색)와 언어별 대체 주소 */
+    const st0 = parties().find((s) => '/party/' + s.slug === loc);
+    const imgs = art ? [art.image] : st0 ? [st0.img] : /^\/(gacha\/(visit)?|en\/|ja\/)$/.test(loc) ? [gachaStore().img || 'gacha/front.webp'] : [];
+    const imgXml = imgs.filter(Boolean).map((x) => '<image:image><image:loc>' + SITE + '/assets/img/' + x + '</image:loc></image:image>').join('');
+    const altXml = INTL_ALT.some((x) => x[1] === SITE + loc) ? INTL_ALT.map((x) => '<xhtml:link rel="alternate" hreflang="' + x[0] + '" href="' + x[1] + '"/>').join('') : '';
+    urls.push('  <url><loc>' + SITE + loc + '</loc><lastmod>' + lastmod + '</lastmod><changefreq>' + cf + '</changefreq><priority>' + pr + '</priority>' + imgXml + altXml + '</url>');
   }
-  write('sitemap.xml', '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + urls.join('\n') + '\n</urlset>\n');
+  write('sitemap.xml', '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n' + urls.join('\n') + '\n</urlset>\n');
   return urls.length;
 }
 
@@ -660,6 +823,9 @@ buildMagazineIndex(arts);
 buildRss(arts);
 buildStations(arts);
 buildSinchon(arts);
+const intl = loadIntl();
+buildIntl(intl);
 updateExisting(arts);
+buildLlms(arts, intl);
 const n = buildSitemap(arts);
-console.log('글 ' + arts.length + '편 · 지점 페이지 ' + parties().filter((s) => s.slug).length + '개 · 사이트맵 ' + n + '개 주소 (' + TODAY + ')');
+console.log('글 ' + arts.length + '편 · 지점 페이지 ' + parties().filter((s) => s.slug).length + '개 · 외국어 안내 ' + intl.length + '개 · 사이트맵 ' + n + '개 주소 · llms.txt (' + TODAY + ')');

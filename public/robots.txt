@@ -1,3 +1,8 @@
+# 플레이션 PLAYTION — https://playtion.kr
+# 검색엔진과 AI 검색(답변 엔진)이 공개 페이지를 읽어 가는 것을 환영해요.
+# 회원 화면, 운영 콘솔, 서버 기능만 막아 둬요.
+# AI 검색용 요약: https://playtion.kr/llms.txt
+
 User-agent: *
 Allow: /
 Disallow: /404
@@ -12,5 +17,43 @@ Disallow: /partner/portal
 Disallow: /admin/
 Disallow: /api/
 Disallow: /cdn-cgi/
+
+# 국내 검색 — 네이버, 다음
+User-agent: Yeti
+User-agent: Daumoa
+Allow: /
+Disallow: /pass/login
+Disallow: /pass/me
+Disallow: /pass/checkin
+Disallow: /pass/kiosk
+Disallow: /pass/collection
+Disallow: /pass/wallet
+Disallow: /partner/portal
+Disallow: /admin/
+Disallow: /api/
+
+# AI 검색·답변 엔진 (ChatGPT, Claude, Perplexity, Google, Apple, Microsoft)
+User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+User-agent: GPTBot
+User-agent: ClaudeBot
+User-agent: Claude-SearchBot
+User-agent: Claude-User
+User-agent: PerplexityBot
+User-agent: Perplexity-User
+User-agent: Google-Extended
+User-agent: Applebot
+User-agent: Applebot-Extended
+User-agent: bingbot
+Allow: /
+Disallow: /pass/login
+Disallow: /pass/me
+Disallow: /pass/checkin
+Disallow: /pass/kiosk
+Disallow: /pass/collection
+Disallow: /pass/wallet
+Disallow: /partner/portal
+Disallow: /admin/
+Disallow: /api/
 
 Sitemap: https://playtion.kr/sitemap.xml

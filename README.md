@@ -267,6 +267,24 @@ public/assets/img/arcade/*.webp          로비 그림(캡슐 타운), 포스터
 - 같은 메뉴의 웹 페이지 수집에서 새 주소(지점 4곳, `/party/sinchon`, `/magazine/`)를 먼저 요청
 - 구글 서치콘솔 등록(소유확인 태그를 주시면 넣어 드려요), GA4 측정 ID 를 `site.js` 의 `analytics.ga4` 에
 
+### 0-6-1. AI 검색(GEO·AEO) 강화 (2026.11.27)
+
+ChatGPT·Perplexity·구글 AI 개요·네이버 AI 브리핑 같은 답변형 검색이 플레이션을 정확히 소개하고 인용하도록 손봤어요. 기획 배경은 claude.ai 프로젝트 문서 「플레이션 SEO·GEO·AEO 강화 v2.0」에 있어요.
+
+| 무엇 | 어디 | 하는 일 |
+|---|---|---|
+| `llms.txt` · `llms-full.txt` | 사이트 맨 위 | AI 검색용 사이트 요약과 매거진 전문. `build.mjs` 가 데이터와 글에서 자동으로 만들어요 |
+| robots.txt | `public/robots.txt` | 네이버·다음·빙과 ChatGPT·Claude·Perplexity·구글·애플 AI 검색 로봇을 명시적으로 허용 |
+| 회사·사이트 엔티티 | 홈·브랜드 페이지 | Organization·WebSite 구조화 데이터(@id 로 매장·지점과 연결) |
+| 가챠샵 매장 정보 | `/gacha/`, `/gacha/visit`, `/en/`, `/ja/` | Store 구조화 데이터 |
+| 브랜드 기본 정보 표 | `/brand` 아래 | 운영 회사·매장·예약 창구를 한 표로. 언론·블로그·AI 가 그대로 인용하기 좋게 |
+| 글 맨 위 "한눈에 보기" | 매거진 글 | 앞 줄 `tldr:` 에 `;;` 로 나눠 3줄 요약을 적으면 상자와 구조화 데이터(abstract)가 생겨요 |
+| 외국어 가챠샵 안내 | `/en/`, `/ja/` (`content/intl/*.md`) | 외국인 관광객용 영어·일본어 안내. 한국어 방문 안내와 hreflang 으로 연결 |
+| 이미지·언어 사이트맵 | `sitemap.xml` | 글·지점 대표 이미지와 언어별 대체 주소를 함께 알려요 |
+| IndexNow | 운영 콘솔 → 도구 → 검색엔진에 알리기 | 새 글·바뀐 페이지를 네이버·빙에 바로 알려요. 키 파일은 `public/9361e21cca88133750828fa9a385b442.txt`, 서버 기능은 `functions/api/indexnow.js` |
+
+새 글을 올렸다면: `build.mjs → prerender.mjs → build.mjs` 로 만들고 배포한 뒤, 운영 콘솔 **도구 → 검색엔진에 알리기 → 최근 7일 바뀐 주소**를 눌러 주세요.
+
 ---
 
 ## 0-7. 가챠샵 창업 안내 새 구성 (2026.10.29)
